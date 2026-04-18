@@ -14,7 +14,6 @@ import { TrustRadarChart } from "@/components/charts/TrustRadarChart";
 import { TrustFactorBars } from "@/components/charts/TrustFactorBars";
 import { motion, AnimatePresence } from "framer-motion";
 import { generateMockHistory } from "@/lib/scoring/mock-service";
-import { supabase } from "@/lib/supabaseClient";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -22,52 +21,12 @@ export default function DashboardPage() {
   const setGlobalTrustScore = useAppStore((s) => s.setTrustScore);
   
   const [showConnect, setShowConnect] = useState(false);
-<<<<<<< HEAD
   const [isLoading, setIsLoading] = useState(true);
   const [scoreData, setScoreData] = useState<any>(null);
   
   // View States
   const [viewMode, setViewMode] = useState<"bars" | "radar">("bars");
   const [isRefreshing, setIsRefreshing] = useState(false);
-=======
-  const [showDetails, setShowDetails] = useState(false);
-  const [scoreBreakdown, setScoreBreakdown] = useState<any>(null);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.replace("/");
-      }
-    };
-    checkAuth();
-  }, [router]);
-
-  // Fallback mock check
-  const workRecordsCount = useLiveQuery(() => db.workRecords.count()) || 0;
-  const manualDataCount = useLiveQuery(() => db.manualScoringData.count()) || 0;
-  const isUsingMock = workRecordsCount === 0 && manualDataCount === 0;
-
-  // Fetch live score from bridge
-  useEffect(() => {
-    async function loadScore() {
-      const liveScore = await getLiveTrustScore();
-      setScoreBreakdown(liveScore);
-    }
-    loadScore();
-  }, [workRecordsCount, manualDataCount]);
-
-  // For trends, we'll use mock if empty, otherwise we'd need a trend service.
-  // We'll stick to historyData for charts for now, but linked to live bridge logic.
-  const historyData = useMemo(() => generateMockHistory(), []);
-
-  // Redirect if not onboarded
-  useEffect(() => {
-    if (!hasCompletedOnboarding) {
-      router.replace("/");
-    }
-  }, [hasCompletedOnboarding, router]);
->>>>>>> e8f94190e328f4335f925e7b5b323f58f6a9e76f
 
   const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
   const connectedPlatforms = useMemo(() => platforms.filter((p) => p.connected), [platforms]);

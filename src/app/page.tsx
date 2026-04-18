@@ -17,6 +17,7 @@ import { AuroraBackground } from "@/components/AuroraBackground";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { seedDemoPersona } from "@/lib/scoring/demo-profiles";
+import { useAppStore } from "@/lib/store/app-store";
 
 export default function Page() {
   return (
@@ -82,12 +83,20 @@ function Hero() {
 function SignInCard() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
   const [error, setError] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { setUser, setOnboardingCompleted } = useAppStore();
 
-  const handleLogin = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
     try {
-<<<<<<< HEAD
       // VRAJ ACCOUNT SPECIAL MAPPING
       if (email.toLowerCase() === "vraj" || email.toLowerCase() === "vraj@example.com") {
         await seedDemoPersona("U001"); // Rahul Sharma
@@ -163,24 +172,10 @@ function SignInCard() {
       setError(message);
     } finally {
       setIsLoading(false);
-=======
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) {
-        setError(error.message);
-      } else {
-        router.push("/dashboard");
-      }
-    } catch (err) {
-      setError("Login failed");
->>>>>>> e8f94190e328f4335f925e7b5b323f58f6a9e76f
     }
   };
 
   return (
-<<<<<<< HEAD
     <div className="w-full flex flex-col items-center justify-center p-4 min-h-[90vh]">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
@@ -262,34 +257,6 @@ function SignInCard() {
           </div>
         </div>
       </div>
-=======
-    <div className="glass-strong p-8 rounded-3xl mt-10">
-      <h2 className="text-xl font-bold">Sign in</h2>
-
-      <input
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full mt-4 bg-transparent border-b border-white/20 p-2"
-      />
-
-      <input
-        placeholder="Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="w-full mt-4 bg-transparent border-b border-white/20 p-2"
-      />
-
-      {error && <p className="text-red-500 mt-2">{error}</p>}
-
-      <button 
-        onClick={handleLogin}
-        className="mt-6 w-full bg-white text-black p-3 rounded-xl"
-      >
-        Login
-      </button>
->>>>>>> e8f94190e328f4335f925e7b5b323f58f6a9e76f
     </div>
   );
 }

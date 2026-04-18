@@ -11,26 +11,16 @@ import {
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-<<<<<<< HEAD
 import { DEMO_PROFILES } from "@/lib/scoring/demo-profiles";
 
 export default function DataHubPage() {
   const [activeTab, setActiveTab] = useState<'work' | 'integrations' | 'raw'>('work');
-=======
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
-
-export default function DataHubPage() {
-  const [activeTab, setActiveTab] = useState<'work' | 'transactions' | 'aa'>('work');
-  const router = useRouter();
->>>>>>> e8f94190e328f4335f925e7b5b323f58f6a9e76f
   
   const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
   const workRecords = useLiveQuery(() => db.workRecords.toArray()) || [];
   const manualData = useLiveQuery(() => db.manualScoringData.toArray()) || [];
   const currentPersonaId = useLiveQuery(() => db.settings.where("key").equals("current_persona").first());
 
-<<<<<<< HEAD
   const disconnectPlatform = async (id: number) => {
     if (confirm("Disconnect this platform? This will remove all associated work records.")) {
       const platform = platforms.find(p => p.id === id);
@@ -42,21 +32,6 @@ export default function DataHubPage() {
         // 3. Remove the platform entry entirely
         await db.platforms.delete(id);
       }
-=======
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.replace("/");
-      }
-    };
-    checkAuth();
-  }, [router]);
-
-  const deleteWorkRecord = async (id: number) => {
-    if (confirm("Delete this record?")) {
-      await db.workRecords.delete(id);
->>>>>>> e8f94190e328f4335f925e7b5b323f58f6a9e76f
     }
   };
 
@@ -173,7 +148,7 @@ export default function DataHubPage() {
               animate={{ opacity: 1, y: 0 }}
               className="space-y-4"
             >
-              <SectionHeader title="Backend Source (JSON)" icon={<Code size={16} />} />
+              <SectionHeader title="Backend Source (JSON)" icon={<Code size={14} />} />
               <div className="p-6 rounded-[2.5rem] bg-[var(--bg-tertiary)] border border-white/5 overflow-x-auto">
                 <pre className="text-[10px] text-blue-400 font-mono leading-relaxed">
                   {JSON.stringify(currentPersona || "No Persona Selected", null, 2)}
@@ -181,7 +156,7 @@ export default function DataHubPage() {
               </div>
               <p className="text-[10px] font-bold text-[var(--text-tertiary)] px-4 leading-relaxed">
                 <Info size={12} className="inline mr-1" />
-                This is the raw "Backend Database" for the current persona. The Trust Score engine consumes these values directly to calculate your credibility.
+                This is the raw &quot;Backend Database&quot; for the current persona. The Trust Score engine consumes these values directly to calculate your credibility.
               </p>
             </motion.div>
           )}
