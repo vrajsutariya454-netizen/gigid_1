@@ -10,6 +10,9 @@ interface UserState {
   did: string | null;
   name: string;
   phone: string;
+  email: string | null;
+  username: string | null;
+  role: string | null;
   isAuthenticated: boolean;
   hasCompletedOnboarding: boolean;
   trustScore: number;
@@ -71,6 +74,9 @@ export const useAppStore = create<AppState>()(
       did: null,
       name: "",
       phone: "",
+      email: null,
+      username: null,
+      role: null,
       isAuthenticated: false,
       hasCompletedOnboarding: false,
       trustScore: 0,
@@ -99,6 +105,9 @@ export const useAppStore = create<AppState>()(
           did: null,
           name: "",
           phone: "",
+          email: null,
+          username: null,
+          role: null,
           isAuthenticated: false,
           trustScore: 0,
           connectedPlatforms: [],
@@ -143,6 +152,9 @@ export const useAppStore = create<AppState>()(
         did: state.did,
         name: state.name,
         phone: state.phone,
+        email: state.email,
+        username: state.username,
+        role: state.role,
         isAuthenticated: state.isAuthenticated,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
         trustScore: state.trustScore,
