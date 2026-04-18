@@ -37,6 +37,14 @@ export interface WorkRecord {
   hoursWorked: number;
 }
 
+export interface ManualScoringData {
+  id?: number;
+  month: string;
+  income: number;
+  activeDays: number;
+  verifiedInflow?: number;
+}
+
 export interface VerifiableCredential {
   id?: number;
   credentialId: string;
@@ -91,6 +99,7 @@ export class GigIDDatabase extends Dexie {
   credentials!: Table<VerifiableCredential>;
   syncQueue!: Table<SyncQueueItem>;
   settings!: Table<AppSetting>;
+  manualScoringData!: Table<ManualScoringData>;
 
   constructor() {
     super("GigIDDatabase");
@@ -102,6 +111,7 @@ export class GigIDDatabase extends Dexie {
       credentials: "++id, credentialId, [credentialSubject.platform]",
       syncQueue: "++id, action, status, createdAt",
       settings: "++id, &key",
+      manualScoringData: "++id, &month",
     });
   }
 }

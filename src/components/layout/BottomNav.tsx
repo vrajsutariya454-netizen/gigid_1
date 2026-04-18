@@ -1,13 +1,13 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Home, FileCheck, Share2, Settings } from "lucide-react";
+import { Home, FileCheck, Database, Settings } from "lucide-react";
 import { useState } from "react";
 
 const NAV_ITEMS = [
   { id: "home", href: "/home", icon: Home, label: "Home" },
-  { id: "credentials", href: "/credentials", icon: FileCheck, label: "Documents" },
-  { id: "share", href: "/share", icon: Share2, label: "Share" },
+  { id: "data", href: "/data-hub", icon: Database, label: "Data" },
+  { id: "credentials", href: "/credentials", icon: FileCheck, label: "Docs" },
   { id: "settings", href: "/settings", icon: Settings, label: "Settings" },
 ];
 
@@ -81,7 +81,7 @@ export function BottomNav() {
               />
             )}
             <Icon
-              size={26}
+              size={24}
               strokeWidth={isActive ? 2.5 : 1.8}
               style={{
                 color: isActive ? "var(--primary-500)" : "var(--text-tertiary)",
