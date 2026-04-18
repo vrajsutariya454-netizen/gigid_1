@@ -1,29 +1,73 @@
 "use client";
 
 import { useAppStore } from "@/lib/store/app-store";
-import { useState } from "react";
-import { User, Phone, Save, ChevronLeft, CheckCircle2, ShieldCheck } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User, Phone, Save, ChevronLeft, CheckCircle2, ShieldCheck, Mail, Tag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function ProfilePage() {
-  const { name, phone, did, trustScore, setUser } = useAppStore();
-  const [formData, setFormData] = useState({ name, phone });
+  const { name, phone, email, username, role, did, trustScore, setUser } = useAppStore();
+  
+  const [formData, setFormData] = useState({ 
+    fullName: name, 
+    phone: phone,
+    username: username || "" 
+  });
+  
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // Sync internal state if store changes
+  useEffect(() => {
+    setFormData({
+      fullName: name,
+      phone: phone,
+      username: username || ""
+    });
+  }, [name, phone, username]);
 
   const handleSave = async () => {
     setIsSaving(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
-    setUser(formData);
-    setIsSaving(false);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+    setError(null);
+    
+    try {
+      // 1. Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No authenticated user found");
+
+      // 2. Update Supabase Database
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          full_name: formData.fullName,
+          username: formData.username,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user.id);
+
+      if (updateError) throw updateError;
+
+      // 3. Update Global Store
+      setUser({ 
+        name: formData.fullName,
+        username: formData.username,
+      });
+
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (err: any) {
+      console.error("Save error:", err);
+      setError(err.message || "Failed to update profile");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const initials = formData.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "ID";
+  const initials = formData.fullName?.split(" ").map(n => n[0]).join("").toUpperCase() || "ID";
 
   return (
     <div className="page-content pb-20">
@@ -64,7 +108,32 @@ export default function ProfilePage() {
 
       {/* Form Section */}
       <div className="flex flex-col gap-10">
+        {error && (
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold text-center">
+            {error}
+          </div>
+        )}
+
         <div className="flex flex-col gap-6">
+          {/* Read Only Email */}
+          <div className="relative group opacity-60">
+            <label className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] ml-2 mb-2 block">
+              Login Email (Permanent)
+            </label>
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">
+                <Mail size={20} />
+              </div>
+              <input 
+                type="text"
+                value={email || ""}
+                readOnly
+                className="w-full border-0 text-[var(--text-secondary)] pr-6 py-5 rounded-2xl text-lg font-bold cursor-not-allowed"
+                style={{ backgroundColor: "var(--bg-secondary)", paddingLeft: "4.5rem" }}
+              />
+            </div>
+          </div>
+
           <div className="relative group">
             <label className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] ml-2 mb-2 block">
               Full Legal Name
@@ -75,8 +144,8 @@ export default function ProfilePage() {
               </div>
               <input 
                 type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                value={formData.fullName}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 className="w-full border-0 text-[var(--text-primary)] pr-6 py-5 rounded-2xl text-lg font-bold focus:outline-none focus:ring-4 transition-all"
                 style={{ 
                   backgroundColor: "var(--bg-tertiary)",
@@ -90,23 +159,23 @@ export default function ProfilePage() {
 
           <div className="relative group">
             <label className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] ml-2 mb-2 block">
-              Phone Number / VPA
+              Username
             </label>
             <div className="relative">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] group-focus-within:text-blue-500 transition-colors">
-                <Phone size={20} />
+                <Tag size={20} />
               </div>
               <input 
                 type="text"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 className="w-full border-0 text-[var(--text-primary)] pr-6 py-5 rounded-2xl text-lg font-bold focus:outline-none focus:ring-4 transition-all"
                 style={{ 
                   backgroundColor: "var(--bg-tertiary)",
                   color: "var(--text-primary)",
                   paddingLeft: "4.5rem"
                 }}
-                placeholder="Enter your phone"
+                placeholder="Unique username"
               />
             </div>
           </div>
@@ -117,9 +186,14 @@ export default function ProfilePage() {
           className="p-8 rounded-3xl"
           style={{ backgroundColor: "var(--bg-secondary)" }}
         >
-          <p className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-4">
-            Your Trust Identifier (DID)
-          </p>
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
+              Trust Identifier (DID)
+            </p>
+            <span className="text-[10px] font-black py-0.5 px-2 rounded-md bg-teal-500/20 text-teal-500 uppercase tracking-widest">
+              {role || "Gig Worker"}
+            </span>
+          </div>
           <p className="text-sm text-[var(--text-secondary)] font-mono break-all leading-loose">
             {did}
           </p>

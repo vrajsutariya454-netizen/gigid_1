@@ -19,6 +19,7 @@
 .DS_Store
 *.pem
 Thumbs.db
+desktop.ini
 
 # debug
 npm-debug.log*
@@ -28,6 +29,10 @@ yarn-error.log*
 
 # env files
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .env*.local
 
 # vercel
@@ -50,7 +55,5 @@ public/workbox-*.js.map
 *.swp
 *.swo
 
-# OS
-.DS_Store
-Thumbs.db
-desktop.ini
+# Supabase
+.supabase/

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useAppStore } from "@/lib/store/app-store";
 import { useRouter, usePathname } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -17,7 +18,10 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { theme, setTheme, logout, did, name, phone, trustScore } = useAppStore();
+  const { 
+    theme, setTheme, logout, 
+    did, name, phone, email, role, trustScore 
+  } = useAppStore();
 
   const navItems = [
     { label: "Home", icon: Home, path: "/home" },
@@ -34,7 +38,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     onClose();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     logout();
     router.push("/");
     onClose();
@@ -105,6 +110,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   </div>
                 </div>
 
+<<<<<<< HEAD
                 <div className="pt-6 border-t border-[var(--bg-primary)] opacity-60">
                   <p className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] mb-2">
                     Identity DID
@@ -112,6 +118,31 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   <p className="text-[11px] text-[var(--text-secondary)] font-mono break-all leading-relaxed">
                     {did?.substring(0, 32) || "did:gigid:0000..."}...
                   </p>
+=======
+                {/* User Info */}
+                <div>
+                  <h3 className="text-xl font-black text-[var(--text-primary)] leading-tight tracking-tight">
+                    {name || "GigID User"}
+                  </h3>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="text-[10px] font-black py-0.5 px-2 rounded-md bg-blue-500/20 text-blue-500 uppercase tracking-widest">
+                      {role || "Gig Worker"}
+                    </span>
+                    <p className="text-[10px] font-bold opacity-60" style={{ color: "var(--text-tertiary)" }}>
+                      {email}
+                    </p>
+                  </div>
+                  
+                  {/* Technical DID */}
+                  <div className="mt-4 p-3 rounded-xl bg-black/20 border border-white/5 opacity-60 group-hover:opacity-100 transition-opacity">
+                    <p className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 ">
+                      Verifiable Identifier
+                    </p>
+                    <p className="text-[10px] text-[var(--text-secondary)] font-mono break-all leading-relaxed">
+                      {did || "did:gigid:unregistered"}
+                    </p>
+                  </div>
+>>>>>>> 30f8171e64b4cdb422b576a9ef74051eeca93103
                 </div>
               </div>
             </div>
