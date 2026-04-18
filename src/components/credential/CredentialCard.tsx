@@ -2,12 +2,13 @@
 
 import { type VerifiableCredential } from "@/lib/db/database";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import { ShieldCheck, Star, Truck, IndianRupee, ChevronRight, Calendar } from "lucide-react";
+import { ShieldCheck, Star, Truck, IndianRupee, ChevronRight, Calendar, Trash2 } from "lucide-react";
 
 interface CredentialCardProps {
   credential: VerifiableCredential;
   onTap?: () => void;
   onShare?: () => void;
+  onDelete?: () => void;
 }
 
 const PLATFORM_COLORS: Record<string, string> = {
@@ -26,7 +27,7 @@ const PLATFORM_ICONS: Record<string, string> = {
   Dunzo: "📦",
 };
 
-export function CredentialCard({ credential, onTap, onShare }: CredentialCardProps) {
+export function CredentialCard({ credential, onTap, onShare, onDelete }: CredentialCardProps) {
   const { credentialSubject: cs } = credential;
   const platformColor = PLATFORM_COLORS[cs.platform] || "var(--primary-500)";
   const platformIcon = PLATFORM_ICONS[cs.platform] || "📄";
@@ -131,35 +132,49 @@ export function CredentialCard({ credential, onTap, onShare }: CredentialCardPro
             Issued {new Date(credential.issuanceDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
           </span>
         </div>
-        {onShare && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onShare();
-            }}
-            style={{
-              padding: "6px 16px",
-              borderRadius: "var(--radius-full)",
-              border: "none",
-              background: `linear-gradient(135deg, ${platformColor}, ${platformColor}dd)`,
-              color: "white",
-              fontSize: "12px",
-              fontWeight: 600,
-              cursor: "pointer",
-              transition: "transform var(--transition-fast), box-shadow var(--transition-fast)",
-            }}
-            onMouseEnter={(e) => {
-              (e.target as HTMLElement).style.transform = "scale(1.05)";
-              (e.target as HTMLElement).style.boxShadow = `0 4px 12px ${platformColor}44`;
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLElement).style.transform = "scale(1)";
-              (e.target as HTMLElement).style.boxShadow = "none";
-            }}
-          >
-            Share Proof
-          </button>
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {onDelete && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="p-2 text-red-500/30 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-all"
+              title="Remove Document"
+            >
+              <Trash2 size={16} />
+            </button>
+          )}
+          {onShare && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onShare();
+              }}
+              style={{
+                padding: "6px 16px",
+                borderRadius: "var(--radius-full)",
+                border: "none",
+                background: `linear-gradient(135deg, ${platformColor}, ${platformColor}dd)`,
+                color: "white",
+                fontSize: "12px",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "transform var(--transition-fast), box-shadow var(--transition-fast)",
+              }}
+              onMouseEnter={(e) => {
+                (e.target as HTMLElement).style.transform = "scale(1.05)";
+                (e.target as HTMLElement).style.boxShadow = `0 4px 12px ${platformColor}44`;
+              }}
+              onMouseLeave={(e) => {
+                (e.target as HTMLElement).style.transform = "scale(1)";
+                (e.target as HTMLElement).style.boxShadow = "none";
+              }}
+            >
+              Share Proof
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

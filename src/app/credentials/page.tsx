@@ -18,6 +18,12 @@ export default function CredentialsPage() {
     router.push(`/share?credentialId=${credential.credentialId}`);
   };
 
+  const handleDelete = async (credentialId: string) => {
+    if (confirm("Are you sure you want to remove this document?")) {
+      await db.credentials.where("credentialId").equals(credentialId).delete();
+    }
+  };
+
   return (
     <div className="page-content">
       {/* Header */}
@@ -118,6 +124,7 @@ export default function CredentialsPage() {
                   )
                 }
                 onShare={() => handleShare(credential)}
+                onDelete={() => handleDelete(credential.credentialId)}
               />
 
               {/* Expanded Details */}

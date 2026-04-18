@@ -29,6 +29,7 @@ export interface Platform {
 
 export interface WorkRecord {
   id?: number;
+  instanceId: number; // Links to the unique ID of the Platform entry
   platformId: string;
   month: string;
   earnings: number;
@@ -104,11 +105,11 @@ export class GigIDDatabase extends Dexie {
   constructor() {
     super("GigIDDatabase");
 
-    this.version(1).stores({
+    this.version(3).stores({
       profiles: "++id, did",
-      platforms: "++id, platformId, name",
-      workRecords: "++id, platformId, month",
-      credentials: "++id, credentialId, [credentialSubject.platform]",
+      platforms: "++id, platformId, name, connected",
+      workRecords: "++id, instanceId, platformId, month",
+      credentials: "++id, credentialId, credentialSubject.platform",
       syncQueue: "++id, action, status, createdAt",
       settings: "++id, &key",
       manualScoringData: "++id, &month",

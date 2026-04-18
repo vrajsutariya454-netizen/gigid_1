@@ -1,5 +1,5 @@
-import { db } from "@/lib/db/database";
-import { createCredential, storeCredential } from "@/lib/identity/credentials";
+// DB writes are handled by ConnectPlatformDialog, not here.
+
 
 export interface PlatformInfo {
   id: string;
@@ -66,83 +66,15 @@ export async function connectPlatform(
     // Simulate OAuth flow delay
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // Fetch mock data
+    // Fetch mock data (used only for metadata, not for DB writes)
     const response = await fetch(platform.apiEndpoint);
     if (!response.ok) throw new Error("Failed to fetch platform data");
 
     const data = await response.json();
 
-    // Store platform connection
-    const existingPlatform = await db.platforms
-      .where("platformId")
-      .equals(platformId)
-      .first();
-
-    if (existingPlatform) {
-      await db.platforms.update(existingPlatform.id!, {
-        connected: true,
-        lastSynced: new Date(),
-        workerId: data.workerId,
-        totalDeliveries: data.totalDeliveries || data.totalTrips,
-        avgRating: data.avgRating,
-        totalEarnings: data.totalEarnings,
-        activeMonths: data.activeMonths,
-        zone: data.zone,
-      });
-    } else {
-      await db.platforms.add({
-        platformId,
-        name: platform.name,
-        icon: platform.icon,
-        color: platform.color,
-        connected: true,
-        lastSynced: new Date(),
-        workerId: data.workerId,
-        totalDeliveries: data.totalDeliveries || data.totalTrips,
-        avgRating: data.avgRating,
-        totalEarnings: data.totalEarnings,
-        activeMonths: data.activeMonths,
-        zone: data.zone,
-      });
-    }
-
-    // Store work records
-    if (data.monthlyEarnings) {
-      for (const record of data.monthlyEarnings) {
-        const existing = await db.workRecords
-          .where({ platformId, month: record.month })
-          .first();
-        if (!existing) {
-          await db.workRecords.add({
-            platformId,
-            month: record.month,
-            earnings: record.amount,
-            trips: record.deliveries || record.trips || 0,
-            rating: record.avgRating,
-            hoursWorked: Math.round(
-              (record.deliveries || record.trips || 0) * 0.5
-            ),
-          });
-        }
-      }
-    }
-
-    // Create verifiable credential
-    const vc = await createCredential({
-      subjectDid: userDid,
-      platform: platform.name,
-      totalDeliveries: data.totalDeliveries || data.totalTrips,
-      avgRating: data.avgRating,
-      last6MonthsEarnings:
-        data.monthlyEarnings?.reduce(
-          (sum: number, m: { amount: number }) => sum + m.amount,
-          0
-        ) || data.totalEarnings,
-      activeMonths: data.activeMonths,
-      zone: data.zone,
-    });
-
-    await storeCredential(vc);
+    // NOTE: All DB writes (platform entry, work records, credentials)
+    // are handled by ConnectPlatformDialog with proper duration scoping.
+    // This function only simulates the OAuth handshake and returns data.
 
     return { success: true, data };
   } catch (error) {
