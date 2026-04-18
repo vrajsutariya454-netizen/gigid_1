@@ -57,30 +57,34 @@ export default function BankPage() {
   };
 
   return (
-    <div className="page-content pb-24 max-w-2xl mx-auto px-4">
+    <div className="page-content flex flex-col gap-10 pb-32">
       
       {/* Header */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-black text-[var(--text-primary)]">
+      <div className="text-left px-2">
+        <h1 className="text-4xl font-black text-[var(--text-primary)] leading-tight">
           GigID Banking
         </h1>
-        <p className="text-sm text-[var(--text-tertiary)] mt-2">
-          Instant financial services for gig workers
+        <p className="text-base font-bold text-[var(--text-tertiary)] mt-3">
+          Direct approval and private loans based on your work record.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex bg-[var(--bg-card)] p-1.5 rounded-2xl mb-10 border border-[var(--border-color)]">
+      <div className="flex bg-[var(--bg-secondary)] p-2 rounded-[28px]">
         <button
           onClick={() => {
             setActiveTab("direct");
             setResult(null);
           }}
-          className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all ${
+          className={`flex-1 py-4 rounded-[22px] text-sm font-black transition-all duration-300 ${
             activeTab === "direct"
-              ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-              : "text-[var(--text-tertiary)]"
+              ? "text-white shadow-xl"
+              : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
           }`}
+          style={activeTab === "direct" ? { 
+            background: "linear-gradient(135deg, var(--primary-600), var(--primary-400))",
+            boxShadow: "0 10px 20px -5px rgba(59, 130, 246, 0.4)"
+          } : {}}
         >
           Direct Approval
         </button>
@@ -89,13 +93,17 @@ export default function BankPage() {
             setActiveTab("private");
             setResult(null);
           }}
-          className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all ${
+          className={`flex-1 py-4 rounded-[22px] text-sm font-black transition-all duration-300 ${
             activeTab === "private"
-              ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-              : "text-[var(--text-tertiary)]"
+              ? "text-white shadow-xl"
+              : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
           }`}
+          style={activeTab === "private" ? { 
+            background: "linear-gradient(135deg, var(--primary-600), var(--primary-400))",
+            boxShadow: "0 10px 20px -5px rgba(59, 130, 246, 0.4)"
+          } : {}}
         >
-          Invisible Approval (ZK)
+          Zero-Knowledge (ZK)
         </button>
       </div>
 
@@ -109,54 +117,64 @@ export default function BankPage() {
             className="space-y-6"
           >
             {activeTab === "direct" ? (
-              <>
+              <div className="flex flex-col gap-10">
                 {/* Direct Card */}
-                <div className="p-6 rounded-2xl bg-blue-500/5 border-blue-500/20 border-2">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-2xl bg-blue-500 text-white">
-                      <Zap size={24} />
+                <div 
+                  className="p-8 rounded-[32px] transition-all"
+                  style={{ backgroundColor: "var(--bg-secondary)" }}
+                >
+                  <div className="flex items-start gap-6">
+                    <div 
+                      className="p-4 rounded-2xl text-white shadow-lg"
+                      style={{ background: "linear-gradient(135deg, var(--primary-600), var(--primary-400))" }}
+                    >
+                      <Zap size={28} />
                     </div>
                     <div>
-                      <h3 className="text-base font-black text-[var(--text-primary)]">
-                        Instant Direct Credit
+                      <h3 className="text-xl font-black text-[var(--text-primary)]">
+                        High-Limit Direct Credit
                       </h3>
-                      <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
-                        Share your raw work history and earnings directly with
-                        partner banks for the highest possible loan limits.
+                      <p className="text-sm font-bold text-[var(--text-secondary)] mt-2 leading-relaxed">
+                        Maximize your loan eligibility by sharing your full verified history directly with our financial partners.
                       </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Bank List */}
-                <div className="space-y-4">
-                  <h4 className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest px-1">
-                    Partner Banks
+                <div className="flex flex-col gap-5">
+                  <h4 className="text-[11px] font-black text-[var(--text-tertiary)] uppercase tracking-[0.2em] px-2 mb-2">
+                    Partner Banks (10)
                   </h4>
 
-                  <div className="max-h-[350px] overflow-y-auto pr-1 space-y-3">
+                  <div className="flex flex-col gap-4">
                     {BANKS.map((bank) => (
                       <div
                         key={bank.id}
-                        className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-green-500/40 transition-all"
+                        className="relative p-6 rounded-3xl bg-[var(--bg-elevated)] border-0 shadow-sm transition-all hover:shadow-md hover:-translate-y-1"
                       >
-                        {/* LEFT: Bank Info */}
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-lg">
-                            {bank.icon}
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 flex items-center justify-center rounded-2xl bg-[var(--bg-secondary)] text-2xl shrink-0">
+                              {bank.icon}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-base font-black text-[var(--text-primary)]">
+                                {bank.name}
+                              </span>
+                              <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mt-0.5">
+                                Instant Partner
+                              </span>
+                            </div>
                           </div>
-                          <span className="text-sm font-semibold text-[var(--text-primary)]">
-                            {bank.name}
-                          </span>
-                        </div>
 
-                        {/* RIGHT: Apply Button (fixed alignment) */}
-                        <div className="pr-2">
                           <button
                             onClick={() => handleProcess("direct")}
-                            className="px-4 py-2 rounded-lg bg-green-500 text-white 
-                                       text-xs font-semibold shadow-md shadow-green-500/20 
-                                       hover:bg-green-600 transition whitespace-nowrap"
+                            className="px-6 py-2.5 rounded-xl font-black text-xs text-white shadow-lg active:scale-95 transition-all shrink-0"
+                            style={{ 
+                              background: "linear-gradient(135deg, var(--primary-600), var(--primary-400))",
+                              boxShadow: "0 8px 20px -6px rgba(59, 130, 246, 0.4)"
+                            }}
                           >
                             Apply
                           </button>
@@ -165,58 +183,81 @@ export default function BankPage() {
                     ))}
                   </div>
                 </div>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="flex flex-col gap-10">
                 {/* ZK Card */}
-                <div className="p-6 rounded-2xl bg-teal-500/5 border-teal-500/20 border-2">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-2xl bg-teal-500 text-white">
-                      <Lock size={24} />
+                <div 
+                  className="p-8 rounded-[32px]"
+                  style={{ backgroundColor: "var(--bg-secondary)" }}
+                >
+                  <div className="flex items-start gap-6">
+                    <div 
+                      className="p-4 rounded-2xl text-white shadow-lg"
+                      style={{ background: "linear-gradient(135deg, var(--success-500), var(--success-600))" }}
+                    >
+                      <Lock size={28} />
                     </div>
                     <div>
-                      <h3 className="text-base font-black text-[var(--text-primary)]">
-                        Zero-Knowledge Loan Proof
+                      <h3 className="text-xl font-black text-[var(--text-primary)]">
+                        Invisible Loan Proof (ZK)
                       </h3>
-                      <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
-                        Authorize a loan without showing your data.
+                      <p className="text-sm font-bold text-[var(--text-secondary)] mt-2 leading-relaxed">
+                        Prove your creditworthiness cryptographically without ever revealing your private work data or wallet balance.
                       </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Privacy Features */}
-                <div className="p-5 rounded-2xl bg-black/20 border border-white/5 space-y-3">
-                  <div className="flex items-center gap-2 text-[var(--text-tertiary)]">
-                    <ShieldAlert size={14} />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">
-                      Privacy Features
+                <div 
+                  className="p-8 rounded-[32px] flex flex-col gap-6"
+                  style={{ backgroundColor: "var(--bg-elevated)" }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-teal-500/10 text-teal-500">
+                      <ShieldAlert size={20} />
+                    </div>
+                    <span className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">
+                      Enterprise Privacy Protection
                     </span>
                   </div>
 
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-                      <CheckCircle2 size={14} className="text-teal-500" />
-                      Hide platform names
+                  <ul className="flex flex-col gap-4">
+                    <li className="flex items-center gap-4 text-base font-bold text-[var(--text-secondary)]">
+                      <div className="w-6 h-6 rounded-full bg-teal-500/10 flex items-center justify-center">
+                        <CheckCircle2 size={16} className="text-teal-500" />
+                      </div>
+                      Anonymized platform origins
                     </li>
-                    <li className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-                      <CheckCircle2 size={14} className="text-teal-500" />
-                      Mask earnings
+                    <li className="flex items-center gap-4 text-base font-bold text-[var(--text-secondary)]">
+                      <div className="w-6 h-6 rounded-full bg-teal-500/10 flex items-center justify-center">
+                        <CheckCircle2 size={16} className="text-teal-500" />
+                      </div>
+                      Masked single-transaction earnings
                     </li>
-                    <li className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-                      <CheckCircle2 size={14} className="text-teal-500" />
-                      Only approval status shared
+                    <li className="flex items-center gap-4 text-base font-bold text-[var(--text-secondary)]">
+                      <div className="w-6 h-6 rounded-full bg-teal-500/10 flex items-center justify-center">
+                        <CheckCircle2 size={16} className="text-teal-500" />
+                      </div>
+                      Approval-only data packets
                     </li>
                   </ul>
                 </div>
 
-                <button
-                  onClick={() => handleProcess("private")}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-black text-sm shadow-xl active:scale-[0.98] transition-all"
-                >
-                  Generate Invisible Proof
-                </button>
-              </>
+                <div className="px-2">
+                  <button
+                    onClick={() => handleProcess("private")}
+                    className="w-full py-5 rounded-[22px] text-white font-black text-lg shadow-2xl active:scale-[0.98] transition-all"
+                    style={{ 
+                      background: "linear-gradient(135deg, var(--success-600), var(--success-500))",
+                      boxShadow: "0 15px 35px -10px rgba(20, 184, 166, 0.4)"
+                    }}
+                  >
+                    Generate Private Proof
+                  </button>
+                </div>
+              </div>
             )}
           </motion.div>
         ) : isProcessing ? (
@@ -238,7 +279,7 @@ export default function BankPage() {
             </h2>
 
             <p className="mt-4 text-4xl font-black text-white">
-              {formatCurrency(result.limit)}
+              {formatCurrency(result?.limit || 0)}
             </p>
 
             <button
@@ -252,10 +293,16 @@ export default function BankPage() {
       </AnimatePresence>
 
       {/* Footer */}
-      <div className="mt-14 p-5 rounded-2xl border border-[var(--border-color)] bg-black/20 flex items-start gap-4">
-        <ShieldCheck size={18} className="text-blue-500" />
-        <p className="text-[11px] text-[var(--text-tertiary)]">
-          GigID is not a bank. We provide cryptographic proof of eligibility.
+      <div 
+        className="p-8 rounded-[32px] flex items-start gap-6 transition-all"
+        style={{ backgroundColor: "var(--bg-secondary)" }}
+      >
+        <div className="p-3 rounded-xl bg-blue-500/10 text-blue-500 shrink-0">
+          <ShieldCheck size={24} />
+        </div>
+        <p className="text-sm font-medium text-[var(--text-secondary)] leading-loose">
+          <span className="font-black text-[var(--text-primary)] block mb-1">Cryptographic Security</span>
+          GigID acts as a verification layer, not a lender. All proofs are generated locally on your device using zero-knowledge protocols.
         </p>
       </div>
     </div>
