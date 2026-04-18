@@ -63,23 +63,30 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed top-0 left-0 h-full w-[300px] bg-[var(--bg-elevated)] shadow-2xl z-[101] flex flex-col"
           >
-            {/* Rich Profile Header */}
-            <div className="p-8 relative">
-              <button 
-                onClick={onClose}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-tertiary)] z-20"
-              >
-                <X size={20} />
-              </button>
+            {/* Unified Profile Header Area */}
+            <div className="p-8 pt-12 pb-4">
+              <div className="flex items-center justify-between mb-6 px-1">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-[var(--primary-500)]">
+                    <Shield size={22} strokeWidth={2.5} />
+                  </div>
+                  <span className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">GigID</span>
+                </div>
+                <button 
+                  onClick={onClose}
+                  className="p-2.5 rounded-full hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-tertiary)]"
+                >
+                  <X size={22} />
+                </button>
+              </div>
 
               <div 
                 onClick={() => handleNav("/profile")}
-                className="flex flex-col gap-4 mt-2 cursor-pointer group active:scale-[0.98] transition-all"
+                className="p-8 rounded-[32px] bg-[var(--bg-secondary)] flex flex-col gap-8 group cursor-pointer active:scale-[0.98] transition-all"
               >
-                {/* Avatar & Trust Badge */}
-                <div className="flex items-start justify-between">
+                <div className="flex items-center gap-5">
                   <div 
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black text-white group-hover:scale-105 transition-transform shadow-lg"
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black text-white shadow-lg shrink-0"
                     style={{
                       background: "linear-gradient(135deg, var(--primary-600), var(--primary-400))",
                       boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.4)"
@@ -87,44 +94,31 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   >
                     {initials}
                   </div>
-                  <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold border flex items-center gap-1.5 ${
-                    trustScore >= 80 
-                    ? "bg-teal-500/10 border-teal-500/20 text-teal-500" 
-                    : "bg-amber-500/10 border-amber-500/20 text-amber-500"
-                  }`}>
-                    <CheckCircle2 size={12} />
-                    {trustScore}% Trust
+                  <div className="flex flex-col gap-1">
+                    <h3 className="text-xl font-black text-[var(--text-primary)] leading-tight tracking-tight">
+                      {name || "GigID User"}
+                    </h3>
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-500/10 text-teal-500 w-fit">
+                      <CheckCircle2 size={12} />
+                      <span className="text-[11px] font-black uppercase tracking-wider">{trustScore}% Trust</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* User Info */}
-                <div>
-                  <h3 
-                    className="text-xl font-black text-[var(--text-primary)] leading-tight tracking-tight transition-colors"
-                    style={{ ":hover": { color: "var(--primary-500)" } } as any}
-                  >
-                    {name || "GigID User"}
-                  </h3>
-                  <p className="text-sm font-bold mt-0.5 opacity-80" style={{ color: "var(--primary-500)" }}>
-                    {phone || "+91 00000 00000"}
+                <div className="pt-6 border-t border-[var(--bg-primary)] opacity-60">
+                  <p className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] mb-2">
+                    Identity DID
                   </p>
-                  
-                  {/* Technical DID */}
-                  <div className="mt-4 p-3 rounded-xl bg-black/20 border border-white/5 opacity-60 group-hover:opacity-100 transition-opacity">
-                    <p className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 ">
-                      Verifiable Identifier
-                    </p>
-                    <p className="text-[10px] text-[var(--text-secondary)] font-mono break-all leading-relaxed">
-                      {did || "did:gigid:unregistered"}
-                    </p>
-                  </div>
+                  <p className="text-[11px] text-[var(--text-secondary)] font-mono break-all leading-relaxed">
+                    {did?.substring(0, 32) || "did:gigid:0000..."}...
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Navigation Sections */}
-            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-2">
-              <p className="px-4 py-2 text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] mb-1">
+            <div className="flex-1 overflow-y-auto p-6 mt-10 flex flex-col gap-2">
+              <p className="px-4 py-2 text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] mb-2 mt-2">
                 Main Navigation
               </p>
               {navItems.map((item) => (

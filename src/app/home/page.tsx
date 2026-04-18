@@ -124,7 +124,7 @@ export default function DashboardPage() {
                     <span className="flex items-center gap-1 font-bold text-[var(--text-secondary)]">💰 {formatCurrency(platform.totalEarnings || 0)}</span>
                   </div>
                 </div>
-                <div className="ml-auto shrink-0 px-3 py-1.5 rounded-full bg-teal-500/10 flex items-center gap-2">
+                <div className="ml-auto shrink-0 mr-2 px-3 py-1.5 rounded-full bg-teal-500/10 flex items-center gap-2">
                    <div className="w-2 h-2 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.5)]" />
                    <span className="text-[11px] text-teal-600 font-bold uppercase tracking-wider">Linked</span>
                 </div>
@@ -137,7 +137,7 @@ export default function DashboardPage() {
       {/* Add Platform FAB */}
       <button
         onClick={() => setShowConnect(true)}
-        className="fixed bottom-24 left-6 w-16 h-16 rounded-full text-white shadow-xl flex items-center justify-center z-40 active:scale-95 transition-transform"
+        className="fixed bottom-32 left-8 w-16 h-16 rounded-full text-white shadow-xl flex items-center justify-center z-40 active:scale-95 transition-transform"
         style={{
           background: "linear-gradient(135deg, var(--success-500), var(--primary-500))",
           boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.5)"
