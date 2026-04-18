@@ -118,8 +118,8 @@ export default function ProfilePage() {
           <h3 className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest px-2">Identity Details</h3>
           <div className="flex flex-col gap-4">
              <InputField label="Email" value={email || ""} readOnly icon={<Mail size={18}/>} />
-             <InputField label="Legal Name" value={formData.fullName} onChange={(val) => setFormData({...formData, fullName: val})} icon={<User size={18}/>} />
-             <InputField label="Username" value={formData.username} onChange={(val) => setFormData({...formData, username: val})} icon={<Tag size={18}/>} />
+             <InputField label="Legal Name" value={formData.fullName} onChange={(val: string) => setFormData({...formData, fullName: val})} icon={<User size={18}/>} />
+             <InputField label="Username" value={formData.username} onChange={(val: string) => setFormData({...formData, username: val})} icon={<Tag size={18}/>} />
           </div>
           <button onClick={handleSave} className="w-full py-4 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-xs shadow-xl h-14 flex items-center justify-center gap-2">
             {isSaving ? "Saving..." : showSuccess ? "Updated!" : <><Save size={16}/> Save Changes</>}

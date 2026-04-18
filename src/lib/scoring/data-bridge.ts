@@ -9,7 +9,8 @@ import { generateMockHistory } from "./mock-service";
 export async function getLiveTrustScore(): Promise<ScoreBreakdown> {
   const workRecords = await db.workRecords.toArray();
   const manualData = await db.manualScoringData.toArray();
-  const platforms = await db.platforms.where("connected").equals(1).toArray();
+  const allPlatforms = await db.platforms.toArray();
+  const platforms = allPlatforms.filter(p => p.connected);
 
   // 1. Check if we have any data (real or manual)
   const hasData = workRecords.length > 0 || manualData.length > 0 || platforms.length > 0;

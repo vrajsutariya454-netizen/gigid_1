@@ -11,16 +11,26 @@ import {
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+<<<<<<< HEAD
 import { DEMO_PROFILES } from "@/lib/scoring/demo-profiles";
 
 export default function DataHubPage() {
   const [activeTab, setActiveTab] = useState<'work' | 'integrations' | 'raw'>('work');
+=======
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
+
+export default function DataHubPage() {
+  const [activeTab, setActiveTab] = useState<'work' | 'transactions' | 'aa'>('work');
+  const router = useRouter();
+>>>>>>> e8f94190e328f4335f925e7b5b323f58f6a9e76f
   
   const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
   const workRecords = useLiveQuery(() => db.workRecords.toArray()) || [];
   const manualData = useLiveQuery(() => db.manualScoringData.toArray()) || [];
   const currentPersonaId = useLiveQuery(() => db.settings.where("key").equals("current_persona").first());
 
+<<<<<<< HEAD
   const disconnectPlatform = async (id: number) => {
     if (confirm("Disconnect this platform? This will remove all associated work records.")) {
       const platform = platforms.find(p => p.id === id);
@@ -32,6 +42,21 @@ export default function DataHubPage() {
         // 3. Remove the platform entry entirely
         await db.platforms.delete(id);
       }
+=======
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace("/");
+      }
+    };
+    checkAuth();
+  }, [router]);
+
+  const deleteWorkRecord = async (id: number) => {
+    if (confirm("Delete this record?")) {
+      await db.workRecords.delete(id);
+>>>>>>> e8f94190e328f4335f925e7b5b323f58f6a9e76f
     }
   };
 
