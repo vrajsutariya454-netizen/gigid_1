@@ -98,6 +98,11 @@ export default function LoginPage() {
       if (message.toLowerCase().includes("rate limit")) {
         message = "Email rate limit exceeded. Supabase limits signups and emails to prevent spam. Please wait a few minutes or use a different email.";
       }
+
+      // Handle Email Not Confirmed specifically
+      if (message.toLowerCase().includes("email not confirmed")) {
+        message = "Your email has not been confirmed yet. Please check your inbox for a verification link or disable 'Email Confirmation' in your Supabase Auth settings.";
+      }
       
       setError(message);
     } finally {
