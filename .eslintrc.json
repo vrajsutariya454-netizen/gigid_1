@@ -1,1 +1,3 @@
-.eslintrc.json not needed - using default next lint config
+{
+  "extends": "next/core-web-vitals"
+}

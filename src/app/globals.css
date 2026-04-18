@@ -320,8 +320,8 @@ body {
 
 /* ===== Page Layout ===== */
 .page-container {
-  padding-top: var(--top-bar-height);
-  padding-bottom: calc(var(--nav-height) + var(--safe-area-bottom) + 16px);
+  padding-top: calc(var(--top-bar-height) + 16px);
+  padding-bottom: calc(var(--nav-height) + var(--safe-area-bottom) + 100px);
   min-height: 100dvh;
 }
 

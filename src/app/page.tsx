@@ -56,10 +56,9 @@ export default function LoginPage() {
 
         {/* Login Card */}
         <div 
-          className="relative group rounded-2xl border p-8 shadow-2xl backdrop-blur-xl transition-all duration-300"
+          className="relative group rounded-3xl p-10 shadow-2xl shadow-blue-500/10 backdrop-blur-xl transition-all duration-300"
           style={{ 
-            backgroundColor: "var(--bg-card)",
-            borderColor: "var(--border-color)"
+            backgroundColor: "var(--bg-elevated)",
           }}
         >
           {/* Subtle top glow line */}
@@ -78,12 +77,10 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl outline-none transition-all duration-300 focus:ring-4"
+                className="w-full px-6 py-5 rounded-2xl outline-none transition-all duration-300 focus:ring-4 font-medium text-lg"
                 style={{ 
-                  backgroundColor: "var(--bg-primary)",
-                  border: "1px solid var(--border-color)",
-                  color: "white",
-                  borderColor: "var(--border-color)"
+                  backgroundColor: "var(--bg-tertiary)",
+                  color: "var(--text-primary)",
                 }}
                 placeholder="you@example.com"
               />
@@ -98,12 +95,10 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl outline-none transition-all duration-300 focus:ring-4"
+                className="w-full px-6 py-5 rounded-2xl outline-none transition-all duration-300 focus:ring-4 font-medium text-lg"
                 style={{ 
-                  backgroundColor: "var(--bg-primary)",
-                  border: "1px solid var(--border-color)",
-                  color: "white",
-                  borderColor: "var(--border-color)"
+                  backgroundColor: "var(--bg-tertiary)",
+                  color: "var(--text-primary)",
                 }}
                 placeholder="••••••••"
               />
@@ -112,30 +107,29 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoggingIn}
-              className="w-full py-3 px-4 mt-2 text-white font-semibold rounded-xl transition-all duration-300 transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-wait"
+              className="w-full py-4 px-4 mt-4 text-white font-bold tracking-wider rounded-2xl transition-transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-wait"
               style={{ 
-                background: "linear-gradient(135deg, var(--primary-600), var(--success-500))",
-                boxShadow: "0 4px 15px rgba(30, 58, 138, 0.3)"
+                background: "linear-gradient(135deg, var(--primary-600), var(--primary-400))",
+                boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.4)"
               }}
             >
               {isLoggingIn ? "Signing In..." : "Sign In / Sign Up"}
             </button>
         </form>
 
-        <div className="my-6 flex items-center justify-between">
-          <hr className="w-full" style={{ borderColor: "var(--border-color)" }} />
-          <span className="px-3 text-xs uppercase tracking-wider font-medium" style={{ color: "var(--text-tertiary)" }}>Or</span>
-          <hr className="w-full" style={{ borderColor: "var(--border-color)" }} />
+        <div className="my-8 flex items-center justify-between">
+          <div className="w-full h-px" style={{ backgroundColor: "var(--border-color)", opacity: 0.5 }} />
+          <span className="px-4 text-[10px] uppercase tracking-widest font-bold" style={{ color: "var(--text-tertiary)" }}>Or</span>
+          <div className="w-full h-px" style={{ backgroundColor: "var(--border-color)", opacity: 0.5 }} />
         </div>
 
         <button
           type="button"
           onClick={() => handleLogin()}
           disabled={isLoggingIn}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-wait"
+          className="w-full flex items-center justify-center gap-3 py-4 px-4 rounded-2xl font-bold shadow-sm transition-transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-wait"
           style={{ 
-            backgroundColor: "var(--bg-primary)",
-            border: "1px solid var(--border-color)",
+            backgroundColor: "var(--bg-elevated)",
             color: "var(--text-primary)"
           }}
         >

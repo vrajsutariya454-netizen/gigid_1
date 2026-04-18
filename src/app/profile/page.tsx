@@ -31,7 +31,7 @@ export default function ProfilePage() {
       <div className="flex items-center gap-4 mb-8">
         <button 
           onClick={() => router.back()}
-          className="p-2 rounded-full bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-secondary)]"
+          className="p-2 rounded-full bg-[var(--bg-elevated)] border-0 text-[var(--text-secondary)] shadow-sm hover:shadow-md transition-shadow"
         >
           <ChevronLeft size={20} />
         </button>
@@ -39,24 +39,32 @@ export default function ProfilePage() {
       </div>
 
       {/* Avatar Section */}
-      <div className="flex flex-col items-center justify-center mb-10">
+      <div className="flex flex-col items-center justify-center mb-16">
         <div className="relative">
-          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-2xl shadow-blue-500/40 border-4 border-[var(--bg-primary)] text-3xl font-black text-white">
+          <div 
+            className="w-32 h-32 flex items-center justify-center shadow-2xl text-4xl font-black text-white"
+            style={{ 
+              borderRadius: "var(--radius-xl)", 
+              background: "linear-gradient(135deg, var(--primary-600), var(--primary-400))",
+              boxShadow: "0 20px 30px -10px rgba(59, 130, 246, 0.5)",
+              border: "6px solid var(--bg-primary)"
+            }}
+          >
             {initials}
           </div>
-          <div className="absolute -bottom-2 -right-2 p-2 rounded-2xl bg-teal-500 border-4 border-[var(--bg-primary)] text-white shadow-xl shadow-teal-500/20">
-            <ShieldCheck size={20} />
+          <div className="absolute -bottom-4 -right-4 p-2.5 rounded-2xl bg-teal-500 border-[4px] border-[var(--bg-primary)] text-white shadow-xl shadow-teal-500/20">
+            <ShieldCheck size={24} />
           </div>
         </div>
-        <div className="mt-4 px-4 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center gap-2">
-          <CheckCircle2 size={14} className="text-teal-500" />
-          <span className="text-xs font-bold text-teal-500 uppercase tracking-widest">{trustScore}% Trust Verified</span>
+        <div className="mt-8 px-5 py-2 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center gap-2">
+          <CheckCircle2 size={16} className="text-teal-500" />
+          <span className="text-sm font-bold text-teal-500 uppercase tracking-widest">{trustScore}% Trust Verified</span>
         </div>
       </div>
 
       {/* Form Section */}
-      <div className="flex flex-col gap-6">
-        <div className="space-y-4">
+      <div className="flex flex-col gap-10">
+        <div className="flex flex-col gap-6">
           <div className="relative group">
             <label className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] ml-2 mb-2 block">
               Full Legal Name
@@ -69,7 +77,12 @@ export default function ProfilePage() {
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] pl-12 pr-4 py-4 rounded-2xl font-bold focus:outline-none focus:border-blue-500 transition-all shadow-sm"
+                className="w-full border-0 text-[var(--text-primary)] pr-6 py-5 rounded-2xl text-lg font-bold focus:outline-none focus:ring-4 transition-all"
+                style={{ 
+                  backgroundColor: "var(--bg-tertiary)",
+                  color: "var(--text-primary)",
+                  paddingLeft: "4.5rem"
+                }}
                 placeholder="Enter your name"
               />
             </div>
@@ -87,7 +100,12 @@ export default function ProfilePage() {
                 type="text"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] pl-12 pr-4 py-4 rounded-2xl font-bold focus:outline-none focus:border-blue-500 transition-all shadow-sm"
+                className="w-full border-0 text-[var(--text-primary)] pr-6 py-5 rounded-2xl text-lg font-bold focus:outline-none focus:ring-4 transition-all"
+                style={{ 
+                  backgroundColor: "var(--bg-tertiary)",
+                  color: "var(--text-primary)",
+                  paddingLeft: "4.5rem"
+                }}
                 placeholder="Enter your phone"
               />
             </div>
@@ -95,25 +113,31 @@ export default function ProfilePage() {
         </div>
 
         {/* DID Section (Read Only) */}
-        <div className="p-5 rounded-2xl bg-black/20 border border-white/5 opacity-80">
-          <p className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] mb-3">
+        <div 
+          className="p-8 rounded-3xl"
+          style={{ backgroundColor: "var(--bg-secondary)" }}
+        >
+          <p className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-4">
             Your Trust Identifier (DID)
           </p>
-          <p className="text-[11px] text-[var(--text-secondary)] font-mono break-all leading-relaxed">
+          <p className="text-sm text-[var(--text-secondary)] font-mono break-all leading-loose">
             {did}
           </p>
         </div>
 
         {/* Action Button */}
-        <div className="fixed bottom-8 left-4 right-4 z-50">
+        <div className="mt-6 mb-4">
           <button
             disabled={isSaving}
             onClick={handleSave}
             className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 transition-all ${
               isSaving || showSuccess
               ? "bg-teal-500 text-white"
-              : "bg-blue-600 text-white shadow-xl shadow-blue-500/20 active:scale-95"
+              : "text-white shadow-xl shadow-blue-500/30 active:scale-95"
             }`}
+            style={{
+              background: (!isSaving && !showSuccess) ? "linear-gradient(135deg, var(--primary-600), var(--primary-400))" : undefined
+            }}
           >
             {isSaving ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

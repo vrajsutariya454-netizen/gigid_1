@@ -61,13 +61,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 left-0 h-full w-[280px] bg-[var(--bg-elevated)] border-r border-[var(--border-color)] z-[101] flex flex-col"
+            className="fixed top-0 left-0 h-full w-[300px] bg-[var(--bg-elevated)] shadow-2xl z-[101] flex flex-col"
           >
             {/* Rich Profile Header */}
-            <div className="p-6 border-b border-[var(--border-color)] relative bg-gradient-to-b from-blue-500/5 to-transparent">
+            <div className="p-8 relative">
               <button 
                 onClick={onClose}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/5 transition-colors text-[var(--text-tertiary)] z-20"
+                className="absolute top-4 right-4 p-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-tertiary)] z-20"
               >
                 <X size={20} />
               </button>
@@ -78,7 +78,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               >
                 {/* Avatar & Trust Badge */}
                 <div className="flex items-start justify-between">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-500/30 border-2 border-white/10 text-xl font-black text-white group-hover:scale-105 transition-transform">
+                  <div 
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black text-white group-hover:scale-105 transition-transform shadow-lg"
+                    style={{
+                      background: "linear-gradient(135deg, var(--primary-600), var(--primary-400))",
+                      boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.4)"
+                    }}
+                  >
                     {initials}
                   </div>
                   <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold border flex items-center gap-1.5 ${
@@ -93,10 +99,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
                 {/* User Info */}
                 <div>
-                  <h3 className="text-xl font-black text-[var(--text-primary)] leading-tight tracking-tight group-hover:text-blue-500 transition-colors">
+                  <h3 
+                    className="text-xl font-black text-[var(--text-primary)] leading-tight tracking-tight transition-colors"
+                    style={{ ":hover": { color: "var(--primary-500)" } } as any}
+                  >
                     {name || "GigID User"}
                   </h3>
-                  <p className="text-sm font-bold text-blue-500 mt-0.5 opacity-80">
+                  <p className="text-sm font-bold mt-0.5 opacity-80" style={{ color: "var(--primary-500)" }}>
                     {phone || "+91 00000 00000"}
                   </p>
                   
@@ -114,7 +123,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
 
             {/* Navigation Sections */}
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-1">
+            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-2">
               <p className="px-4 py-2 text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] mb-1">
                 Main Navigation
               </p>
@@ -124,19 +133,24 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   onClick={() => handleNav(item.path)}
                   className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 group ${
                     pathname === item.path 
-                    ? "bg-blue-500/10 text-blue-500" 
-                    : "text-[var(--text-secondary)] hover:bg-white/5"
+                    ? "font-black shadow-sm" 
+                    : "text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]"
                   }`}
+                  style={pathname === item.path ? { backgroundColor: "var(--bg-primary)", color: "var(--primary-500)" } : {}}
                 >
-                  <item.icon size={20} className={pathname === item.path ? "text-blue-500" : "text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)]"} />
+                  <item.icon 
+                    size={20} 
+                    className={pathname === item.path ? "" : "text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)]"} 
+                    style={pathname === item.path ? { color: "var(--primary-500)" } : {}}
+                  />
                   <span className="text-sm font-bold">{item.label}</span>
                   {pathname === item.path && (
-                    <motion.div layoutId="nav-active" className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500" />
+                    <motion.div layoutId="nav-active" className="ml-auto w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--primary-500)" }} />
                   )}
                 </button>
               ))}
 
-              <div className="h-px bg-[var(--border-color)] my-4 mx-2" />
+              <div className="my-6" />
 
               <p className="px-4 py-2 text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] mb-1">
                 System
@@ -144,15 +158,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               
               <button
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-[var(--text-secondary)] hover:bg-white/5 transition-all"
+                className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-all"
               >
-                {theme === "dark" ? <Sun size={20} className="text-amber-400" /> : <Moon size={20} className="text-blue-500" />}
+                {theme === "dark" ? <Sun size={20} className="text-amber-400" /> : <Moon size={20} className="text-[var(--primary-500)]" />}
                 <span className="text-sm font-bold">{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
               </button>
 
               <button
                 onClick={() => handleNav("/help")}
-                className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-[var(--text-secondary)] hover:bg-white/5 transition-all"
+                className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-all"
               >
                 <HelpCircle size={20} className="text-[var(--text-tertiary)]" />
                 <span className="text-sm font-bold">Help & Support</span>
@@ -160,7 +174,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-[var(--border-color)]">
+            <div className="p-6 mt-auto">
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center justify-center gap-3 p-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-colors"

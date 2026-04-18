@@ -67,6 +67,7 @@ function AppShell({ children }: { children: ReactNode }) {
           {children}
         </main>
         {!isLoginPage && <VoiceFAB />}
+        {!isLoginPage && <BottomNav />}
       </div>
     </div>
   );

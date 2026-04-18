@@ -135,12 +135,12 @@ export function VoiceFAB() {
         onClick={toggleListening}
         style={{
           position: "fixed",
-          bottom: "calc(var(--nav-height) + 16px)",
+          bottom: "calc(var(--nav-height) + 24px)",
           right: "16px",
           width: "56px",
           height: "56px",
           borderRadius: "50%",
-          border: "none",
+          border: "1px solid rgba(255,255,255,0.1)",
           background: isVoiceActive
             ? "linear-gradient(135deg, var(--danger-500), var(--danger-600))"
             : "linear-gradient(135deg, var(--primary-500), var(--primary-700))",
