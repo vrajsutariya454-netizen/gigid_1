@@ -3,8 +3,12 @@
 import { useState } from "react";
 import { AVAILABLE_PLATFORMS, type PlatformInfo } from "@/lib/aggregation/platform-connector";
 import { connectPlatform } from "@/lib/aggregation/platform-connector";
+import { db } from "@/lib/db/database";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useAppStore } from "@/lib/store/app-store";
-import { X, ShieldCheck, Check, Loader2, Upload, Trash2, Image as ImageIcon } from "lucide-react";
+import { X, ShieldCheck, Check, Loader2, Upload, Trash2, Image as ImageIcon, Calendar, ChevronRight } from "lucide-react";
+import { performEstimate } from "@/lib/services/backend-api";
+import { createCredential } from "@/lib/identity/credentials";
 
 interface ConnectPlatformDialogProps {
   open: boolean;
@@ -13,9 +17,15 @@ interface ConnectPlatformDialogProps {
 }
 
 export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPlatformDialogProps) {
-  const { did, connectedPlatforms, addConnectedPlatform } = useAppStore();
-  const [step, setStep] = useState<"select" | "consent" | "connecting" | "manual" | "success">("select");
+  const { did, removeConnectedPlatform } = useAppStore();
+  
+  // Real-time parity with database
+  const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
+  const dbConnectedIds = platforms.filter(p => p.connected).map(p => p.platformId);
+
+  const [step, setStep] = useState<"select" | "duration" | "consent" | "connecting" | "manual" | "success">("select");
   const [selectedPlatform, setSelectedPlatform] = useState<PlatformInfo | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<3 | 6 | 12>(6);
   const [manualName, setManualName] = useState("");
   const [manualFile, setManualFile] = useState<File | null>(null);
 
@@ -23,18 +33,36 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
 
   const handleSelect = (platform: PlatformInfo) => {
     setSelectedPlatform(platform);
+    setStep("duration");
+  };
+
+  const handleDurationSelect = (months: 3 | 6 | 12) => {
+    setSelectedDuration(months);
     setStep("consent");
   };
 
-  const handleManualOpen = () => {
-    setStep("manual");
+  const handleDisconnect = async (e: React.MouseEvent, platformId: string) => {
+    e.stopPropagation();
+    // Get ALL instances for this platformId (could be multiple durations)
+    const instances = await db.platforms.where("platformId").equals(platformId).toArray();
+    if (instances.length === 0) return;
+
+    const instanceNames = instances.map(p => p.name).join(", ");
+    if (confirm(`Remove ${instanceNames}? This will delete all linked history for these accounts.`)) {
+      for (const instance of instances) {
+        // Delete ONLY the work records for this specific instance
+        await db.workRecords.where("instanceId").equals(instance.id!).delete();
+        await db.platforms.delete(instance.id!);
+      }
+      removeConnectedPlatform(platformId);
+    }
   };
 
   const handleManualSubmit = async () => {
     if (!manualName || !manualFile) return;
     setStep("connecting");
-    // Simulate upload
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Simulate complex proof verification
+    await new Promise(resolve => setTimeout(resolve, 2500));
     setStep("success");
     setTimeout(() => {
       handleClose();
@@ -45,15 +73,62 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
     if (!selectedPlatform || !did) return;
     setStep("connecting");
 
-    const result = await connectPlatform(selectedPlatform.id, did);
-    if (result.success) {
-      addConnectedPlatform(selectedPlatform.id);
-      setStep("success");
-      setTimeout(() => {
-        onConnected(selectedPlatform.id);
-        handleClose();
-      }, 1500);
-    } else {
+    try {
+      const estimate = await performEstimate(selectedPlatform.id, selectedDuration);
+      const result = await connectPlatform(selectedPlatform.id, did);
+      
+      if (result.success) {
+        // Create a unique instance entry (multi-instance support)
+        const instanceId = await db.platforms.add({
+          platformId: selectedPlatform.id,
+          name: `${selectedPlatform.name} (${selectedDuration}m)`,
+          icon: selectedPlatform.icon,
+          color: selectedPlatform.color,
+          connected: true,
+          lastSynced: new Date()
+        });
+
+        // Credential scoped to this instance
+        const vc = await createCredential({
+          subjectDid: did,
+          platform: `${selectedPlatform.name} (${selectedDuration}m)`,
+          totalDeliveries: estimate.deliveries,
+          avgRating: parseFloat(estimate.rating),
+          last6MonthsEarnings: estimate.earnings
+        });
+        await db.credentials.add(vc);
+
+        // Per-month unique records tied to this specific instanceId
+        // Each month gets a random variance around the backend estimate
+        const baseMonthlyEarnings = Math.round(estimate.earnings / selectedDuration);
+        const baseMonthlyTrips = Math.round(estimate.deliveries / selectedDuration);
+        const baseRating = parseFloat(estimate.rating);
+        const now = new Date();
+
+        for (let i = 0; i < selectedDuration; i++) {
+          const month = new Date(now.getFullYear(), now.getMonth() - i, 1).toISOString().slice(0, 7);
+          // Add natural monthly variance (+-15%)
+          const variance = 0.85 + Math.random() * 0.3;
+          const monthTrips = Math.round(baseMonthlyTrips * variance);
+          await db.workRecords.add({
+            instanceId: instanceId as number,
+            platformId: selectedPlatform.id,
+            month,
+            earnings: Math.round(baseMonthlyEarnings * variance),
+            trips: monthTrips,
+            rating: Math.min(5, parseFloat((baseRating + (Math.random() * 0.4 - 0.2)).toFixed(1))),
+            hoursWorked: Math.round(monthTrips * 0.35) // ~21 min per delivery
+          });
+        }
+
+        setStep("success");
+        setTimeout(() => {
+          onConnected(selectedPlatform.id);
+          handleClose();
+        }, 1500);
+      }
+    } catch (err) {
+      console.error("Connection failed:", err);
       setStep("select");
     }
   };
@@ -67,420 +142,143 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 100,
-        display: "flex",
-        alignItems: "flex-end",
-        justifyContent: "center",
-      }}
-    >
-      {/* Backdrop */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "rgba(0,0,0,0.6)",
-          backdropFilter: "blur(4px)",
-        }}
-        onClick={handleClose}
-      />
+    <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }} onClick={handleClose} />
 
-      {/* Sheet */}
-      <div
-        style={{
-          position: "relative",
-          width: "100%",
-          maxWidth: "480px",
-          maxHeight: "90vh",
-          background: "var(--bg-elevated)",
-          borderRadius: "var(--radius-xl) var(--radius-xl) 0 0",
-          padding: "24px",
-          overflowY: "auto",
-        }}
-        className="animate-slide-up"
-      >
-        {/* Handle */}
-        <div
-          style={{
-            width: "40px",
-            height: "4px",
-            borderRadius: "2px",
-            background: "var(--border-strong)",
-            margin: "0 auto 20px",
-          }}
-        />
+      <div style={{ position: "relative", width: "100%", maxWidth: "480px", maxHeight: "90vh", background: "var(--bg-elevated)", borderRadius: "40px 40px 0 0", padding: "32px 24px 48px", overflowY: "auto" }} className="animate-slide-up">
+        {/* Drag Handle */}
+        <div style={{ width: "48px", height: "5px", borderRadius: "5px", background: "var(--border-strong)", margin: "0 auto 32px", opacity: 0.3 }} />
 
-        {/* Close button */}
-        <button
-          onClick={handleClose}
-          style={{
-            position: "absolute",
-            top: "16px",
-            right: "16px",
-            background: "var(--bg-tertiary)",
-            border: "none",
-            borderRadius: "50%",
-            width: "32px",
-            height: "32px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            color: "var(--text-secondary)",
-            zIndex: 10,
-          }}
-        >
-          <X size={18} />
+        <button onClick={handleClose} style={{ position: "absolute", top: "24px", right: "24px", background: "var(--bg-tertiary)", border: "none", borderRadius: "50%", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-secondary)", zIndex: 10 }}>
+          <X size={20} />
         </button>
 
-        {/* Platform Selection */}
+        {/* 1. SELECT PLATFORM */}
         {step === "select" && (
           <>
-            <h2 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>
-              Connect Platform
-            </h2>
-            <p style={{ fontSize: "14px", color: "var(--text-secondary)", marginBottom: "24px" }}>
-              Choose a platform to import your work history
-            </p>
+            <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mb-1">Connect Work</h2>
+            <p className="text-sm font-bold text-[var(--text-tertiary)] mb-8">Link your accounts to verify your history.</p>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
               {AVAILABLE_PLATFORMS.map((platform) => {
-                const isConnected = connectedPlatforms.includes(platform.id);
+                const isConnected = dbConnectedIds.includes(platform.id);
                 return (
-                  <button
-                    key={platform.id}
-                    onClick={() => !isConnected && handleSelect(platform)}
-                    disabled={isConnected}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: "20px 16px",
-                      borderRadius: "var(--radius-lg)",
-                      border: `2px solid ${isConnected ? "var(--success-500)" : "var(--border-color)"}`,
-                      background: isConnected ? "rgba(16, 185, 129, 0.08)" : "var(--bg-secondary)",
-                      cursor: isConnected ? "default" : "pointer",
-                      opacity: isConnected ? 0.7 : 1,
-                      transition: "all var(--transition-fast)",
-                    }}
-                  >
-                    <span style={{ fontSize: "36px" }}>{platform.icon}</span>
-                    <span
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color: "var(--text-primary)",
-                      }}
+                  <div key={platform.id} style={{ position: "relative" }}>
+                    <button
+                      onClick={() => handleSelect(platform)}
+                      style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "24px 16px", borderRadius: "24px", border: `2px solid ${isConnected ? "var(--success-500)30" : "var(--border-color)"}`, background: isConnected ? "rgba(16, 185, 129, 0.05)" : "var(--bg-secondary)", cursor: "pointer", transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+                      className="hover:scale-[1.02] hover:border-blue-500/50"
                     >
-                      {platform.name}
-                    </span>
+                      <span style={{ fontSize: "40px", marginBottom: "4px" }}>{platform.icon}</span>
+                      <span style={{ fontSize: "14px", fontWeight: 900, color: "var(--text-primary)" }}>{platform.name}</span>
+                      {isConnected && (
+                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/10 text-teal-500 text-[10px] font-black uppercase">
+                          <Check size={12} strokeWidth={3} /> Active
+                        </div>
+                      )}
+                    </button>
                     {isConnected && (
-                      <span
-                        style={{
-                          fontSize: "11px",
-                          color: "var(--success-500)",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}
-                      >
-                        <Check size={12} /> Connected
-                      </span>
+                      <button onClick={(e) => handleDisconnect(e, platform.id)} className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg border-2 border-[var(--bg-elevated)] active:scale-90 transition-transform">
+                        <Trash2 size={14} strokeWidth={2.5} />
+                      </button>
                     )}
-                  </button>
+                  </div>
                 );
               })}
-              
-              {/* Manual Proof Option */}
-              <button
-                onClick={handleManualOpen}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "20px 16px",
-                  borderRadius: "var(--radius-lg)",
-                  border: "2px dashed var(--primary-500)",
-                  background: "var(--primary-500)10",
-                  cursor: "pointer",
-                  transition: "all var(--transition-fast)",
-                }}
-              >
-                <div style={{ 
-                  width: "48px", 
-                  height: "48px", 
-                  borderRadius: "50%", 
-                  background: "var(--primary-500)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "white"
-                }}>
-                  <Upload size={24} />
+              <button onClick={() => setStep("manual")} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "24px 16px", borderRadius: "24px", border: "2px dashed var(--primary-500)40", background: "var(--primary-500)10", cursor: "pointer", transition: "all 0.2s" }} className="hover:bg-blue-500/10 hover:border-blue-500/60">
+                <div style={{ width: "52px", height: "52px", borderRadius: "18px", background: "var(--primary-500)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", boxShadow: "0 8px 16px -4px rgba(59, 130, 246, 0.4)" }}>
+                  <Upload size={24} strokeWidth={3} />
                 </div>
-                <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--primary-500)" }}>
-                  Other (Manual)
-                </span>
-                <span style={{ fontSize: "10px", color: "var(--text-tertiary)", fontWeight: 600 }}>
-                  Upload Proof
-                </span>
+                <span className="text-sm font-black text-blue-500">Other Method</span>
               </button>
             </div>
           </>
         )}
 
-        {/* Manual Step */}
-        {step === "manual" && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-             <h2 style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-primary)", marginBottom: "8px" }}>
-              Manual Proof
-            </h2>
-            <p style={{ fontSize: "14px", color: "var(--text-secondary)", marginBottom: "24px" }}>
-              Upload a screenshot of your profile or earnings for unlisted platforms.
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-              <div>
-                <label style={{ fontSize: "11px", fontWeight: 800, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px", display: "block" }}>
-                  Platform Name
-                </label>
-                <input 
-                  type="text"
-                  placeholder="e.g. Bluedart, Local Logistics"
-                  value={manualName}
-                  onChange={(e) => setManualName(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "16px",
-                    borderRadius: "var(--radius-md)",
-                    background: "var(--bg-secondary)",
-                    border: "1px solid var(--border-color)",
-                    color: "var(--text-primary)",
-                    fontSize: "15px",
-                    fontWeight: 600
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: "11px", fontWeight: 800, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px", display: "block" }}>
-                  Proof Screenshot
-                </label>
-                {!manualFile ? (
-                  <label style={{
-                    cursor: "pointer",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "40px 20px",
-                    borderRadius: "var(--radius-lg)",
-                    border: "2px dashed var(--border-color)",
-                    background: "var(--bg-secondary)",
-                    transition: "all 0.2s"
-                  }}
-                  className="hover:border-blue-500 hover:bg-blue-500/5"
-                  >
-                    <input 
-                      type="file" 
-                      hidden 
-                      accept="image/*"
-                      onChange={(e) => setManualFile(e.target.files?.[0] || null)}
-                    />
-                    <ImageIcon size={32} className="text-blue-500/50 mb-3" />
-                    <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-secondary)" }}>
-                      Tap to select image
-                    </span>
-                    <span style={{ fontSize: "11px", color: "var(--text-tertiary)", marginTop: "4px" }}>
-                      PNG, JPG up to 10MB
-                    </span>
-                  </label>
-                ) : (
-                  <div style={{
-                    padding: "16px",
-                    borderRadius: "var(--radius-lg)",
-                    background: "var(--success-500)10",
-                    border: "1px solid var(--success-500)30",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px"
-                  }}>
-                    <div style={{ width: "48px", height: "48px", background: "var(--bg-tertiary)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <ImageIcon size={20} className="text-teal-500" />
+        {/* 2. DURATION SELECTION */}
+        {step === "duration" && selectedPlatform && (
+          <div className="animate-in fade-in slide-in-from-bottom-4">
+            <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mb-2">Sync Duration</h2>
+            <p className="text-sm font-bold text-[var(--text-tertiary)] mb-8">Choose history length to verify via API.</p>
+            <div className="grid grid-cols-1 gap-4">
+              {[3, 6, 12].map((m) => (
+                <button key={m} onClick={() => handleDurationSelect(m as any)} className="flex items-center justify-between p-6 rounded-[2rem] bg-[var(--bg-secondary)] border border-white/5 hover:border-blue-500/40 hover:bg-blue-500/5 transition-all group">
+                  <div className="flex items-center gap-5">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                      <Calendar size={20} />
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {manualFile.name}
-                      </p>
-                      <p style={{ fontSize: "11px", color: "var(--success-500)", fontWeight: 600 }}>Ready to verify</p>
+                    <div className="text-left">
+                      <p className="text-sm font-black text-[var(--text-primary)]">{m} Months History</p>
+                      <p className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase">{m === 12 ? "Full Year" : m === 6 ? "Medium Term" : "Short Term"}</p>
                     </div>
-                    <button 
-                      onClick={() => setManualFile(null)}
-                      style={{ padding: "8px", color: "var(--danger-500)", background: "transparent", border: "none" }}
-                    >
-                      <Trash2 size={18} />
-                    </button>
                   </div>
-                )}
-              </div>
-
-              <div style={{ display: "flex", gap: "12px", marginTop: "12px" }}>
-                <button
-                  onClick={() => setStep("select")}
-                  style={{
-                    flex: 1,
-                    padding: "16px",
-                    borderRadius: "var(--radius-md)",
-                    border: "1px solid var(--border-color)",
-                    background: "transparent",
-                    color: "var(--text-primary)",
-                    fontSize: "15px",
-                    fontWeight: 700,
-                  }}
-                >
-                  Back
+                  <ChevronRight size={20} className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
-                <button
-                  onClick={handleManualSubmit}
-                  disabled={!manualName || !manualFile}
-                  style={{
-                    flex: 2,
-                    padding: "16px",
-                    borderRadius: "var(--radius-md)",
-                    border: "none",
-                    background: (!manualName || !manualFile) ? "var(--border-color)" : "var(--primary-500)",
-                    color: "white",
-                    fontSize: "15px",
-                    fontWeight: 700,
-                    cursor: (!manualName || !manualFile) ? "not-allowed" : "pointer"
-                  }}
-                >
-                  Submit for Review
-                </button>
-              </div>
+              ))}
             </div>
+            <button onClick={() => setStep("select")} className="w-full mt-6 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-[var(--text-primary)] bg-[var(--bg-tertiary)]">Back</button>
           </div>
         )}
 
-        {/* Consent Screen */}
+        {/* 3. CONSENT SCREEN */}
         {step === "consent" && selectedPlatform && (
-          <>
-            <div style={{ textAlign: "center", marginBottom: "24px" }}>
-              <span style={{ fontSize: "48px" }}>{selectedPlatform.icon}</span>
-              <h2 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", marginTop: "12px" }}>
-                Allow GigID to access your {selectedPlatform.name} data?
-              </h2>
-              <p style={{ fontSize: "14px", color: "var(--text-secondary)", marginTop: "8px" }}>
-                GigID will read your work history, ratings, and earnings to create verifiable credentials.
-              </p>
+          <div className="animate-in fade-in slide-in-from-bottom-4">
+            <div className="text-center mb-8">
+              <span style={{ fontSize: "64px" }}>{selectedPlatform.icon}</span>
+              <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mt-6">Connect {selectedPlatform.name}?</h2>
+              <p className="text-sm font-bold text-[var(--text-tertiary)] mt-2">Allow GigID to read your verified history ({selectedDuration}mo).</p>
             </div>
-
-            <div style={{ marginBottom: "24px" }}>
-              {["Work history & delivery count", "Ratings & reviews", "Earnings data (last 6 months)", "Account verification status"].map((item) => (
-                <div
-                  key={item}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "10px 0",
-                    borderBottom: "1px solid var(--border-color)",
-                  }}
-                >
-                  <ShieldCheck size={16} color="var(--success-500)" />
-                  <span style={{ fontSize: "14px", color: "var(--text-primary)" }}>{item}</span>
+            <div className="space-y-4 mb-10">
+              {["Work history & deliveries", "Customer ratings", `Earnings (${selectedDuration}MO)`, "Verified status"].map((item) => (
+                <div key={item} className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5">
+                  <ShieldCheck size={18} className="text-teal-500" strokeWidth={3} />
+                  <span className="text-xs font-bold text-[var(--text-primary)]">{item}</span>
                 </div>
               ))}
             </div>
-
-            <div style={{ display: "flex", gap: "12px" }}>
-              <button
-                onClick={() => setStep("select")}
-                style={{
-                  flex: 1,
-                  padding: "14px",
-                  borderRadius: "var(--radius-md)",
-                  border: "1px solid var(--border-color)",
-                  background: "transparent",
-                  color: "var(--text-primary)",
-                  fontSize: "15px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                Deny
-              </button>
-              <button
-                onClick={handleConnect}
-                style={{
-                  flex: 2,
-                  padding: "14px",
-                  borderRadius: "var(--radius-md)",
-                  border: "none",
-                  background: `linear-gradient(135deg, ${selectedPlatform.color}, ${selectedPlatform.color}cc)`,
-                  color: "white",
-                  fontSize: "15px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  boxShadow: `0 4px 12px ${selectedPlatform.color}44`,
-                }}
-              >
-                Allow Access
-              </button>
+            <div className="flex gap-4">
+              <button onClick={() => setStep("duration")} className="flex-1 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-[var(--text-primary)] bg-[var(--bg-tertiary)]">Back</button>
+              <button onClick={handleConnect} style={{ background: `linear-gradient(135deg, ${selectedPlatform.color}, ${selectedPlatform.color}cc)` }} className="flex-[2] py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-white shadow-2xl">Confirm Sync</button>
             </div>
-          </>
-        )}
-
-        {/* Connecting */}
-        {step === "connecting" && (
-          <div style={{ textAlign: "center", padding: "40px 0" }}>
-            <Loader2
-              size={48}
-              color="var(--primary-500)"
-              style={{ animation: "spin 1s linear infinite", margin: "0 auto" }}
-            />
-            <p style={{ fontSize: "16px", fontWeight: 600, color: "var(--text-primary)", marginTop: "20px" }}>
-              {manualName ? `Uploading proof for ${manualName}...` : `Connecting to ${selectedPlatform?.name}...`}
-            </p>
-            <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: "8px" }}>
-              {manualName ? "Uploading screenshot securely..." : "Fetching your work history and creating credential"}
-            </p>
-            <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
           </div>
         )}
 
-        {/* Success */}
+        {/* 4. MANUAL PROOF */}
+        {step === "manual" && (
+           <div className="animate-in fade-in slide-in-from-bottom-4">
+              <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mb-2">Manual Proof</h2>
+              <p className="text-sm font-bold text-[var(--text-tertiary)] mb-8">Upload a screenshot to verify unlisted work.</p>
+              <div className="flex flex-col gap-6">
+                <input type="text" placeholder="Platform Name" value={manualName} onChange={(e) => setManualName(e.target.value)} className="w-full p-5 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-4 ring-blue-500/10" />
+                <label className="cursor-pointer flex flex-col items-center justify-center p-12 rounded-[2rem] border-2 border-dashed border-white/10 bg-white/5 hover:bg-blue-500/5 hover:border-blue-500/30 transition-all">
+                  <input type="file" hidden accept="image/*" onChange={(e) => setManualFile(e.target.files?.[0] || null)} />
+                  <ImageIcon size={36} className="text-blue-500/50 mb-3" />
+                  <span className="text-sm font-black text-[var(--text-secondary)]">{manualFile ? manualFile.name : "Select Proof Image"}</span>
+                </label>
+                <div className="flex gap-4">
+                  <button onClick={() => setStep("select")} className="flex-1 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-[var(--text-primary)] bg-[var(--bg-tertiary)]">Back</button>
+                  <button onClick={handleManualSubmit} disabled={!manualName || !manualFile} className="flex-[2] py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-white bg-blue-600 disabled:opacity-30">Submit</button>
+                </div>
+              </div>
+           </div>
+        )}
+
+        {/* LOADING & SUCCESS */}
+        {step === "connecting" && (
+          <div className="text-center py-12">
+            <Loader2 size={56} className="text-blue-500 animate-spin mx-auto" strokeWidth={3} />
+            <p className="text-lg font-black text-[var(--text-primary)] mt-6">Syncing API Data...</p>
+            <p className="text-xs font-bold text-[var(--text-tertiary)] mt-2">Fetching {selectedDuration} months of history.</p>
+          </div>
+        )}
+
         {step === "success" && (
-          <div style={{ textAlign: "center", padding: "40px 0" }}>
-            <div
-              style={{
-                width: "72px",
-                height: "72px",
-                borderRadius: "50%",
-                background: "rgba(16, 185, 129, 0.15)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "0 auto",
-              }}
-              className="animate-scale-in"
-            >
-              <Check size={36} color="var(--success-500)" strokeWidth={3} />
+          <div className="text-center py-12">
+            <div className="w-20 h-20 rounded-[2rem] bg-teal-500/20 flex items-center justify-center mx-auto">
+              <Check size={40} className="text-teal-500" strokeWidth={4} />
             </div>
-            <p style={{ fontSize: "18px", fontWeight: 700, color: "var(--success-500)", marginTop: "20px" }}>
-              {manualName ? "Proof Submitted!" : "Connected!"}
-            </p>
-            <p style={{ fontSize: "14px", color: "var(--text-secondary)", marginTop: "8px" }}>
-              {manualName 
-                ? "Our team will verify your document shortly."
-                : `Your ${selectedPlatform?.name} credential has been created`
-              }
-            </p>
+            <p className="text-xl font-black text-teal-500 mt-6">Success!</p>
+            <p className="text-xs font-bold text-[var(--text-tertiary)] mt-2">Aggregated your verified profile.</p>
           </div>
         )}
       </div>

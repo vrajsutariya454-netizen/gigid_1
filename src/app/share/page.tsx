@@ -7,6 +7,7 @@ import { db, type VerifiableCredential } from "@/lib/db/database";
 import { generateProof, proofToShareableJSON, AVAILABLE_PREDICATES, type ZKPPredicate, type ZKProof } from "@/lib/identity/zkp";
 import { QRCodeSVG } from "qrcode.react";
 import { Share2, ShieldCheck, Loader2, Copy, CheckCircle2, QrCode, ChevronDown, Lock } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 
 function SharePageContent() {
   const searchParams = useSearchParams();
@@ -20,6 +21,17 @@ function SharePageContent() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showCredentialPicker, setShowCredentialPicker] = useState(false);
+
+  // Auth check
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace("/");
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   // Auto-select preselected credential
   useEffect(() => {

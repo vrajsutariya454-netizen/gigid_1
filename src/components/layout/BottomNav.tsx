@@ -6,7 +6,6 @@ import { useState } from "react";
 
 const NAV_ITEMS = [
   { id: "home", href: "/home", icon: Home, label: "Home" },
-  { id: "data", href: "/data-hub", icon: Database, label: "Data" },
   { id: "credentials", href: "/credentials", icon: FileCheck, label: "Docs" },
   { id: "settings", href: "/settings", icon: Settings, label: "Settings" },
 ];

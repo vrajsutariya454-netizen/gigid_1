@@ -3,20 +3,34 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/database";
 import { useAppStore } from "@/lib/store/app-store";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, LayoutTemplate, ShieldCheck, ChevronRight, Info, Clock } from "lucide-react";
 import { ConnectPlatformDialog } from "@/components/platform/ConnectPlatformDialog";
 import { formatCurrency } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { isAuthenticated } from "@/lib/auth";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function PlatformsPage() {
   const [showConnect, setShowConnect] = useState(false);
   const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
   const connectedPlatforms = platforms.filter(p => p.connected);
+  const router = useRouter();
   
   // Mock manual pending platforms
   const manualPlatforms = [
     { name: "Local Courier", status: "pending", date: "2026-04-18" }
   ];
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace("/");
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   return (
     <div className="page-content pb-32">
