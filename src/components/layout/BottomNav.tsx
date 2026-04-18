@@ -32,8 +32,7 @@ export function BottomNav() {
         justifyContent: "space-around",
         paddingBottom: "var(--safe-area-bottom)",
         zIndex: 50,
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
+        boxShadow: "0 -10px 25px rgba(0,0,0,0.5)",
       }}
     >
       {NAV_ITEMS.map((item) => {
@@ -94,8 +93,8 @@ export function BottomNav() {
               style={{
                 fontSize: "10px",
                 fontWeight: isActive ? 600 : 400,
-                color: isActive ? "var(--primary-500)" : "var(--text-tertiary)",
-                opacity: showLabel || isActive ? 1 : 0,
+                color: isActive ? "var(--primary-400)" : "var(--text-tertiary)",
+                opacity: showLabel || isActive ? 1 : 0.7,
                 transform: showLabel || isActive ? "translateY(0)" : "translateY(4px)",
                 transition: "all var(--transition-fast)",
                 whiteSpace: "nowrap",

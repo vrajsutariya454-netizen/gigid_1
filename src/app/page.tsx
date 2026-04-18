@@ -7,7 +7,7 @@ import { generateDID } from "@/lib/identity/did";
 import { db } from "@/lib/db/database";
 
 export default function LoginPage() {
-  const { hasCompletedOnboarding, setOnboardingCompleted, setUser } = useAppStore();
+  const { setOnboardingCompleted, setUser } = useAppStore();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,26 +42,35 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 selection:bg-blue-500/30">
+    <div className="w-full flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500 ease-out">
         {/* Logo / Header */}
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-extrabold tracking-tight mb-2">
+          <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-[var(--text-primary)]">
             GigID
           </h1>
-          <p className="text-zinc-400 text-sm font-medium">
+          <p className="text-[var(--text-secondary)] text-sm font-medium">
             Your Work, Your Identity
           </p>
         </div>
 
         {/* Login Card */}
-        <div className="relative group rounded-2xl bg-zinc-950 border border-zinc-800/50 p-8 shadow-2xl backdrop-blur-xl">
+        <div 
+          className="relative group rounded-2xl border p-8 shadow-2xl backdrop-blur-xl transition-all duration-300"
+          style={{ 
+            backgroundColor: "var(--bg-card)",
+            borderColor: "var(--border-color)"
+          }}
+        >
           {/* Subtle top glow line */}
-          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
+          <div 
+            className="absolute top-0 inset-x-0 h-px" 
+            style={{ background: "linear-gradient(to right, transparent, var(--primary-500), transparent)" }}
+          ></div>
           
           <form onSubmit={handleLogin} className="flex flex-col space-y-5">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider ml-1">
+              <label className="text-xs font-semibold uppercase tracking-wider ml-1" style={{ color: "var(--text-tertiary)" }}>
                 Email
               </label>
               <input
@@ -69,13 +78,19 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-500 outline-none transition-all duration-300 focus:bg-zinc-800/50 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
+                className="w-full px-4 py-3 rounded-xl outline-none transition-all duration-300 focus:ring-4"
+                style={{ 
+                  backgroundColor: "var(--bg-primary)",
+                  border: "1px solid var(--border-color)",
+                  color: "white",
+                  borderColor: "var(--border-color)"
+                }}
                 placeholder="you@example.com"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider ml-1">
+              <label className="text-xs font-semibold uppercase tracking-wider ml-1" style={{ color: "var(--text-tertiary)" }}>
                 Password
               </label>
               <input
@@ -83,7 +98,13 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-500 outline-none transition-all duration-300 focus:bg-zinc-800/50 focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10"
+                className="w-full px-4 py-3 rounded-xl outline-none transition-all duration-300 focus:ring-4"
+                style={{ 
+                  backgroundColor: "var(--bg-primary)",
+                  border: "1px solid var(--border-color)",
+                  color: "white",
+                  borderColor: "var(--border-color)"
+                }}
                 placeholder="••••••••"
               />
             </div>
@@ -91,25 +112,34 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoggingIn}
-              className="w-full py-3 px-4 mt-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.2)] hover:shadow-[0_0_25px_rgba(59,130,246,0.3)] transition-all duration-300 transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-wait"
+              className="w-full py-3 px-4 mt-2 text-white font-semibold rounded-xl transition-all duration-300 transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-wait"
+              style={{ 
+                background: "linear-gradient(135deg, var(--primary-600), var(--success-500))",
+                boxShadow: "0 4px 15px rgba(30, 58, 138, 0.3)"
+              }}
             >
               {isLoggingIn ? "Signing In..." : "Sign In / Sign Up"}
             </button>
         </form>
 
         <div className="my-6 flex items-center justify-between">
-          <hr className="w-full border-zinc-800" />
-          <span className="px-3 text-xs text-zinc-500 uppercase tracking-wider font-medium">Or</span>
-          <hr className="w-full border-zinc-800" />
+          <hr className="w-full" style={{ borderColor: "var(--border-color)" }} />
+          <span className="px-3 text-xs uppercase tracking-wider font-medium" style={{ color: "var(--text-tertiary)" }}>Or</span>
+          <hr className="w-full" style={{ borderColor: "var(--border-color)" }} />
         </div>
 
         <button
           type="button"
           onClick={() => handleLogin()}
           disabled={isLoggingIn}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800/80 rounded-xl text-zinc-200 font-medium transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-wait"
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-wait"
+          style={{ 
+            backgroundColor: "var(--bg-primary)",
+            border: "1px solid var(--border-color)",
+            color: "var(--text-primary)"
+          }}
         >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" style={{ color: "var(--success-500)" }} viewBox="0 0 24 24">
               <path
                 fill="currentColor"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

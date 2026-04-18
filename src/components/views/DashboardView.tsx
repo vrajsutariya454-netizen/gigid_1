@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Plus, TrendingUp, ShieldCheck, Wallet } from "lucide-react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/database";
@@ -8,20 +8,9 @@ import { calculateTrustScore } from "@/lib/aggregation/platform-connector";
 import { TrustScore } from "@/components/dashboard/TrustScore";
 import { ConnectPlatformDialog } from "@/components/platform/ConnectPlatformDialog";
 import { formatCurrency } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { useAppStore } from "@/lib/store/app-store";
 
-export default function DashboardPage() {
-  const router = useRouter();
-  const hasCompletedOnboarding = useAppStore((s) => s.hasCompletedOnboarding);
+export function DashboardView() {
   const [showConnect, setShowConnect] = useState(false);
-
-  // Redirect if not onboarded
-  useEffect(() => {
-    if (!hasCompletedOnboarding) {
-      router.replace("/");
-    }
-  }, [hasCompletedOnboarding, router]);
 
   const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
   const credentials = useLiveQuery(() => db.credentials.toArray()) || [];
@@ -46,7 +35,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="page-content">
+    <div className="p-4 pb-32">
       {/* Trust Score */}
       <div className="text-center py-6">
         <TrustScore score={trustScore} size={200} />
@@ -77,25 +66,25 @@ export default function DashboardPage() {
       {/* Connected Platforms */}
       <div className="mb-6">
         <h2 className="text-base font-bold text-[var(--text-primary)] mb-3 px-1">
-          Connected Platforms
+          Platforms
         </h2>
 
         {connectedPlatforms.length === 0 ? (
-          <div className="card p-8 text-center bg-[var(--bg-card)] border border-[var(--border-color)]">
+          <div className="card p-8 text-center bg-[var(--bg-card)]">
             <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-4 text-3xl">
               🔗
             </div>
             <p className="text-sm font-bold text-[var(--text-primary)] mb-1">
-              No platforms connected yet
+              No connections
             </p>
             <p className="text-xs text-[var(--text-tertiary)] mb-5">
-              Link your gig profiles to get started
+              Link your gig profiles to boost score
             </p>
             <button
               onClick={() => setShowConnect(true)}
-              className="px-6 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-blue-800 text-white text-xs font-bold shadow-lg shadow-blue-500/20"
+              className="px-6 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-blue-800 text-white text-xs font-bold shadow-lg"
             >
-              Connect Platform
+              Connect Now
             </button>
           </div>
         ) : (
@@ -116,9 +105,8 @@ export default function DashboardPage() {
                     <span>💰 {formatCurrency(platform.totalEarnings || 0)}</span>
                   </div>
                 </div>
-                <div className="px-2 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center gap-1.5">
-                   <div className="w-1.5 h-1.5 rounded-full bg-teal-500" />
-                   <span className="text-[10px] text-teal-500 font-bold">Linked</span>
+                <div className="px-2 py-1 rounded-full bg-teal-500/10 border border-teal-500/20">
+                  <span className="text-[10px] text-teal-500 font-bold">Linked</span>
                 </div>
               </div>
             ))}
@@ -126,10 +114,10 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Add Platform FAB */}
+      {/* Add Platform FAB - Smaller and pinned to Slide 0 */}
       <button
         onClick={() => setShowConnect(true)}
-        className="fixed bottom-24 left-6 w-14 h-14 rounded-full bg-gradient-to-tr from-teal-500 to-blue-600 text-white shadow-xl flex items-center justify-center z-40 active:scale-95 transition-transform"
+        className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-gradient-to-tr from-teal-500 to-blue-600 text-white shadow-xl flex items-center justify-center z-40 active:scale-90 transition-transform"
       >
         <Plus size={28} />
       </button>
@@ -169,4 +157,3 @@ function StatCard({
     </div>
   );
 }
-
