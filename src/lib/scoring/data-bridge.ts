@@ -10,7 +10,8 @@ export async function getLiveTrustScore(): Promise<ScoreBreakdown> {
   // 1. Fetch Real Data from Dexie
   const workRecords = await db.workRecords.toArray();
   const manualData = await db.manualScoringData.toArray();
-  const platforms = await db.platforms.where("connected").equals(1).toArray();
+  const allPlatforms = await db.platforms.toArray();
+  const platforms = allPlatforms.filter(p => p.connected);
 
   // If absolutely no data exists, return mock (for demonstration)
   if (workRecords.length === 0 && manualData.length === 0 && platforms.length === 0) {

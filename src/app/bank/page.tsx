@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppStore } from "@/lib/store/app-store";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Zap,
   Lock,
@@ -10,6 +10,8 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 const BANKS = [
   { id: "hdfc", name: "HDFC Bank", icon: "🏦" },
@@ -28,6 +30,17 @@ export default function BankPage() {
   const { trustScore } = useAppStore();
 
   const [activeTab, setActiveTab] = useState<"direct" | "private">("direct");
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace("/");
+      }
+    };
+    checkAuth();
+  }, [router]);
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");

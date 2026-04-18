@@ -5,14 +5,25 @@ import { db } from "@/lib/db/database";
 import { CredentialCard } from "@/components/credential/CredentialCard";
 import { FileCheck, ShieldCheck, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { type VerifiableCredential } from "@/lib/db/database";
 import { verifyCredential } from "@/lib/identity/credentials";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function CredentialsPage() {
   const router = useRouter();
   const credentials = useLiveQuery(() => db.credentials.toArray()) || [];
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace("/");
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   const handleShare = (credential: VerifiableCredential) => {
     router.push(`/share?credentialId=${credential.credentialId}`);

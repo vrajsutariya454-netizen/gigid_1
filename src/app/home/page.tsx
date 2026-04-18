@@ -14,6 +14,7 @@ import { TrustScoreDetails } from "@/components/dashboard/TrustScoreDetails";
 import { SimpleTrend } from "@/components/charts/SimpleTrend";
 import { motion, AnimatePresence } from "framer-motion";
 import { generateMockHistory } from "@/lib/scoring/mock-service";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -21,6 +22,16 @@ export default function DashboardPage() {
   const [showConnect, setShowConnect] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [scoreBreakdown, setScoreBreakdown] = useState<any>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace("/");
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   // Fallback mock check
   const workRecordsCount = useLiveQuery(() => db.workRecords.count()) || 0;

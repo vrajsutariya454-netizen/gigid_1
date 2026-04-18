@@ -3,8 +3,9 @@
 import { useAppStore, type ThemeMode, type TextSize, type Language } from "@/lib/store/app-store";
 import { clearAllData } from "@/lib/db/database";
 import { Settings as SettingsIcon, Sun, Moon, EyeOff, Type, Globe, Trash2, Info, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 const THEMES: { id: ThemeMode; label: string; icon: React.ReactNode; desc: string }[] = [
   { id: "light", label: "Light", icon: <Sun size={20} />, desc: "Bright & clear" },
@@ -29,6 +30,16 @@ export default function SettingsPage() {
   const { theme, setTheme, textSize, setTextSize, language, setLanguage, did, logout } = useAppStore();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace("/");
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   const handleClearData = async () => {
     await clearAllData();

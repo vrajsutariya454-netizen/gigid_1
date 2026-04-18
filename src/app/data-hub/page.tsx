@@ -10,13 +10,26 @@ import {
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function DataHubPage() {
   const [activeTab, setActiveTab] = useState<'work' | 'transactions' | 'aa'>('work');
+  const router = useRouter();
   
   const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
   const workRecords = useLiveQuery(() => db.workRecords.toArray()) || [];
   const manualData = useLiveQuery(() => db.manualScoringData.toArray()) || [];
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace("/");
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   const deleteWorkRecord = async (id: number) => {
     if (confirm("Delete this record?")) {
