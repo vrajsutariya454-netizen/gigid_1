@@ -110,40 +110,26 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   </div>
                 </div>
 
-<<<<<<< HEAD
                 <div className="pt-6 border-t border-[var(--bg-primary)] opacity-60">
-                  <p className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] mb-2">
-                    Identity DID
-                  </p>
-                  <p className="text-[11px] text-[var(--text-secondary)] font-mono break-all leading-relaxed">
-                    {did?.substring(0, 32) || "did:gigid:0000..."}...
-                  </p>
-=======
-                {/* User Info */}
-                <div>
-                  <h3 className="text-xl font-black text-[var(--text-primary)] leading-tight tracking-tight">
-                    {name || "GigID User"}
-                  </h3>
-                  <div className="mt-1 flex items-center gap-2">
+                  <div className="flex items-center gap-2 mb-4">
                     <span className="text-[10px] font-black py-0.5 px-2 rounded-md bg-blue-500/20 text-blue-500 uppercase tracking-widest">
                       {role || "Gig Worker"}
                     </span>
-                    <p className="text-[10px] font-bold opacity-60" style={{ color: "var(--text-tertiary)" }}>
+                    <p className="text-[10px] font-bold text-[var(--text-tertiary)]">
                       {email}
                     </p>
                   </div>
                   
-                  {/* Technical DID */}
-                  <div className="mt-4 p-3 rounded-xl bg-black/20 border border-white/5 opacity-60 group-hover:opacity-100 transition-opacity">
-                    <p className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 ">
+                  <div className="p-4 rounded-2xl bg-black/20 border border-white/5">
+                    <p className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5">
                       Verifiable Identifier
                     </p>
                     <p className="text-[10px] text-[var(--text-secondary)] font-mono break-all leading-relaxed">
                       {did || "did:gigid:unregistered"}
                     </p>
                   </div>
->>>>>>> 30f8171e64b4cdb422b576a9ef74051eeca93103
                 </div>
+
               </div>
             </div>
 

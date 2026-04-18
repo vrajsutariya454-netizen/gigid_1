@@ -37,6 +37,14 @@ export interface WorkRecord {
   hoursWorked: number;
 }
 
+export interface ManualScoringData {
+  id?: number;
+  month: string;
+  income: number;
+  activeDays: number;
+  verifiedInflow?: number;
+}
+
 export interface VerifiableCredential {
   id?: number;
   credentialId: string;
@@ -91,17 +99,19 @@ export class GigIDDatabase extends Dexie {
   credentials!: Table<VerifiableCredential>;
   syncQueue!: Table<SyncQueueItem>;
   settings!: Table<AppSetting>;
+  manualScoringData!: Table<ManualScoringData>;
 
   constructor() {
     super("GigIDDatabase");
 
-    this.version(1).stores({
+    this.version(3).stores({
       profiles: "++id, did",
-      platforms: "++id, platformId, name",
+      platforms: "++id, platformId, name, connected",
       workRecords: "++id, platformId, month",
-      credentials: "++id, credentialId, [credentialSubject.platform]",
+      credentials: "++id, credentialId, credentialSubject.platform",
       syncQueue: "++id, action, status, createdAt",
       settings: "++id, &key",
+      manualScoringData: "++id, &month",
     });
   }
 }

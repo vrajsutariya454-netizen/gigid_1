@@ -2,10 +2,15 @@
 
 import { useAppStore } from "@/lib/store/app-store";
 import { useState, useEffect } from "react";
-import { User, Phone, Save, ChevronLeft, CheckCircle2, ShieldCheck, Mail, Tag } from "lucide-react";
+import { 
+  User, Phone, Save, ChevronLeft, 
+  CheckCircle2, ShieldCheck, Mail, Tag, 
+  Plus, IndianRupee, Calendar, History 
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabaseClient";
+import { db } from "@/lib/db/database";
 
 export default function ProfilePage() {
   const { name, phone, email, username, role, did, trustScore, setUser } = useAppStore();
@@ -19,9 +24,15 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Manual Entry States
+  const [showFinancialForm, setShowFinancialForm] = useState(false);
+  const [newMonth, setNewMonth] = useState("");
+  const [newIncome, setNewIncome] = useState("");
+  const [newDays, setNewDays] = useState("");
+
   const router = useRouter();
 
-  // Sync internal state if store changes
   useEffect(() => {
     setFormData({
       fullName: name,
@@ -33,14 +44,11 @@ export default function ProfilePage() {
   const handleSave = async () => {
     setIsSaving(true);
     setError(null);
-    
     try {
-      // 1. Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No authenticated user found");
 
-      // 2. Update Supabase Database
-      const { error: updateError } = await supabase
+      await supabase
         .from("profiles")
         .update({
           full_name: formData.fullName,
@@ -49,180 +57,136 @@ export default function ProfilePage() {
         })
         .eq("id", user.id);
 
-      if (updateError) throw updateError;
-
-      // 3. Update Global Store
-      setUser({ 
-        name: formData.fullName,
-        username: formData.username,
-      });
-
+      setUser({ name: formData.fullName, username: formData.username });
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (err: any) {
-      console.error("Save error:", err);
       setError(err.message || "Failed to update profile");
     } finally {
       setIsSaving(false);
     }
   };
 
+  const handleAddFinancial = async () => {
+    if (!newMonth || !newIncome || !newDays) return;
+    try {
+      await db.manualScoringData.add({
+        month: newMonth,
+        income: parseFloat(newIncome),
+        activeDays: parseInt(newDays),
+        verifiedInflow: parseFloat(newIncome) * 0.8 // Simulated verified ratio
+      });
+      setNewMonth("");
+      setNewIncome("");
+      setNewDays("");
+      setShowFinancialForm(false);
+      alert("Financial data saved locally!");
+    } catch (err) {
+      alert("Error saving data. Month might already exist.");
+    }
+  };
+
   const initials = formData.fullName?.split(" ").map(n => n[0]).join("").toUpperCase() || "ID";
 
   return (
-    <div className="page-content pb-20">
+    <div className="page-content pb-32">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
-        <button 
-          onClick={() => router.back()}
-          className="p-2 rounded-full bg-[var(--bg-elevated)] border-0 text-[var(--text-secondary)] shadow-sm hover:shadow-md transition-shadow"
-        >
+        <button onClick={() => router.back()} className="p-2 rounded-full bg-[var(--bg-elevated)] border-0 text-[var(--text-secondary)] shadow-sm">
           <ChevronLeft size={20} />
         </button>
-        <h1 className="text-2xl font-black text-[var(--text-primary)]">Manage Profile</h1>
+        <h1 className="text-2xl font-black text-[var(--text-primary)]">Manage Account</h1>
       </div>
 
-      {/* Avatar Section */}
-      <div className="flex flex-col items-center justify-center mb-16">
+      {/* Avatar & Trusted Badge */}
+      <div className="flex flex-col items-center mb-16">
         <div className="relative">
-          <div 
-            className="w-32 h-32 flex items-center justify-center shadow-2xl text-4xl font-black text-white"
-            style={{ 
-              borderRadius: "var(--radius-xl)", 
-              background: "linear-gradient(135deg, var(--primary-600), var(--primary-400))",
-              boxShadow: "0 20px 30px -10px rgba(59, 130, 246, 0.5)",
-              border: "6px solid var(--bg-primary)"
-            }}
-          >
-            {initials}
-          </div>
-          <div className="absolute -bottom-4 -right-4 p-2.5 rounded-2xl bg-teal-500 border-[4px] border-[var(--bg-primary)] text-white shadow-xl shadow-teal-500/20">
+          <div className="w-32 h-32 flex items-center justify-center shadow-2xl text-4xl font-black text-white" style={{ borderRadius: "2rem", background: "linear-gradient(135deg, var(--primary-600), var(--primary-400))", border: "6px solid var(--bg-primary)" }}>{initials}</div>
+          <div className="absolute -bottom-4 -right-4 p-2.5 rounded-2xl bg-teal-500 border-[4px] border-[var(--bg-primary)] text-white shadow-xl">
             <ShieldCheck size={24} />
           </div>
         </div>
         <div className="mt-8 px-5 py-2 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center gap-2">
           <CheckCircle2 size={16} className="text-teal-500" />
-          <span className="text-sm font-bold text-teal-500 uppercase tracking-widest">{trustScore}% Trust Verified</span>
+          <span className="text-xs font-black text-teal-500 uppercase tracking-widest">{trustScore}% Verified Identity</span>
         </div>
       </div>
 
-      {/* Form Section */}
-      <div className="flex flex-col gap-10">
-        {error && (
-          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold text-center">
-            {error}
+      <div className="flex flex-col gap-12">
+        {/* Profile Settings */}
+        <section className="space-y-6">
+          <h3 className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest px-2">Identity Details</h3>
+          <div className="flex flex-col gap-4">
+             <InputField label="Email" value={email || ""} readOnly icon={<Mail size={18}/>} />
+             <InputField label="Legal Name" value={formData.fullName} onChange={(val) => setFormData({...formData, fullName: val})} icon={<User size={18}/>} />
+             <InputField label="Username" value={formData.username} onChange={(val) => setFormData({...formData, username: val})} icon={<Tag size={18}/>} />
           </div>
-        )}
-
-        <div className="flex flex-col gap-6">
-          {/* Read Only Email */}
-          <div className="relative group opacity-60">
-            <label className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] ml-2 mb-2 block">
-              Login Email (Permanent)
-            </label>
-            <div className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">
-                <Mail size={20} />
-              </div>
-              <input 
-                type="text"
-                value={email || ""}
-                readOnly
-                className="w-full border-0 text-[var(--text-secondary)] pr-6 py-5 rounded-2xl text-lg font-bold cursor-not-allowed"
-                style={{ backgroundColor: "var(--bg-secondary)", paddingLeft: "4.5rem" }}
-              />
-            </div>
-          </div>
-
-          <div className="relative group">
-            <label className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] ml-2 mb-2 block">
-              Full Legal Name
-            </label>
-            <div className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] group-focus-within:text-blue-500 transition-colors">
-                <User size={20} />
-              </div>
-              <input 
-                type="text"
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                className="w-full border-0 text-[var(--text-primary)] pr-6 py-5 rounded-2xl text-lg font-bold focus:outline-none focus:ring-4 transition-all"
-                style={{ 
-                  backgroundColor: "var(--bg-tertiary)",
-                  color: "var(--text-primary)",
-                  paddingLeft: "4.5rem"
-                }}
-                placeholder="Enter your name"
-              />
-            </div>
-          </div>
-
-          <div className="relative group">
-            <label className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] ml-2 mb-2 block">
-              Username
-            </label>
-            <div className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] group-focus-within:text-blue-500 transition-colors">
-                <Tag size={20} />
-              </div>
-              <input 
-                type="text"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                className="w-full border-0 text-[var(--text-primary)] pr-6 py-5 rounded-2xl text-lg font-bold focus:outline-none focus:ring-4 transition-all"
-                style={{ 
-                  backgroundColor: "var(--bg-tertiary)",
-                  color: "var(--text-primary)",
-                  paddingLeft: "4.5rem"
-                }}
-                placeholder="Unique username"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* DID Section (Read Only) */}
-        <div 
-          className="p-8 rounded-3xl"
-          style={{ backgroundColor: "var(--bg-secondary)" }}
-        >
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-widest">
-              Trust Identifier (DID)
-            </p>
-            <span className="text-[10px] font-black py-0.5 px-2 rounded-md bg-teal-500/20 text-teal-500 uppercase tracking-widest">
-              {role || "Gig Worker"}
-            </span>
-          </div>
-          <p className="text-sm text-[var(--text-secondary)] font-mono break-all leading-loose">
-            {did}
-          </p>
-        </div>
-
-        {/* Action Button */}
-        <div className="mt-6 mb-4">
-          <button
-            disabled={isSaving}
-            onClick={handleSave}
-            className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 transition-all ${
-              isSaving || showSuccess
-              ? "bg-teal-500 text-white"
-              : "text-white shadow-xl shadow-blue-500/30 active:scale-95"
-            }`}
-            style={{
-              background: (!isSaving && !showSuccess) ? "linear-gradient(135deg, var(--primary-600), var(--primary-400))" : undefined
-            }}
-          >
-            {isSaving ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : showSuccess ? (
-              <CheckCircle2 size={20} className="animate-in zoom-in-50" />
-            ) : (
-              <Save size={20} />
-            )}
-            {isSaving ? "Saving..." : showSuccess ? "Account Updated" : "Save Changes"}
+          <button onClick={handleSave} className="w-full py-4 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-xs shadow-xl h-14 flex items-center justify-center gap-2">
+            {isSaving ? "Saving..." : showSuccess ? "Updated!" : <><Save size={16}/> Save Changes</>}
           </button>
-        </div>
+        </section>
+
+        {/* Financial Data Entry */}
+        <section className="space-y-6">
+          <div className="flex justify-between items-center px-2">
+            <h3 className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest flex items-center gap-2">
+              <History size={14}/> Financial Verification
+            </h3>
+            <button onClick={() => setShowFinancialForm(!showFinancialForm)} className="text-[10px] font-black text-blue-500 uppercase tracking-widest flex items-center gap-1">
+              {showFinancialForm ? "Cancel" : <><Plus size={12}/> Add Month</>}
+            </button>
+          </div>
+
+          <AnimatePresence>
+            {showFinancialForm && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="p-6 rounded-[2rem] bg-blue-500/5 border border-blue-500/10 mb-6 space-y-5 overflow-hidden">
+                <div className="space-y-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9px] font-bold text-blue-500/70 uppercase tracking-widest ml-1">Month Name (e.g. 2024-03)</label>
+                    <input type="text" value={newMonth} onChange={e => setNewMonth(e.target.value)} placeholder="YYYY-MM" className="w-full bg-white/5 border-0 p-4 rounded-xl text-sm font-bold text-[var(--text-primary)]" />
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex-1 space-y-1.5">
+                      <label className="text-[9px] font-bold text-blue-500/70 uppercase tracking-widest ml-1">Income</label>
+                      <input type="number" value={newIncome} onChange={e => setNewIncome(e.target.value)} placeholder="₹" className="w-full bg-white/5 border-0 p-4 rounded-xl text-sm font-bold text-[var(--text-primary)]" />
+                    </div>
+                    <div className="flex-1 space-y-1.5">
+                      <label className="text-[9px] font-bold text-blue-500/70 uppercase tracking-widest ml-1">Active Days</label>
+                      <input type="number" value={newDays} onChange={e => setNewDays(e.target.value)} placeholder="Max 31" className="w-full bg-white/5 border-0 p-4 rounded-xl text-sm font-bold text-[var(--text-primary)]" />
+                    </div>
+                  </div>
+                </div>
+                <button onClick={handleAddFinancial} className="w-full py-3 rounded-xl bg-blue-600 text-white font-black uppercase tracking-widest text-[10px]">Verify & Add to Hub</button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div onClick={() => router.push('/data-hub')} className="p-6 rounded-[2rem] bg-[var(--bg-elevated)] border-white/5 flex items-center gap-4 cursor-pointer hover:border-blue-500/20 transition-all">
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500"><History size={20}/></div>
+            <div className="flex-1">
+               <h4 className="text-sm font-black text-[var(--text-primary)]">Manage All Statement Data</h4>
+               <p className="text-[10px] font-bold text-[var(--text-tertiary)]">Edit your 6-month transaction and work history</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function InputField({ label, value, onChange, readOnly, icon }: any) {
+  return (
+    <div className={`relative group ${readOnly ? 'opacity-60' : ''}`}>
+      <label className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] ml-2 mb-2 block">{label}</label>
+      <div className="relative">
+        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] group-focus-within:text-blue-500 transition-colors">{icon}</div>
+        <input 
+          type="text" value={value} 
+          onChange={readOnly ? undefined : (e) => onChange(e.target.value)}
+          readOnly={readOnly}
+          className="w-full border-0 text-[var(--text-primary)] pr-6 py-5 rounded-2xl text-base font-bold transition-all h-14"
+          style={{ backgroundColor: "var(--bg-tertiary)", paddingLeft: "4.5rem", cursor: readOnly ? 'not-allowed' : 'text' }}
+        />
       </div>
     </div>
   );

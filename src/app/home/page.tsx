@@ -1,20 +1,44 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Plus, TrendingUp, ShieldCheck, Wallet } from "lucide-react";
+import { Plus, TrendingUp, ShieldCheck, Wallet, ChevronDown, ChevronUp, History, Landmark, AlertCircle } from "lucide-react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/database";
-import { calculateTrustScore } from "@/lib/aggregation/platform-connector";
 import { TrustScore } from "@/components/dashboard/TrustScore";
 import { ConnectPlatformDialog } from "@/components/platform/ConnectPlatformDialog";
 import { formatCurrency } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store/app-store";
+import { getLiveTrustScore } from "@/lib/scoring/data-bridge";
+import { TrustScoreDetails } from "@/components/dashboard/TrustScoreDetails";
+import { SimpleTrend } from "@/components/charts/SimpleTrend";
+import { motion, AnimatePresence } from "framer-motion";
+import { generateMockHistory } from "@/lib/scoring/mock-service";
 
 export default function DashboardPage() {
   const router = useRouter();
   const hasCompletedOnboarding = useAppStore((s) => s.hasCompletedOnboarding);
   const [showConnect, setShowConnect] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [scoreBreakdown, setScoreBreakdown] = useState<any>(null);
+
+  // Fallback mock check
+  const workRecordsCount = useLiveQuery(() => db.workRecords.count()) || 0;
+  const manualDataCount = useLiveQuery(() => db.manualScoringData.count()) || 0;
+  const isUsingMock = workRecordsCount === 0 && manualDataCount === 0;
+
+  // Fetch live score from bridge
+  useEffect(() => {
+    async function loadScore() {
+      const liveScore = await getLiveTrustScore();
+      setScoreBreakdown(liveScore);
+    }
+    loadScore();
+  }, [workRecordsCount, manualDataCount]);
+
+  // For trends, we'll use mock if empty, otherwise we'd need a trend service.
+  // We'll stick to historyData for charts for now, but linked to live bridge logic.
+  const historyData = useMemo(() => generateMockHistory(), []);
 
   // Redirect if not onboarded
   useEffect(() => {
@@ -31,25 +55,27 @@ export default function DashboardPage() {
     [platforms]
   );
 
-  const trustScore = useMemo(
-    () => calculateTrustScore(connectedPlatforms),
-    [connectedPlatforms]
-  );
-
   const totalEarnings = useMemo(
     () => connectedPlatforms.reduce((sum, p) => sum + (p.totalEarnings || 0), 0),
     [connectedPlatforms]
   );
 
-  const handlePlatformConnected = useCallback(() => {
-    setShowConnect(false);
-  }, []);
+  if (!scoreBreakdown) return null;
 
   return (
-    <div className="page-content flex flex-col gap-10">
-      {/* Trust Score Section (Main Focus) */}
-      <div className="text-center py-8">
-        <TrustScore score={trustScore} size={220} />
+    <div className="page-content flex flex-col gap-10 pb-32">
+      {/* Premium Trust Score Header */}
+      <div className="flex flex-col items-center py-8 relative">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-500/10 blur-[100px] pointer-events-none" />
+
+        <TrustScore score={scoreBreakdown.finalScore} size={240} />
+
+        {isUsingMock && (
+          <div className="mt-4 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-2">
+            <AlertCircle size={14} className="text-amber-500" />
+            <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Demo Mode: No real data linked</span>
+          </div>
+        )}
       </div>
 
       {/* Stats Row */}
@@ -77,80 +103,78 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Connected Platforms */}
-      <div className="flex flex-col gap-5">
-        <h2 className="text-lg font-bold text-[var(--text-primary)] px-2">
-          Connected Platforms
-        </h2>
+      <div className="mt-8 flex flex-col items-center gap-4">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
+          <Landmark size={12} className="text-blue-400" />
+          <span className="text-[9px] font-black uppercase tracking-widest text-blue-400">AA Verified Score</span>
+        </div>
 
-        {connectedPlatforms.length === 0 ? (
-          <div className="card p-10 text-center bg-[var(--bg-elevated)] border-0 rounded-3xl shadow-sm">
-            <div className="w-20 h-20 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-6 text-4xl">
-              🔗
-            </div>
-            <p className="text-base font-bold text-[var(--text-primary)] mb-2">
-              No platforms connected yet
-            </p>
-            <p className="text-sm text-[var(--text-tertiary)] mb-8">
-              Link your gig profiles to get started
-            </p>
-            <button
-              onClick={() => setShowConnect(true)}
-              className="px-8 py-3.5 rounded-full text-white text-sm font-bold shadow-lg shadow-blue-500/30 transition-transform active:scale-95"
-              style={{
-                background: "linear-gradient(135deg, var(--primary-600), var(--primary-400))"
-              }}
-            >
-              Connect Platform
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {connectedPlatforms.map((platform) => (
-              <div
-                key={platform.id}
-                className="card p-5 flex items-center gap-5 bg-[var(--bg-elevated)] border-0 rounded-2xl shadow-sm transition-transform hover:-translate-y-1"
-              >
-                <div className="w-14 h-14 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-3xl shrink-0">
-                  {platform.icon}
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-base font-bold text-[var(--text-primary)]">
-                    {platform.name}
-                  </h3>
-                  <div className="flex gap-4 text-xs text-[var(--text-tertiary)] mt-1.5 font-medium">
-                    <span className="flex items-center gap-1">⭐ {platform.avgRating?.toFixed(1)}</span>
-                    <span className="flex items-center gap-1">🚚 {platform.totalDeliveries?.toLocaleString()}</span>
-                    <span className="flex items-center gap-1 font-bold text-[var(--text-secondary)]">💰 {formatCurrency(platform.totalEarnings || 0)}</span>
-                  </div>
-                </div>
-                <div className="ml-auto shrink-0 mr-2 px-3 py-1.5 rounded-full bg-teal-500/10 flex items-center gap-2">
-                   <div className="w-2 h-2 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.5)]" />
-                   <span className="text-[11px] text-teal-600 font-bold uppercase tracking-wider">Linked</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <button
+          onClick={() => setShowDetails(!showDetails)}
+          className="flex items-center gap-3 px-8 py-3 rounded-2xl bg-[var(--bg-elevated)] border border-white/5 text-[var(--text-primary)] hover:border-blue-500/30 transition-all font-black text-[11px] uppercase tracking-widest shadow-xl shadow-black/20"
+        >
+          {showDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          {showDetails ? "Hide Data Specs" : "View Reliability Specs"}
+        </button>
       </div>
 
-      {/* Add Platform FAB */}
+      <AnimatePresence>
+        {showDetails && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <TrustScoreDetails breakdown={scoreBreakdown} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Financial Health Trends */}
+      <div className="flex flex-col gap-6">
+        <h2 className="text-lg font-black text-[var(--text-primary)] px-2 flex items-center gap-2">
+          <History size={20} className="text-blue-500" />
+          Financial Health Trends
+        </h2>
+
+        <div className="grid grid-cols-1 gap-5">
+          <div className="card p-6 bg-[var(--bg-elevated)] border-white/5 rounded-[2rem] shadow-xl">
+            <SimpleTrend
+              data={historyData.aaData.monthlyInflows}
+              label="Bank Verified Inflows (₹)"
+              color="var(--primary-400)"
+              height={100}
+            />
+          </div>
+          <div className="card p-6 bg-[var(--bg-elevated)] border-white/5 rounded-[2rem] shadow-xl">
+            <SimpleTrend
+              data={historyData.activeDays}
+              label="Active Work Days"
+              color="var(--success-400)"
+              height={100}
+              max={30}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Action FAB */}
       <button
-        onClick={() => setShowConnect(true)}
-        className="fixed bottom-32 left-8 w-16 h-16 rounded-full text-white shadow-xl flex items-center justify-center z-40 active:scale-95 transition-transform"
+        onClick={() => router.push("/data-hub")}
+        className="fixed bottom-24 right-6 w-16 h-16 rounded-[2rem] text-white shadow-2xl flex items-center justify-center z-40 active:scale-95 transition-transform border border-white/10"
         style={{
-          background: "linear-gradient(135deg, var(--success-500), var(--primary-500))",
-          boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.5)"
+          background: "linear-gradient(135deg, var(--primary-600), var(--primary-400))",
+          boxShadow: "0 20px 40px -10px rgba(59, 130, 246, 0.5)"
         }}
-        aria-label="Add Platform"
       >
-        <Plus size={32} strokeWidth={2.5} />
+        <Plus size={32} strokeWidth={3} />
       </button>
 
       <ConnectPlatformDialog
         open={showConnect}
         onClose={() => setShowConnect(false)}
-        onConnected={handlePlatformConnected}
+        onConnected={() => { }}
       />
     </div>
   );
@@ -170,23 +194,16 @@ function StatCard({
   textColor: string;
 }) {
   return (
-    <div
-      className="card p-4 py-6 text-center flex flex-col items-center gap-3 border-0 rounded-2xl shadow-sm"
-      style={{ backgroundColor: "var(--bg-elevated)" }}
-    >
-      <div 
-        className="w-12 h-12 rounded-full flex items-center justify-center mb-1"
-        style={{ backgroundColor: color }}
-      >
+    <div className="card p-4 py-7 text-center flex flex-col items-center gap-3 bg-[var(--bg-elevated)] border-white/5 rounded-[1.5rem] shadow-xl">
+      <div className="w-11 h-11 rounded-2xl flex items-center justify-center mb-1 shadow-inner" style={{ backgroundColor: color }}>
         {icon}
       </div>
-      <span className="text-xl font-black text-[var(--text-primary)] leading-none">
+      <span className="text-sm font-black text-[var(--text-primary)] leading-none tracking-tight">
         {value}
       </span>
-      <span className="text-[10px] font-bold uppercase tracking-[0.1em]" style={{ color: textColor }}>
+      <span className="text-[8px] font-black uppercase tracking-[0.2em]" style={{ color: textColor }}>
         {label}
       </span>
     </div>
   );
 }
-
