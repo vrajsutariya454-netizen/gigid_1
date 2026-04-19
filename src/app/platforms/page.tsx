@@ -13,12 +13,14 @@ import { formatCurrency } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 export default function PlatformsPage() {
   const [showConnect, setShowConnect] = useState(false);
   const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
   const connectedPlatforms = platforms.filter(p => p.connected);
   const router = useRouter();
+  const { t } = useTranslation();
   
   const manualPlatforms = [
     { name: "Local Courier", status: "pending", date: "2026-04-18" }
@@ -55,9 +57,9 @@ export default function PlatformsPage() {
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2 text-primary">
                 <Sparkles size={10} strokeWidth={3} />
-                <span className="text-[9px] font-black uppercase tracking-[0.3em]">Work Connectivity</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.3em]">{t('plat.title')}</span>
               </div>
-              <h1 className="font-display text-4xl tracking-tight text-gradient">Manage Nodes</h1>
+              <h1 className="font-display text-5xl tracking-tight text-primary">{t('plat.title')}</h1>
             </div>
           </div>
           
@@ -69,15 +71,15 @@ export default function PlatformsPage() {
           </button>
         </section>
 
-        <p className="max-w-md text-sm font-medium text-muted-foreground leading-relaxed -mt-4 ml-2">
-          Connect your gig accounts to automatically aggregate work history, earnings, and ratings into your unified Trust Score.
+        <p className="max-w-md text-sm font-medium text-muted-foreground leading-relaxed -mt-4 ml-2 font-sans">
+          {t('plat.subtitle')}
         </p>
 
         {/* --- CONNECTED NODES --- */}
         <section className="flex flex-col gap-6">
           <div className="px-2 flex items-center gap-3">
             <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">
-              Active Connections
+              {t('plat.activeConnections')}
             </h2>
             <div className="h-px flex-1 bg-border/40" />
             <span className="text-[10px] font-black text-muted-foreground/40">{connectedPlatforms.length}</span>
@@ -87,20 +89,20 @@ export default function PlatformsPage() {
             <motion.div 
                initial={{ opacity: 0 }}
                animate={{ opacity: 1 }}
-               className="noise glass-card p-16 text-center flex flex-col items-center gap-6 rounded-[3rem] border-dashed border-2 border-primary/20 bg-primary/5"
+               className="noise bg-card p-16 text-center flex flex-col items-center gap-6 rounded-[3rem] shadow-xl shadow-primary/5"
             >
-              <div className="w-16 h-16 rounded-[1.5rem] bg-primary/10 flex items-center justify-center text-primary/30">
+              <div className="w-16 h-16 rounded-[1.5rem] bg-secondary flex items-center justify-center text-primary/30">
                 <LayoutTemplate size={32} />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-black text-foreground">No platforms synchronized</p>
-                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Connect your first node to build trust</p>
+                <p className="text-base font-black text-foreground">{t('plat.noPlatforms')}</p>
+                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{t('plat.connectFirst')}</p>
               </div>
               <button 
                 onClick={() => setShowConnect(true)}
                 className="mt-2 flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-widest hover:gap-3 transition-all"
               >
-                Sync Platform Now <ArrowRight size={12} />
+                {t('plat.syncNow')} <ArrowRight size={12} />
               </button>
             </motion.div>
           ) : (
@@ -110,32 +112,32 @@ export default function PlatformsPage() {
                   key={platform.id} 
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="noise glass-card p-6 flex flex-col gap-6 rounded-[2.5rem] group hover:border-primary/40 transition-all"
+                  className="noise bg-card p-8 flex flex-col gap-6 rounded-[3rem] group shadow-xl shadow-primary/5 hover:shadow-primary/10 transition-all cursor-pointer"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="text-3xl bg-background/40 p-3 rounded-[1.25rem] border border-border group-hover:scale-110 transition-transform">
+                  <div className="flex items-center gap-5">
+                    <div className="text-4xl bg-secondary p-4 rounded-[1.5rem] shadow-sm group-hover:scale-110 transition-transform duration-500">
                       {platform.icon}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-black text-foreground tracking-tight">{platform.name}</h3>
-                      <div className="flex gap-4 mt-1">
-                         <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[9px] font-black uppercase">
+                      <h3 className="text-xl font-black text-foreground tracking-tight font-display">{platform.name} Node</h3>
+                      <div className="flex gap-3 mt-1.5">
+                         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/5 text-primary text-[9px] font-black uppercase tracking-wider">
                             ⭐ {platform.avgRating?.toFixed(1)}
                          </div>
-                         <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase">
-                            ₹ {formatCurrency(platform.totalEarnings || 0)}
+                         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary text-primary text-[9px] font-black uppercase tracking-wider">
+                            {t('plat.syncActive')}
                          </div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between pt-4 border-t border-border/40">
-                     <div className="flex items-center gap-1.5 text-[9px] font-black text-accent uppercase tracking-widest">
-                        <div className="w-1 h-1 rounded-full bg-accent animate-pulse" />
-                        Live API Link
+                  <div className="flex items-center justify-between pt-6 mt-2 border-t border-secondary">
+                     <div className="flex items-center gap-1.5 text-[9px] font-black text-primary uppercase tracking-widest opacity-40">
+                        <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
+                        Live Security Tunnel
                      </div>
-                     <button className="p-2 rounded-xl glass hover:bg-muted transition-all">
-                        <ChevronRight size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                     <button className="p-2.5 rounded-xl bg-secondary text-primary hover:bg-primary hover:text-white transition-all">
+                        <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
                      </button>
                   </div>
                 </motion.div>
@@ -148,27 +150,27 @@ export default function PlatformsPage() {
         <section className="flex flex-col gap-6">
           <div className="px-2 flex items-center gap-3">
             <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">
-              Manual Proofs
+              {t('plat.manualProofs')}
             </h2>
             <div className="h-px flex-1 bg-border/40" />
           </div>
 
           <div className="flex flex-col gap-4">
             {manualPlatforms.map((mp) => (
-              <div key={mp.name} className="noise glass-card p-6 flex items-center gap-6 rounded-[2rem] border-accent/20 bg-accent/5">
-                <div className="w-12 h-12 rounded-[1.25rem] bg-accent/10 flex items-center justify-center text-accent">
+              <div key={mp.name} className="noise bg-card p-8 flex items-center gap-6 rounded-[2.5rem] shadow-md shadow-primary/5">
+                <div className="w-14 h-14 rounded-[1.25rem] bg-secondary flex items-center justify-center text-primary">
                   <Clock size={24} strokeWidth={2.5} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-black text-foreground tracking-tight">{mp.name}</h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[9px] font-black text-accent uppercase tracking-widest">Audit Pending</span>
-                    <div className="w-1 h-1 rounded-full bg-accent/40" />
-                    <span className="text-[9px] font-bold text-muted-foreground/60">{mp.date}</span>
+                  <h3 className="text-lg font-black text-foreground tracking-tight font-display">{mp.name}</h3>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-[9px] font-black text-primary uppercase tracking-widest opacity-60">{t('plat.processing')}</span>
+                    <div className="w-1 h-1 rounded-full bg-secondary" />
+                    <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest">{mp.date}</span>
                   </div>
                 </div>
-                <button className="px-4 py-2 rounded-xl glass text-[9px] font-black text-muted-foreground uppercase tracking-widest hover:text-foreground">
-                  View Proof
+                <button className="px-6 py-3 rounded-xl bg-secondary text-[10px] font-black text-primary uppercase tracking-widest hover:bg-muted-foreground/10 transition-all">
+                  {t('plat.inspect')}
                 </button>
               </div>
             ))}

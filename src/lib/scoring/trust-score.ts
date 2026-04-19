@@ -14,6 +14,16 @@ export interface AAData {
   avgMonthlyBalance: number;
   monthlyExpenses: number;
   verifiedIncomeAmount: number;
+  verifiedTransactions?: VerifiedTransaction[];
+}
+
+export interface VerifiedTransaction {
+  id: string;
+  date: string;
+  amount: number;
+  description: string;
+  bank: string;
+  type: 'credit' | 'debit';
 }
 
 export interface ScoreBreakdown {
@@ -29,6 +39,7 @@ export interface ScoreBreakdown {
     balanceHealth: number;       // Bh
   };
   finalScore: number;  // T
+  aaTransactions: VerifiedTransaction[];
 }
 
 export const RELIABILITY_WEIGHTS: Record<Transaction['source'], number> = {
@@ -175,13 +186,14 @@ export function computeFinalScore(
       cashFlowConsistency: cf,
       balanceHealth: bh
     },
-    finalScore
+    finalScore,
+    aaTransactions: aaData.verifiedTransactions || []
   };
 }
 
 export function getInterpretation(score: number): { label: string, color: string } {
-  if (score >= 85) return { label: "High Trust", color: "var(--success-500)" };
-  if (score >= 70) return { label: "Moderate", color: "var(--primary-500)" };
-  if (score >= 55) return { label: "Risky", color: "var(--warning-500)" };
-  return { label: "High Risk", color: "var(--danger-500)" };
+  if (score >= 85) return { label: "score.highTrust", color: "var(--success-500)" };
+  if (score >= 70) return { label: "score.moderate", color: "var(--primary-500)" };
+  if (score >= 55) return { label: "score.risky", color: "var(--warning-500)" };
+  return { label: "score.highRisk", color: "var(--danger-500)" };
 }

@@ -3,16 +3,18 @@
 import { usePathname, useRouter } from "next/navigation";
 import { Home, FileCheck, Database, Settings } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 const NAV_ITEMS = [
-  { id: "home", href: "/home", icon: Home, label: "Home" },
-  { id: "credentials", href: "/credentials", icon: FileCheck, label: "Verification" },
-  { id: "settings", href: "/settings", icon: Settings, label: "Settings" },
+  { id: "home", href: "/home", icon: Home, translationKey: "nav.home" as const },
+  { id: "credentials", href: "/credentials", icon: FileCheck, translationKey: "nav.credentials" as const },
+  { id: "settings", href: "/settings", icon: Settings, translationKey: "nav.settings" as const },
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const { t } = useTranslation();
   const [pressedId, setPressedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
@@ -64,7 +66,7 @@ export function BottomNav() {
               transition: "transform var(--transition-fast)",
               transform: isActive ? "scale(1.1)" : "scale(1)",
             }}
-            aria-label={item.label}
+            aria-label={t(item.translationKey)}
             aria-current={isActive ? "page" : undefined}
           >
             {isActive && (
@@ -99,7 +101,7 @@ export function BottomNav() {
                 whiteSpace: "nowrap",
               }}
             >
-              {item.label}
+              {t(item.translationKey)}
             </span>
           </button>
         );

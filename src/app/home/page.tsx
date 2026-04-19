@@ -13,10 +13,12 @@ import { performGlobalTrustAudit } from "@/lib/services/backend-api";
 import { TrustRadarChart } from "@/components/charts/TrustRadarChart";
 import { TrustFactorBars } from "@/components/charts/TrustFactorBars";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 export default function DashboardPage() {
   const router = useRouter();
   const { hasCompletedOnboarding, setTrustScore: setGlobalTrustScore, name } = useAppStore();
+  const { t } = useTranslation();
   
   const [showConnect, setShowConnect] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,7 +30,7 @@ export default function DashboardPage() {
   const connectedPlatforms = useMemo(() => platforms.filter((p) => p.connected), [platforms]);
 
   const disconnectPlatform = async (id: number) => {
-    if (confirm("Remove this platform? All synced history and credentials will be permanently deleted.")) {
+    if (confirm(t('dash.confirmRemove'))) {
       const platform = platforms.find(p => p.id === id);
       if (platform) {
         setIsLoading(true);
@@ -84,11 +86,11 @@ export default function DashboardPage() {
     if (!scoreData) return [];
     const b = scoreData.breakdown;
     return [
-      { label: "Stability", value: parseFloat(b.S), weight: "30%", description: "Consistency of monthly income variance" },
-      { label: "Capacity", value: parseFloat(b.E), weight: "25%", description: "Aggregated monthly average vs. local reference" },
-      { label: "Consistency", value: parseFloat(b.C), weight: "25%", description: "Active work days and volume over time" },
-      { label: "Regularity", value: parseFloat(b.Rt), weight: "20%", description: "Transaction frequency and interval health" },
-      { label: "Reliability", value: parseFloat(b.Rs) * parseFloat(b.AA.Raa), weight: "Multiplier", description: "Verification level of data sources" },
+      { label: t("dash.stability"), value: parseFloat(b.S), weight: "30%", description: t("dash.desc.stability") },
+      { label: t("dash.capacity"), value: parseFloat(b.E), weight: "25%", description: t("dash.desc.capacity") },
+      { label: t("dash.consistency"), value: parseFloat(b.C), weight: "25%", description: t("dash.desc.consistency") },
+      { label: t("dash.regularity"), value: parseFloat(b.Rt), weight: "20%", description: t("dash.desc.regularity") },
+      { label: t("dash.reliability"), value: parseFloat(b.Rs) * parseFloat(b.AA.Raa), weight: "Multiplier", description: t("dash.desc.reliability") },
     ];
   }, [scoreData]);
 
@@ -107,16 +109,15 @@ export default function DashboardPage() {
         <section className="flex flex-col gap-2 pt-6">
           <div className="flex items-center gap-2 text-primary">
             <Sparkles size={12} strokeWidth={3} />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Personal Identity Hub</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">{t('dash.title')}</span>
           </div>
           <div className="flex items-end justify-between">
-            <h1 className="font-display text-5xl tracking-tight leading-none text-gradient">
-              Welcome back, <br />
-              <span className="italic font-normal">{name?.split(" ")[0] || "Worker"}</span>
+            <h1 className="font-display text-6xl tracking-tight leading-[0.9] text-primary">
+              {t('dash.subtitle', { name: name?.split(" ")[0] || "Worker" })}
             </h1>
             <div className="flex flex-col items-end opacity-40">
-              <span className="text-[9px] font-bold uppercase tracking-widest leading-none">Security Status</span>
-              <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mt-1">Encrypted</span>
+              <span className="text-[9px] font-bold uppercase tracking-widest leading-none">{t('dash.securityStatus')}</span>
+              <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-1">{t('dash.encryptedNode')}</span>
             </div>
           </div>
         </section>
@@ -128,7 +129,7 @@ export default function DashboardPage() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="noise glass-card p-10 rounded-[3rem] flex flex-col items-center justify-center relative overflow-hidden"
+            className="noise bg-card p-10 rounded-[3rem] shadow-xl shadow-primary/5 flex flex-col items-center justify-center relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 p-8 opacity-10">
               <ShieldCheck size={120} strokeWidth={1} />
@@ -143,9 +144,9 @@ export default function DashboardPage() {
             )}
 
             <div className="mt-8 text-center max-w-xs transition-all">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground mb-2">Global Trust Index</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground mb-2">{t('dash.trustScore')}</p>
               <p className="text-xs font-medium text-muted-foreground/80 leading-relaxed">
-                Your score reflects verified earnings, work continuity, and platform reliability.
+                {t('dash.trustStatus')}
               </p>
             </div>
           </motion.div>
@@ -154,15 +155,15 @@ export default function DashboardPage() {
           <motion.section 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="noise glass-card p-8 rounded-[3rem] shadow-2xl flex flex-col"
+            className="noise bg-card p-8 rounded-[3rem] shadow-xl shadow-primary/5 flex flex-col"
           >
             <div className="flex items-center justify-between mb-8">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <Activity size={12} className="text-primary" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Algorithm v2.4</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t('dash.algorithm')} v2.4</span>
                 </div>
-                <h2 className="text-2xl font-black tracking-tight text-foreground/90">Identity Engine</h2>
+                <h2 className="text-2xl font-black tracking-tight text-foreground/90">{t('dash.engine')}</h2>
               </div>
 
               <div className="flex bg-muted/30 p-1.5 rounded-2xl gap-1">
@@ -199,18 +200,18 @@ export default function DashboardPage() {
                   
                   <div className="mt-8 pt-8 border-t border-border flex items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">Verified Inflow</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">{t('dash.verifiedInflow')}</span>
                       <span className="text-xs font-bold text-accent flex items-center gap-1.5 mt-0.5">
-                        <Landmark size={12} /> AA-Secure Multi-Link
+                        <Landmark size={12} /> {t('data.aaSection')}
                       </span>
                     </div>
                     <button 
                       onClick={refreshScore}
                       disabled={isRefreshing}
-                      className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-muted/50 border border-border hover:border-primary/30 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95"
+                      className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-secondary hover:bg-muted-foreground/5 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 text-primary"
                     >
                       {isRefreshing ? <Loader2 size={12} className="animate-spin" /> : <History size={12} />}
-                      Re-Audit Hub
+                      {t('dash.audit')}
                     </button>
                   </div>
                 </div>
@@ -219,23 +220,87 @@ export default function DashboardPage() {
                    <div className="w-16 h-16 rounded-[24px] bg-muted/20 flex items-center justify-center text-muted-foreground/30">
                      <Database size={32} />
                    </div>
-                   <div>
-                     <p className="text-sm font-black text-foreground mb-1">Identity Vault Empty</p>
-                     <p className="max-w-[220px] text-[10px] font-bold text-muted-foreground uppercase tracking-wider leading-relaxed">
-                       Link your first platform to calculate your verifiable trust fingerprint.
-                     </p>
-                   </div>
-                   <button 
-                     onClick={() => setShowConnect(true)}
-                     className="px-8 py-3 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/20 hover:scale-105 transition-all"
-                   >
-                     Initialize Now
-                   </button>
+                    <div>
+                      <p className="text-sm font-black text-foreground mb-1">{t('dash.vaultEmpty')}</p>
+                      <p className="max-w-[220px] text-[10px] font-bold text-muted-foreground uppercase tracking-wider leading-relaxed">
+                        {t('dash.linkFirst')}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => setShowConnect(true)}
+                      className="px-8 py-3 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/20 hover:scale-105 transition-all"
+                    >
+                      {t('dash.initialize')}
+                    </button>
                 </div>
               )}
             </div>
           </motion.section>
         </div>
+
+        {/* --- ACCOUNT AGGREGATOR HIGHLIGHT (KEY FEATURE) --- */}
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative"
+        >
+          <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 blur-2xl -z-10" />
+          <div className="noise bg-card p-10 rounded-[3.5rem] shadow-2xl shadow-primary/5 overflow-hidden group">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
+              <div className="flex flex-col gap-5 max-w-lg">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-2xl bg-primary text-white shadow-xl shadow-primary/20">
+                    <Landmark size={24} strokeWidth={2.5} />
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t('data.aaSection')}</span>
+                      <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                    </div>
+                    <h2 className="text-3xl font-black tracking-tight text-foreground/90">{t('data.aaSection')} Hub</h2>
+                  </div>
+                </div>
+                <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                  Your trust is backed by real-time, bank-verified financial telemetry. Via the **Sahamati** framework, we audit your 6-month transaction velocity to mathematically prove your stability without storing sensitive credentials.
+                </p>
+                <div className="flex flex-wrap gap-4 mt-2">
+                   <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-background/40 border border-border/60">
+                      <CheckCircle2 size={12} className="text-accent" />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/80">Income-to-Expense Ratio</span>
+                   </div>
+                   <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-background/40 border border-border/60">
+                      <CheckCircle2 size={12} className="text-accent" />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/80">Verified Cash Flow</span>
+                   </div>
+                   <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-background/40 border border-border/60">
+                      <CheckCircle2 size={12} className="text-accent" />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/80">Identity Correlation</span>
+                   </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4 w-full lg:w-80">
+                <button 
+                  onClick={() => router.push("/data-hub?tab=financial")}
+                  className="w-full h-18 rounded-[1.5rem] bg-primary text-white font-black uppercase tracking-widest text-[11px] transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-primary/20 flex items-center justify-center gap-3 group"
+                >
+                  <Search size={18} />
+                  {t('nav.dataHub')}
+                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                </button>
+                <div className="noise bg-secondary/50 p-5 rounded-[1.5rem] flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent">
+                    <ShieldCheck size={20} strokeWidth={2.5} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 leading-none">Status</span>
+                    <span className="text-xs font-black text-foreground mt-1 tracking-tight">ENCRYPTED DATA NODE</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.section>
 
         {/* --- INTEGRATIONS SECTION --- */}
         <section className="flex flex-col gap-6">
@@ -248,7 +313,7 @@ export default function DashboardPage() {
               onClick={() => setShowConnect(true)}
               className="px-5 py-2.5 rounded-full glass border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-primary/5 transition-all"
             >
-              <Plus size={14} strokeWidth={3} /> Add Source
+              <Plus size={14} strokeWidth={3} /> {t('common.active')} Platform
             </button>
           </div>
           
@@ -257,7 +322,7 @@ export default function DashboardPage() {
               <motion.div 
                 layoutId={`p-${p.id}`}
                 key={p.id} 
-                className="noise glass-card p-6 rounded-[2rem] flex flex-col gap-6 group hover:border-primary/30 transition-all cursor-pointer relative"
+                className="noise bg-card p-6 rounded-[2.5rem] shadow-lg shadow-primary/5 flex flex-col gap-6 group hover:shadow-primary/10 transition-all cursor-pointer relative"
               >
                 <div className="flex items-start justify-between">
                   <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/5 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">

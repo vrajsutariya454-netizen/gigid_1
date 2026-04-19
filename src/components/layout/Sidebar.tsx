@@ -3,10 +3,11 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   X, Home, FileText, Share2, Settings, 
-  Moon, Sun, LogOut, HelpCircle, Shield, 
+  LogOut, HelpCircle, Shield, 
   User, CheckCircle2, LayoutTemplate, Landmark,
   QrCode, ExternalLink, Fingerprint
 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import { useAppStore } from "@/lib/store/app-store";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
@@ -19,20 +20,21 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { t } = useTranslation();
   const { 
     theme, setTheme, logout, 
     did, name, email, role, trustScore, kycStatus 
   } = useAppStore();
 
   const navItems = [
-    { label: "Home", icon: Home, path: "/home" },
-    { label: "Profile", icon: User, path: "/profile" },
-    { label: "Platforms", icon: LayoutTemplate, path: "/platforms" },
-    { label: "Gig Wallet", icon: Landmark, path: "/bank" },
-    { label: "Credentials", icon: FileText, path: "/credentials" },
-    { label: "KYC Center", icon: Fingerprint, path: "/kyc" },
-    { label: "Data Sharing", icon: Share2, path: "/share" },
-    { label: "Settings", icon: Settings, path: "/settings" },
+    { label: t("nav.home"), icon: Home, path: "/home" },
+    { label: t("nav.profile"), icon: User, path: "/profile" },
+    { label: t("nav.platforms"), icon: LayoutTemplate, path: "/platforms" },
+    { label: t("nav.bank"), icon: Landmark, path: "/bank" },
+    { label: t("nav.credentials"), icon: FileText, path: "/credentials" },
+    { label: t("nav.kyc"), icon: Fingerprint, path: "/kyc" },
+    { label: t("nav.share"), icon: Share2, path: "/share" },
+    { label: t("nav.settings"), icon: Settings, path: "/settings" },
   ];
 
   const handleNav = (path: string) => {
@@ -68,7 +70,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 220 }}
-            className="fixed top-0 left-0 h-full w-[320px] glass-panel shadow-2xl z-[101] flex flex-col noise"
+            className="fixed top-0 left-0 h-full w-[320px] bg-background shadow-2xl z-[101] flex flex-col noise"
           >
             {/* Header / Brand */}
             <div className="p-8 pb-4 flex items-center justify-between">
@@ -90,7 +92,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <div className="px-8 py-6">
               <div 
                 onClick={() => handleNav("/profile")}
-                className="group p-6 rounded-3xl glass-card cursor-pointer active:scale-[0.98] transition-all hover:bg-primary/5"
+                className="group p-6 rounded-3xl bg-secondary cursor-pointer active:scale-[0.98] transition-all hover:bg-muted-foreground/5"
               >
                 <div className="flex items-center gap-4">
                   <div className="relative">
@@ -109,12 +111,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 
                 <div className="mt-6 flex items-center justify-between px-1">
                   <div className="flex flex-col gap-1">
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">Trust Score</span>
-                    <span className="text-lg font-display font-bold text-primary">{trustScore}%</span>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">{t("profile.trustScore")}</span>
+                    <span className="text-lg font-display font-black text-primary">{trustScore}%</span>
                   </div>
                   <div className="h-4 w-px bg-border" />
                   <div className="flex flex-col gap-1 items-end">
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">Status</span>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">{t("profile.status")}</span>
                     <span className={`text-[10px] font-bold uppercase tracking-widest leading-none mt-1 ${
                       kycStatus === 'verified' ? 'text-emerald-400' : 
                       kycStatus === 'pending' ? 'text-amber-400' : 'text-muted-foreground/40'
@@ -130,7 +132,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-10 scrollbar-hide">
               {/* Main Nav */}
               <div className="flex flex-col gap-1">
-                <span className="px-4 text-[9px] font-bold uppercase tracking-[0.25em] text-muted-foreground/40 mb-2">Navigation</span>
+                <span className="px-4 text-[9px] font-bold uppercase tracking-[0.25em] text-muted-foreground/40 mb-2">{t("nav.title")}</span>
                 {navItems.map((item) => {
                   const isActive = pathname === item.path;
                   return (
@@ -139,14 +141,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                       onClick={() => handleNav(item.path)}
                       className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all relative group ${
                         isActive 
-                        ? "text-primary bg-primary/5 font-bold" 
+                        ? "text-primary bg-primary/10 font-black" 
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
                       }`}
                     >
                       <item.icon size={18} className={isActive ? "text-primary" : "text-muted-foreground/40 group-hover:text-foreground/70"} />
                       <span className="text-sm tracking-tight">{item.label}</span>
                       {isActive && (
-                        <motion.div layoutId="nav-active-pip" className="absolute right-4 w-1 h-1 rounded-full bg-primary" />
+                        <motion.div layoutId="nav-active-pip" className="absolute left-0 w-1 h-6 rounded-r-full bg-primary" />
                       )}
                     </button>
                   );
@@ -155,12 +157,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
               {/* Identity Section */}
               <div className="flex flex-col gap-1">
-                <span className="px-4 text-[9px] font-bold uppercase tracking-[0.25em] text-muted-foreground/40 mb-2">My Digital DID</span>
+                <span className="px-4 text-[9px] font-bold uppercase tracking-[0.25em] text-muted-foreground/40 mb-2">{t("did.title")}</span>
                 <div className="mx-4 p-4 rounded-2xl bg-muted/30 border border-border flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <QrCode size={12} className="text-muted-foreground/40" />
-                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Public Key</span>
+                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{t("did.publicKey")}</span>
                     </div>
                     <ExternalLink size={10} className="text-muted-foreground/30" />
                   </div>
@@ -172,20 +174,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
               {/* System Section */}
               <div className="flex flex-col gap-1">
-                <span className="px-4 text-[9px] font-bold uppercase tracking-[0.25em] text-muted-foreground/40 mb-2">System</span>
-                <button
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-                >
-                  {theme === "dark" ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-primary" />}
-                  <span className="text-sm tracking-tight">{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-                </button>
+                <span className="px-4 text-[9px] font-bold uppercase tracking-[0.25em] text-muted-foreground/40 mb-2">{t("system.title")}</span>
                 <button
                   onClick={() => handleNav("/help")}
                   className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
                 >
                   <HelpCircle size={18} className="text-muted-foreground/40" />
-                  <span className="text-sm tracking-tight">Help & Support</span>
+                  <span className="text-sm tracking-tight">{t("system.help")}</span>
                 </button>
               </div>
             </div>
@@ -197,11 +192,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl bg-red-500/5 hover:bg-red-500/10 text-red-500 border border-red-500/10 transition-all active:scale-[0.98] group"
               >
                 <LogOut size={16} strokeWidth={2.5} className="transition-transform group-hover:-translate-x-1" />
-                <span className="text-xs font-bold uppercase tracking-widest">Sign Out Hub</span>
+                <span className="text-xs font-bold uppercase tracking-widest">{t("profile.logout")}</span>
               </button>
               
               <div className="flex items-center justify-between opacity-30">
-                <span className="text-[8px] font-bold uppercase tracking-widest">Secure Environment</span>
+                <span className="text-[8px] font-bold uppercase tracking-widest">{t("system.secure")}</span>
                 <span className="text-[8px] font-bold uppercase tracking-widest">v1.2.4</span>
               </div>
             </div>
