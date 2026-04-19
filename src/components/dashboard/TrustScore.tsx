@@ -31,10 +31,10 @@ export function TrustScore({ score, size = 180 }: TrustScoreProps) {
   }, [score]);
 
   const getColor = (s: number) => {
-    if (s >= 75) return { main: "var(--success-500)", glow: "var(--success-400)" };
-    if (s >= 50) return { main: "var(--primary-500)", glow: "var(--primary-400)" };
-    if (s >= 25) return { main: "var(--warning-500)", glow: "var(--warning-400)" };
-    return { main: "var(--danger-500)", glow: "var(--danger-400)" };
+    if (s >= 75) return { main: "var(--color-accent)", glow: "var(--color-accent)" };
+    if (s >= 50) return { main: "var(--color-primary)", glow: "var(--color-primary)" };
+    if (s >= 25) return { main: "oklch(0.7 0.2 60)", glow: "oklch(0.7 0.2 60)" };
+    return { main: "oklch(0.6 0.2 20)", glow: "oklch(0.6 0.2 20)" };
   };
 
   const colors = getColor(animatedScore);

@@ -318,12 +318,24 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }} onClick={handleClose} />
+    <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "16px" }}>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(12px)" }} onClick={handleClose} />
 
-      <div style={{ position: "relative", width: "100%", maxWidth: "480px", maxHeight: "90vh", background: "var(--bg-elevated)", borderRadius: "40px 40px 0 0", padding: "32px 24px 48px", overflowY: "auto" }} className="animate-slide-up">
+      <div 
+        style={{ 
+          position: "relative", 
+          width: "100%", 
+          maxWidth: "500px", 
+          maxHeight: "85vh", 
+          borderRadius: "3rem", 
+          padding: "40px", 
+          overflowY: "auto",
+          border: "1px solid var(--color-border)",
+        }} 
+        className="animate-slide-up noise glass-card shadow-2xl"
+      >
         {/* Drag Handle */}
-        <div style={{ width: "48px", height: "5px", borderRadius: "5px", background: "var(--border-strong)", margin: "0 auto 32px", opacity: 0.3 }} />
+        <div style={{ width: "48px", height: "5px", borderRadius: "5px", background: "var(--color-border)", margin: "0 auto 40px", opacity: 0.5 }} />
 
         <button onClick={handleClose} style={{ position: "absolute", top: "24px", right: "24px", background: "var(--bg-tertiary)", border: "none", borderRadius: "50%", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-secondary)", zIndex: 10 }}>
           <X size={20} />
@@ -334,38 +346,43 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
           <>
             <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mb-1">Connect Work</h2>
             <p className="text-sm font-bold text-[var(--text-tertiary)] mb-8">Link your accounts to verify your history.</p>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+            <div className="grid grid-cols-2 gap-4">
               {AVAILABLE_PLATFORMS.map((platform) => {
                 const isConnected = dbConnectedIds.includes(platform.id);
                 return (
                   <div key={platform.id} style={{ position: "relative" }}>
                     <button
                       onClick={() => handleSelect(platform)}
-                      style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "24px 16px", borderRadius: "24px", border: `2px solid ${isConnected ? "var(--success-500)30" : "var(--border-color)"}`, background: isConnected ? "rgba(16, 185, 129, 0.05)" : "var(--bg-secondary)", cursor: "pointer", transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
-                      className="hover:scale-[1.02] hover:border-blue-500/50"
+                      className={`w-full flex flex-col items-center gap-3 p-6 rounded-[2rem] border transition-all hover:scale-[1.05] active:scale-95 ${
+                        isConnected 
+                          ? "border-accent/40 bg-accent/5" 
+                          : "border-border bg-muted/30 hover:border-primary/50 hover:bg-muted"
+                      }`}
                     >
-                      <span style={{ fontSize: "40px", marginBottom: "4px" }}>{platform.icon}</span>
-                      <span style={{ fontSize: "14px", fontWeight: 900, color: "var(--text-primary)" }}>{platform.name}</span>
+                      <span className="text-4xl mb-1">{platform.icon}</span>
+                      <span className="text-xs font-black uppercase tracking-widest text-[var(--text-primary)]">{platform.name}</span>
                       {isConnected && (
-                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/10 text-teal-500 text-[10px] font-black uppercase">
-                          <Check size={12} strokeWidth={3} /> Active
+                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-[9px] font-black uppercase">
+                          <Check size={10} strokeWidth={4} /> Active
                         </div>
                       )}
                     </button>
                     {isConnected && (
-                      <button onClick={(e) => handleDisconnect(e, platform.id)} className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg border-2 border-[var(--bg-elevated)] active:scale-90 transition-transform">
-                        <Trash2 size={14} strokeWidth={2.5} />
+                      <button onClick={(e) => handleDisconnect(e, platform.id)} className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg border-2 border-[#1a1a1a] active:scale-90 transition-transform">
+                        <Trash2 size={12} strokeWidth={3} />
                       </button>
                     )}
                   </div>
                 );
               })}
-              <button onClick={() => setStep("manual")} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "24px 16px", borderRadius: "24px", border: "2px dashed var(--primary-500)40", background: "var(--primary-500)10", cursor: "pointer", transition: "all 0.2s" }} className="hover:bg-blue-500/10 hover:border-blue-500/60">
-                <div style={{ width: "52px", height: "52px", borderRadius: "18px", background: "var(--primary-500)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", boxShadow: "0 8px 16px -4px rgba(59, 130, 246, 0.4)" }}>
-                  <Upload size={24} strokeWidth={3} />
+              <button 
+                onClick={() => setStep("manual")} 
+                className="flex flex-col items-center gap-3 p-6 rounded-[2rem] border-2 border-dashed border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/40 transition-all group"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                  <Upload size={20} strokeWidth={3} />
                 </div>
-                <span className="text-sm font-black text-blue-500">Other Method</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-primary">Other Method</span>
               </button>
             </div>
           </>
@@ -577,24 +594,24 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
         {/* LOADING & SUCCESS */}
         {step === "connecting" && (
           <div className="text-center py-12">
-            <Loader2 size={56} className="text-blue-500 animate-spin mx-auto" strokeWidth={3} />
-            <p className="text-lg font-black text-[var(--text-primary)] mt-6">
-              {manualName ? "Verifying Documents..." : "Syncing API Data..."}
+            <Loader2 size={56} className="text-primary animate-spin mx-auto" strokeWidth={3} />
+            <p className="font-display text-4xl text-gradient mt-8">
+              {manualName ? "Verifying Proof" : "Syncing Node"}
             </p>
-            <p className="text-xs font-bold text-[var(--text-tertiary)] mt-2">
-              {manualName ? `Processing ${manualFiles.length} proof(s) for ${manualName}` : `Fetching ${selectedDuration} months of history.`}
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-4">
+              {manualName ? "Processing cryptographic evidence" : "Establishing secure data tunnel"}
             </p>
           </div>
         )}
 
         {step === "success" && (
           <div className="text-center py-12">
-            <div className="w-20 h-20 rounded-[2rem] bg-teal-500/20 flex items-center justify-center mx-auto">
-              <Check size={40} className="text-teal-500" strokeWidth={4} />
+            <div className="w-20 h-20 rounded-[2.5rem] bg-accent/20 border border-accent/20 flex items-center justify-center mx-auto shadow-2xl shadow-accent/20 animate-in zoom-in">
+              <Check size={40} className="text-accent" strokeWidth={4} />
             </div>
-            <p className="text-xl font-black text-teal-500 mt-6">Success!</p>
-            <p className="text-xs font-bold text-[var(--text-tertiary)] mt-2">
-              {manualName ? `${manualName} added to your identity vault.` : "Aggregated your verified profile."}
+            <p className="font-display text-4xl text-gradient mt-8">Success</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-accent mt-4">
+              Vault Updated
             </p>
           </div>
         )}

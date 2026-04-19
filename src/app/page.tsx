@@ -17,11 +17,11 @@ import { useAppStore } from "@/lib/store/app-store";
 export default function Page() {
   return (
     <main className="relative min-h-screen bg-background text-foreground selection:bg-primary/30 selection:text-white">
-      {/* Dynamic Background */}
+      {/* Aurora Background (Harmonized with Home) */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] rounded-full bg-primary/20 blur-[120px] animate-float opacity-40" />
-        <div className="absolute -top-[5%] -right-[10%] w-[50%] h-[50%] rounded-full bg-accent/20 blur-[130px] animate-float [animation-delay:2s] opacity-30" />
-        <div className="absolute -bottom-[10%] left-[20%] w-[55%] h-[55%] rounded-full bg-accent-2/15 blur-[140px] animate-float [animation-delay:4s] opacity-25" />
+        <div className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] rounded-full bg-primary/15 blur-[120px] animate-float opacity-30" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-accent/10 blur-[130px] animate-float [animation-delay:3s] opacity-20" />
+        <div className="absolute top-[20%] left-[10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[100px] animate-pulse opacity-10" />
       </div>
 
       <div className="relative z-10 flex flex-col min-h-screen">

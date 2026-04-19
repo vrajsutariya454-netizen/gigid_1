@@ -4,8 +4,9 @@ import { useAppStore } from "@/lib/store/app-store";
 import { useState, useEffect } from "react";
 import { 
   User, Phone, Save, ChevronLeft, 
-  CheckCircle2, ShieldCheck, Mail, Tag, 
-  Plus, IndianRupee, Calendar, History 
+  CheckCircle2, ShieldCheck, Shield, Mail, Tag, 
+  Plus, IndianRupee, Calendar, History,
+  Sparkles, ArrowRight, Loader2
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,7 +26,6 @@ export default function ProfilePage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Manual Entry States
   const [showFinancialForm, setShowFinancialForm] = useState(false);
   const [newMonth, setNewMonth] = useState("");
   const [newIncome, setNewIncome] = useState("");
@@ -74,13 +74,12 @@ export default function ProfilePage() {
         month: newMonth,
         income: parseFloat(newIncome),
         activeDays: parseInt(newDays),
-        verifiedInflow: parseFloat(newIncome) * 0.8 // Simulated verified ratio
+        verifiedInflow: parseFloat(newIncome) * 0.8
       });
       setNewMonth("");
       setNewIncome("");
       setNewDays("");
       setShowFinancialForm(false);
-      alert("Financial data saved locally!");
     } catch (err) {
       alert("Error saving data. Month might already exist.");
     }
@@ -89,103 +88,161 @@ export default function ProfilePage() {
   const initials = formData.fullName?.split(" ").map(n => n[0]).join("").toUpperCase() || "ID";
 
   return (
-    <div className="page-content pb-32">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => router.back()} className="p-2 rounded-full bg-muted border border-border text-muted-foreground shadow-sm">
-          <ChevronLeft size={20} />
-        </button>
-        <h1 className="text-2xl font-black text-foreground">Manage Account</h1>
+    <main className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
+      {/* Aurora Background */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] rounded-full bg-primary/15 blur-[120px] animate-float opacity-30" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-accent/10 blur-[130px] animate-float [animation-delay:3s] opacity-20" />
       </div>
 
-      {/* Avatar & Trusted Badge */}
-      <div className="flex flex-col items-center mb-16">
-        <div className="relative">
-          <div className="w-32 h-32 flex items-center justify-center shadow-2xl text-4xl font-black text-white rounded-[2rem] bg-gradient-to-br from-primary to-accent border-[6px] border-background">{initials}</div>
-          <div className="absolute -bottom-4 -right-4 p-2.5 rounded-2xl bg-emerald-500 border-[4px] border-background text-white shadow-xl">
-            <ShieldCheck size={24} />
-          </div>
-        </div>
-        <div className="mt-8 px-5 py-2 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center gap-2">
-          <CheckCircle2 size={16} className="text-teal-500" />
-          <span className="text-xs font-black text-teal-500 uppercase tracking-widest">{trustScore}% Verified Identity</span>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-12">
-        {/* Profile Settings */}
-        <section className="space-y-6">
-          <h3 className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest px-2">Identity Details</h3>
-          <div className="flex flex-col gap-4">
-             <InputField label="Email" value={email || ""} readOnly icon={<Mail size={18}/>} />
-             <InputField label="Legal Name" value={formData.fullName} onChange={(val: string) => setFormData({...formData, fullName: val})} icon={<User size={18}/>} />
-             <InputField label="Username" value={formData.username} onChange={(val: string) => setFormData({...formData, username: val})} icon={<Tag size={18}/>} />
-          </div>
-          <button onClick={handleSave} className="w-full py-4 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-xs shadow-xl h-14 flex items-center justify-center gap-2">
-            {isSaving ? "Saving..." : showSuccess ? "Updated!" : <><Save size={16}/> Save Changes</>}
+      <div className="relative z-10 page-content pb-32 flex flex-col gap-10">
+        {/* Header */}
+        <section className="pt-6 flex items-center gap-6">
+          <button 
+            onClick={() => router.back()} 
+            className="p-3 rounded-2xl glass border-border text-muted-foreground hover:text-foreground transition-all active:scale-90"
+          >
+            <ChevronLeft size={20} />
           </button>
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2 text-primary">
+              <Sparkles size={10} strokeWidth={3} />
+              <span className="text-[9px] font-black uppercase tracking-[0.3em]">Account Control</span>
+            </div>
+            <h1 className="font-display text-4xl tracking-tight text-gradient">Manage Profile</h1>
+          </div>
         </section>
 
-        {/* Financial Data Entry */}
-        <section className="space-y-6">
-          <div className="flex justify-between items-center px-2">
-            <h3 className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest flex items-center gap-2">
-              <History size={14}/> Financial Verification
-            </h3>
-            <button onClick={() => setShowFinancialForm(!showFinancialForm)} className="text-[10px] font-black text-blue-500 uppercase tracking-widest flex items-center gap-1">
-              {showFinancialForm ? "Cancel" : <><Plus size={12}/> Add Month</>}
-            </button>
-          </div>
-
-          <AnimatePresence>
-            {showFinancialForm && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="p-6 rounded-[2rem] bg-primary/5 border border-primary/20 mb-6 space-y-5 overflow-hidden">
-                <div className="space-y-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[9px] font-bold text-blue-500/70 uppercase tracking-widest ml-1">Month Name (e.g. 2024-03)</label>
-                    <input type="text" value={newMonth} onChange={e => setNewMonth(e.target.value)} placeholder="YYYY-MM" className="w-full bg-muted border border-border p-4 rounded-xl text-sm font-bold text-foreground" />
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="flex-1 space-y-1.5">
-                      <label className="text-[9px] font-bold text-primary/70 uppercase tracking-widest ml-1">Income</label>
-                      <input type="number" value={newIncome} onChange={e => setNewIncome(e.target.value)} placeholder="₹" className="w-full bg-muted border border-border p-4 rounded-xl text-sm font-bold text-foreground" />
-                    </div>
-                    <div className="flex-1 space-y-1.5">
-                      <label className="text-[9px] font-bold text-primary/70 uppercase tracking-widest ml-1">Active Days</label>
-                      <input type="number" value={newDays} onChange={e => setNewDays(e.target.value)} placeholder="Max 31" className="w-full bg-muted border border-border p-4 rounded-xl text-sm font-bold text-foreground" />
-                    </div>
-                  </div>
-                </div>
-                <button onClick={handleAddFinancial} className="w-full py-3 rounded-xl bg-blue-600 text-white font-black uppercase tracking-widest text-[10px]">Verify & Add to Hub</button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <div onClick={() => router.push('/data-hub')} className="p-6 rounded-[2rem] bg-muted border border-border flex items-center gap-4 cursor-pointer hover:border-primary/20 transition-all">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary"><History size={20}/></div>
-            <div className="flex-1">
-               <h4 className="text-sm font-black text-foreground">Manage All Statement Data</h4>
-               <p className="text-[10px] font-bold text-muted-foreground">Edit your 6-month transaction and work history</p>
+        {/* Identity Hero */}
+        <section className="flex flex-col items-center py-4">
+          <div className="relative">
+            <div className="w-36 h-36 flex items-center justify-center shadow-2xl text-4xl font-black text-white rounded-[2.5rem] bg-gradient-to-tr from-primary to-accent border-[6px] border-[#1a1a1a]/40 backdrop-blur-xl">
+              {initials}
+            </div>
+            <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-accent border-[3px] border-[#1a1a1a] text-white flex items-center justify-center shadow-2xl">
+              <ShieldCheck size={20} strokeWidth={2.5} />
             </div>
           </div>
+          
+          <div className="mt-8 px-6 py-2.5 rounded-full glass border-accent/20 flex items-center gap-2.5">
+            <CheckCircle2 size={14} className="text-accent" />
+            <span className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">{trustScore}% Integrity Verified</span>
+          </div>
         </section>
+
+        {/* --- SETTINGS GRID --- */}
+        <div className="grid lg:grid-cols-2 gap-10">
+          
+          {/* Section 1: Identity */}
+          <section className="flex flex-col gap-6">
+            <div className="px-2">
+              <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-1">Identity Details</h3>
+              <p className="text-xs text-muted-foreground font-medium">Your verifiable legal identity information.</p>
+            </div>
+            
+            <div className="noise glass-card p-8 rounded-[2.5rem] flex flex-col gap-6">
+               <InputField label="Gig Email" value={email || ""} readOnly icon={<Mail size={16}/>} />
+               <InputField label="Legal Full Name" value={formData.fullName} onChange={(val: string) => setFormData({...formData, fullName: val})} icon={<User size={16}/>} />
+               <InputField label="Handle / Username" value={formData.username} onChange={(val: string) => setFormData({...formData, username: val})} icon={<Tag size={16}/>} />
+               
+               <button 
+                onClick={handleSave} 
+                className="w-full mt-2 h-16 rounded-[1.25rem] bg-primary text-white font-black uppercase tracking-widest text-[11px] shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 group"
+               >
+                 {isSaving ? <Loader2 className="animate-spin" size={18} /> : showSuccess ? "Account Synchronized" : <><History size={16}/> Push Changes</>}
+                 {!isSaving && !showSuccess && <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />}
+               </button>
+            </div>
+          </section>
+
+          {/* Section 2: Financial & History */}
+          <section className="flex flex-col gap-6">
+            <div className="px-2 flex justify-between items-end">
+              <div>
+                <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-1">Financial Data Hub</h3>
+                <p className="text-xs text-muted-foreground font-medium">Add or audit your verifiable income history.</p>
+              </div>
+              <button 
+                onClick={() => setShowFinancialForm(!showFinancialForm)} 
+                className="text-[10px] font-black text-accent uppercase tracking-widest flex items-center gap-1.5 p-2 px-4 rounded-full glass border-accent/20 hover:bg-accent/5 transition-all"
+              >
+                {showFinancialForm ? "Close Form" : <><Plus size={12} strokeWidth={3}/> New Entry</>}
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-6">
+              <AnimatePresence>
+                {showFinancialForm && (
+                  <motion.div 
+                    initial={{ height: 0, opacity: 0, scale: 0.95 }} 
+                    animate={{ height: "auto", opacity: 1, scale: 1 }} 
+                    exit={{ height: 0, opacity: 0, scale: 0.95 }} 
+                    className="noise glass-card p-8 rounded-[2.5rem] border-accent/30 bg-accent/5 space-y-6 overflow-hidden"
+                  >
+                    <div className="space-y-5">
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[9px] font-black text-accent uppercase tracking-widest ml-1">Period (YYYY-MM)</label>
+                        <input type="text" value={newMonth} onChange={e => setNewMonth(e.target.value)} placeholder="2026-04" className="w-full glass bg-muted/20 border-border p-4 rounded-2xl text-sm font-bold text-foreground outline-none focus:border-accent/40" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[9px] font-black text-accent uppercase tracking-widest ml-1">Net Earnings</label>
+                          <input type="number" value={newIncome} onChange={e => setNewIncome(e.target.value)} placeholder="₹" className="w-full glass bg-muted/20 border-border p-4 rounded-2xl text-sm font-bold text-foreground outline-none focus:border-accent/40" />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[9px] font-black text-accent uppercase tracking-widest ml-1">Actv Days</label>
+                          <input type="number" value={newDays} onChange={e => setNewDays(e.target.value)} placeholder="Days" className="w-full glass bg-muted/20 border-border p-4 rounded-2xl text-sm font-bold text-foreground outline-none focus:border-accent/40" />
+                        </div>
+                      </div>
+                    </div>
+                    <button onClick={handleAddFinancial} className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-accent/20 transition-all hover:scale-[1.02] active:scale-95">
+                      Register Income Proof
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div 
+                onClick={() => router.push('/home')} 
+                className="noise glass-card p-8 rounded-[2.5rem] flex items-center gap-6 cursor-pointer hover:border-primary/40 transition-all group"
+              >
+                <div className="w-16 h-16 rounded-[24px] bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <History size={24} />
+                </div>
+                <div className="flex-1">
+                   <h4 className="text-base font-black text-foreground tracking-tight">Statement History Hub</h4>
+                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Audit and export your data records</p>
+                </div>
+                <ChevronLeft className="rotate-180 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+              </div>
+
+              <div className="p-6 rounded-[2rem] border border-dashed border-border flex items-start gap-4 opacity-50">
+                 <Shield className="text-primary mt-1" size={16} />
+                 <p className="text-[10px] font-medium text-muted-foreground leading-relaxed">
+                   Privacy Note: Your financial data is encrypted and stored locally in your Gig DID vault. It is only shared during loan verification audits with your explicit consent.
+                 </p>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
 
 function InputField({ label, value, onChange, readOnly, icon }: any) {
   return (
-    <div className={`relative group ${readOnly ? 'opacity-60' : ''}`}>
-      <label className="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-[0.2em] ml-2 mb-2 block">{label}</label>
+    <div className={`flex flex-col gap-2 group ${readOnly ? 'opacity-50' : ''}`}>
+      <label className="text-[9px] font-black text-primary uppercase tracking-[0.25em] ml-2 block">{label}</label>
       <div className="relative">
-        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] group-focus-within:text-blue-500 transition-colors">{icon}</div>
+        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors h-4 w-4 flex items-center justify-center">{icon}</div>
         <input 
-          type="text" value={value} 
+          type="text" 
+          value={value} 
           onChange={readOnly ? undefined : (e) => onChange(e.target.value)}
           readOnly={readOnly}
-          className="w-full border border-border text-foreground pr-6 py-5 rounded-2xl text-base font-bold transition-all h-14"
-          style={{ backgroundColor: "var(--color-muted)", paddingLeft: "4.5rem", cursor: readOnly ? 'not-allowed' : 'text' }}
+          placeholder={`Enter your ${label.toLowerCase()}`}
+          className="w-full glass bg-muted/20 border-border text-foreground py-5 pl-[4.5rem] pr-6 rounded-2xl text-sm font-bold transition-all h-16 outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/5 placeholder:text-muted-foreground/20"
         />
       </div>
     </div>

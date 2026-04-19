@@ -39,7 +39,7 @@ export function TrustFactorBars({ data }: FactorBarsProps) {
               animate={{ width: `${factor.value * 100}%` }}
               transition={{ duration: 1, delay: idx * 0.1 }}
               className={`h-full relative ${
-                factor.value > 0.8 ? "bg-teal-500" : factor.value > 0.5 ? "bg-blue-500" : "bg-red-500"
+                factor.value > 0.8 ? "bg-accent" : factor.value > 0.5 ? "bg-primary" : "bg-red-500/50"
               }`}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20" />

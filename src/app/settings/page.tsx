@@ -5,7 +5,7 @@ import { clearAllData } from "@/lib/db/database";
 import { 
   Settings as SettingsIcon, Sun, Moon, EyeOff, Type, Globe, 
   Trash2, Info, ChevronRight, Monitor, Palette, Bell,
-  ShieldCheck, ArrowLeft, Check
+  ShieldCheck, ArrowLeft, Check, Sparkles, ChevronLeft
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -51,46 +51,63 @@ export default function SettingsPage() {
   };
 
   return (
-    <main className="min-h-screen pb-24 lg:pb-12 bg-background transition-colors duration-500">
-      <div className="max-w-3xl mx-auto px-6 pt-12">
-        
-        {/* Header */}
-        <header className="flex items-center justify-between mb-12">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-4xl font-display font-bold text-foreground">Settings</h1>
-            <p className="text-muted-foreground/60 text-sm font-medium">Customize your digital hub experience</p>
-          </div>
-          <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
-            <SettingsIcon className="w-6 h-6 text-primary" />
-          </div>
-        </header>
+    <main className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
+      {/* Aurora Background */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] rounded-full bg-primary/15 blur-[120px] animate-float opacity-30" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-accent/10 blur-[130px] animate-float [animation-delay:3s] opacity-20" />
+      </div>
 
-        <div className="flex flex-col gap-10">
+      <div className="relative z-10 page-content pb-32 flex flex-col gap-10">
+        
+        {/* Header Area */}
+        <section className="pt-6 flex flex-col gap-6">
+          <div className="flex items-center gap-6">
+            <button 
+              onClick={() => router.back()} 
+              className="p-3 rounded-2xl glass border-border text-muted-foreground hover:text-foreground transition-all active:scale-90"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-primary">
+                <Sparkles size={10} strokeWidth={3} />
+                <span className="text-[9px] font-black uppercase tracking-[0.3em]">Environment Tuning</span>
+              </div>
+              <h1 className="font-display text-4xl tracking-tight text-gradient">Preferences</h1>
+            </div>
+          </div>
+          <p className="max-w-md text-sm font-medium text-muted-foreground leading-relaxed -mt-2 ml-2">
+            Customize your interaction layer, interface themes, and cryptographic security protocols.
+          </p>
+        </section>
+
+        <div className="grid lg:grid-cols-1 gap-12">
           
           {/* Appearance Section */}
-          <Section title="Appearance" icon={Palette}>
-            <div className="grid gap-6">
+          <Section title="Interface Layer" icon={Palette}>
+            <div className="grid gap-8">
               {/* Theme Grid */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-4">
                 {THEMES.map((t) => {
                   const isActive = theme === t.id;
                   return (
                     <button
                       key={t.id}
                       onClick={() => setTheme(t.id)}
-                      className={`relative p-5 rounded-2xl border transition-all flex flex-col items-center gap-3 group active:scale-[0.98] ${
+                      className={`relative p-8 rounded-[2rem] border transition-all flex flex-col items-center gap-4 group active:scale-[0.98] noise ${
                         isActive 
-                        ? "bg-primary/5 border-primary shadow-lg shadow-primary/10" 
-                        : "bg-surface border-white/5 hover:border-white/20"
+                        ? "bg-primary/5 border-primary shadow-xl shadow-primary/10" 
+                        : "glass border-border/40 hover:border-primary/20"
                       }`}
                     >
-                      <t.icon className={`w-6 h-6 ${isActive ? t.color : "text-muted-foreground/40"}`} />
-                      <span className={`text-[11px] font-bold uppercase tracking-widest ${isActive ? "text-foreground" : "text-muted-foreground/60"}`}>
+                      <t.icon className={`w-8 h-8 ${isActive ? "text-primary shadow-[0_0_15px_rgba(var(--primary),0.5)]" : "text-muted-foreground/40"}`} />
+                      <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isActive ? "text-foreground" : "text-muted-foreground/60"}`}>
                         {t.label}
                       </span>
                       {isActive && (
-                        <motion.div layoutId="theme-active" className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-primary border-4 border-background flex items-center justify-center">
-                          <Check size={8} className="text-white" strokeWidth={4} />
+                        <motion.div layoutId="theme-active" className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-primary border-[3px] border-background flex items-center justify-center shadow-lg">
+                          <Check size={10} className="text-white" strokeWidth={5} />
                         </motion.div>
                       )}
                     </button>
@@ -99,19 +116,19 @@ export default function SettingsPage() {
               </div>
 
               {/* Text Size Segmented Control */}
-              <div className="flex items-center justify-between p-2 rounded-2xl bg-muted border border-border mt-2">
+              <div className="flex items-center justify-between p-2 rounded-[2rem] glass border-border/40 shadow-inner">
                 {TEXT_SIZES.map((ts) => {
                   const isActive = textSize === ts.id;
                   return (
                     <button
                       key={ts.id}
                       onClick={() => setTextSize(ts.id)}
-                      className={`flex-1 py-3 px-2 rounded-[14px] transition-all text-sm font-bold tracking-tight relative ${
+                      className={`flex-1 py-4 px-3 rounded-[1.5rem] transition-all text-[10px] font-black uppercase tracking-widest relative ${
                         isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       {isActive && (
-                        <motion.div layoutId="size-active" className="absolute inset-0 bg-background rounded-[14px] shadow-sm" />
+                        <motion.div layoutId="size-active" className="absolute inset-0 bg-background/60 shadow-lg border border-border rounded-[1.5rem] backdrop-blur-md" />
                       )}
                       <span className="relative z-10">{ts.label}</span>
                     </button>
@@ -122,28 +139,32 @@ export default function SettingsPage() {
           </Section>
 
           {/* Localization Section */}
-          <Section title="Localization" icon={Globe}>
-            <div className="grid sm:grid-cols-2 gap-3">
+          <Section title="Localization Hub" icon={Globe}>
+            <div className="grid sm:grid-cols-2 gap-4">
               {LANGUAGES.map((lang) => {
                 const isActive = language === lang.id;
                 return (
                   <button
                     key={lang.id}
                     onClick={() => setLanguage(lang.id)}
-                    className={`flex items-center justify-between p-5 rounded-2xl border transition-all group active:scale-[0.98] ${
+                    className={`flex items-center justify-between p-6 rounded-[2rem] border transition-all group active:scale-[0.98] noise ${
                       isActive 
-                      ? "bg-primary/5 border-primary shadow-lg shadow-primary/10" 
-                      : "bg-muted border-border hover:border-border/80"
+                      ? "bg-primary/5 border-primary shadow-xl shadow-primary/10" 
+                      : "glass border-border/40 hover:border-primary/20"
                     }`}
                   >
-                    <div className="flex items-center gap-4">
-                      <span className="text-2xl">{lang.flag}</span>
-                      <div className="flex flex-col items-start gap-0.5">
-                        <span className={`font-bold text-sm ${isActive ? "text-foreground" : "text-foreground/70"}`}>{lang.native}</span>
-                        <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground/40">{lang.label}</span>
+                    <div className="flex items-center gap-5">
+                      <span className="text-3xl filter saturate-[0.8]">{lang.flag}</span>
+                      <div className="flex flex-col items-start gap-1">
+                        <span className={`font-black tracking-tight text-base ${isActive ? "text-foreground" : "text-foreground/70"}`}>{lang.native}</span>
+                        <span className="text-[9px] uppercase font-black tracking-widest text-muted-foreground/40">{lang.label} Node</span>
                       </div>
                     </div>
-                    {isActive && <Check className="w-5 h-5 text-primary" strokeWidth={3} />}
+                    {isActive && (
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Check className="w-4 h-4 text-primary" strokeWidth={3} />
+                      </div>
+                    )}
                   </button>
                 );
               })}
@@ -151,18 +172,23 @@ export default function SettingsPage() {
           </Section>
 
           {/* Account Security Section */}
-          <Section title="Security & Data" icon={ShieldCheck}>
-            <div className="flex flex-col gap-4">
+          <Section title="Decentralized Identity" icon={ShieldCheck}>
+            <div className="flex flex-col gap-6">
               {/* DID Box */}
-              <div className="p-8 rounded-3xl bg-muted/30 border border-dashed border-border flex flex-col gap-4">
+              <div className="noise glass-card p-10 rounded-[2.5rem] flex flex-col gap-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Info size={14} className="text-primary" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Digital Identifier</span>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                      <ShieldCheck size={18} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-foreground tracking-tight">Active Cryptographic Identifier</h4>
+                      <p className="text-[9px] font-bold text-muted-foreground uppercase mt-0.5">Verified on-chain via GigID Node</p>
+                    </div>
                   </div>
-                  <button className="text-[10px] font-bold uppercase tracking-widest text-primary hover:underline">Revoke DID</button>
+                  <button className="text-[10px] font-black uppercase tracking-widest text-red-500/60 hover:text-red-500 hover:underline transition-all">Revoke DID</button>
                 </div>
-                <code className="text-xs text-muted-foreground leading-relaxed font-mono bg-background p-4 rounded-xl border border-border break-all">
+                <code className="text-[11px] text-muted-foreground font-mono bg-background/40 p-6 rounded-2xl border border-border break-all leading-relaxed shadow-inner">
                   {did || "did:gigid:unregistered_0x...f3a"}
                 </code>
               </div>
@@ -170,10 +196,10 @@ export default function SettingsPage() {
               {/* Danger Zone */}
               <button
                 onClick={() => setShowClearConfirm(true)}
-                className="w-full h-16 rounded-2xl border-2 border-dashed border-border bg-muted/30 hover:bg-red-500/5 hover:border-red-500/30 text-muted-foreground hover:text-red-500 transition-all flex items-center justify-center gap-3 font-bold uppercase tracking-widest text-xs active:scale-[0.98] group"
+                className="w-full h-20 rounded-[2.5rem] border-2 border-dashed border-border/40 glass hover:bg-red-500/5 hover:border-red-500/30 text-muted-foreground hover:text-red-500 transition-all flex items-center justify-center gap-4 font-black uppercase tracking-[0.2em] text-[10px] active:scale-[0.98] group"
               >
-                <Trash2 className="w-4 h-4 transition-transform group-hover:scale-110" />
-                Clear Hub Data
+                <Trash2 className="w-5 h-5 transition-transform group-hover:scale-110" strokeWidth={2.5} />
+                Purge Hub Memory
               </button>
             </div>
           </Section>
@@ -181,13 +207,13 @@ export default function SettingsPage() {
         </div>
 
         {/* Footer Info */}
-        <footer className="mt-20 text-center flex flex-col items-center gap-3 py-10 border-t border-border">
-          <div className="flex items-center gap-2 opacity-30">
-            <ShieldCheck className="w-4 h-4" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em]">GigID Secure v1.0.4</span>
+        <footer className="mt-20 flex flex-col items-center gap-6 py-12 border-t border-border/40">
+          <div className="flex items-center gap-3 opacity-40">
+            <ShieldCheck className="w-5 h-5" strokeWidth={2.5} />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">GigID Protocol v1.2.4</span>
           </div>
-          <p className="text-[10px] text-muted-foreground/40 max-w-xs leading-relaxed uppercase tracking-wider">
-            Your data is stored locally using AES-256 encryption. Clearing data is permanent and irreversible.
+          <p className="text-[10px] text-muted-foreground/30 max-w-sm text-center font-medium leading-relaxed uppercase tracking-[0.05em]">
+            Identity records are secured locally via AES-256 node encryption. Purging data is final and cannot be recovered by centralized authority.
           </p>
         </footer>
 
@@ -202,35 +228,35 @@ export default function SettingsPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowClearConfirm(false)}
-              className="absolute inset-0 bg-background/80 backdrop-blur-md"
+              className="absolute inset-0 bg-background/80 backdrop-blur-xl"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-sm p-8 rounded-[2.5rem] bg-background border border-border shadow-2xl flex flex-col items-center text-center gap-6"
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              className="relative w-full max-w-sm p-10 rounded-[3rem] glass border-border shadow-2xl flex flex-col items-center text-center gap-8 noise"
             >
-              <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-2">
-                <Trash2 className="w-8 h-8 text-red-500" />
+              <div className="w-20 h-20 rounded-[2.5rem] bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                <Trash2 className="w-10 h-10 text-red-500" strokeWidth={1.5} />
               </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="text-2xl font-display font-bold text-foreground">Irreversible Action</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  This will wipe your entire digital identity, credentials, and settings. This cannot be undone.
+              <div className="flex flex-col gap-3">
+                <h3 className="font-display text-4xl tracking-tight text-foreground">Final Purge</h3>
+                <p className="text-sm text-muted-foreground font-medium leading-relaxed">
+                  This action will disintegrate your digital identity, linked credentials, and data vault.
                 </p>
               </div>
-              <div className="flex flex-col w-full gap-3">
+              <div className="flex flex-col w-full gap-4">
                 <button
                   onClick={handleClearData}
-                  className="w-full py-4 rounded-2xl bg-red-500 text-white font-bold uppercase tracking-widest text-xs shadow-lg shadow-red-500/20 active:scale-95 transition-all"
+                  className="w-full h-18 rounded-2xl bg-red-500 text-white font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-red-500/30 active:scale-95 transition-all"
                 >
-                  Confirm Deletion
+                  Authorize Purge
                 </button>
                 <button
                   onClick={() => setShowClearConfirm(false)}
-                  className="w-full py-4 rounded-2xl bg-muted text-muted-foreground font-bold uppercase tracking-widest text-xs hover:bg-muted/80 transition-all"
+                  className="w-full h-18 rounded-2xl glass text-muted-foreground font-black uppercase tracking-widest text-[11px] hover:text-foreground transition-all"
                 >
-                  Cancel
+                  Abort
                 </button>
               </div>
             </motion.div>
@@ -243,11 +269,11 @@ export default function SettingsPage() {
 
 function Section({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-3 px-1">
-        <div className="w-1 h-4 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]" />
-        <Icon size={16} className="text-muted-foreground/40" />
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.25em] text-muted-foreground/60">{title}</h2>
+    <div className="flex flex-col gap-8">
+      <div className="flex items-center gap-3 px-2">
+        <div className="w-1.5 h-6 bg-gradient-to-b from-primary to-accent rounded-full shadow-[0_0_12px_rgba(var(--primary),0.5)]" />
+        <Icon size={18} className="text-primary" />
+        <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-foreground">{title}</h2>
       </div>
       {children}
     </div>
