@@ -17,7 +17,7 @@ import { useTranslation } from "@/lib/i18n/use-translation";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { hasCompletedOnboarding, setTrustScore: setGlobalTrustScore, name } = useAppStore();
+  const { hasCompletedOnboarding, setTrustScore: setGlobalTrustScore, name, kycStatus } = useAppStore();
   const { t } = useTranslation();
   
   const [showConnect, setShowConnect] = useState(false);
@@ -64,8 +64,7 @@ export default function DashboardPage() {
           E: local.earnings.toFixed(3),
           C: local.consistency.toFixed(3),
           Rt: local.regularity.toFixed(3),
-          Rs: local.reliability.toFixed(3),
-          AA: { Raa: local.aaScore.toFixed(3) }
+          Rs: local.reliability.toFixed(3)
         }
       });
     } finally {
@@ -90,7 +89,7 @@ export default function DashboardPage() {
       { label: t("dash.capacity"), value: parseFloat(b.E), weight: "25%", description: t("dash.desc.capacity") },
       { label: t("dash.consistency"), value: parseFloat(b.C), weight: "25%", description: t("dash.desc.consistency") },
       { label: t("dash.regularity"), value: parseFloat(b.Rt), weight: "20%", description: t("dash.desc.regularity") },
-      { label: t("dash.reliability"), value: parseFloat(b.Rs) * parseFloat(b.AA.Raa), weight: "Multiplier", description: t("dash.desc.reliability") },
+      { label: t("dash.reliability"), value: parseFloat(b.Rs), weight: "Multiplier", description: t("dash.desc.reliability") },
     ];
   }, [scoreData]);
 
@@ -121,6 +120,25 @@ export default function DashboardPage() {
             </div>
           </div>
         </section>
+
+        {/* --- INCOMPLETE KYC BANNER --- */}
+        {kycStatus !== 'verified' && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-4 p-5 rounded-[2rem] bg-amber-500/8 border border-amber-500/25 cursor-pointer hover:bg-amber-500/12 transition-all group"
+            onClick={() => router.push('/profile')}
+          >
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/15 flex items-center justify-center text-amber-500 shrink-0">
+              <AlertTriangle size={18} strokeWidth={2.5} />
+            </div>
+            <div className="flex-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500">KYC Incomplete</p>
+              <p className="text-[10px] text-amber-500/70 font-medium mt-0.5">Verify your Aadhaar to unlock full trust tier &amp; institutional loans.</p>
+            </div>
+            <ArrowRight size={14} className="text-amber-500/50 group-hover:text-amber-500 group-hover:translate-x-1 transition-all" />
+          </motion.div>
+        )}
 
         {/* --- TRUST CENTER --- */}
         <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-8">
@@ -315,7 +333,7 @@ export default function DashboardPage() {
               onClick={() => setShowConnect(true)}
               className="px-5 py-2.5 rounded-full glass border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-primary/5 transition-all"
             >
-              <Plus size={14} strokeWidth={3} /> {t('common.active')} Platform
+              <Plus size={14} strokeWidth={3} /> Add Platform
             </button>
           </div>
           
@@ -372,3 +390,4 @@ export default function DashboardPage() {
     </main>
   );
 }
+

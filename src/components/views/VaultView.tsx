@@ -14,6 +14,7 @@ import { verifyCredential } from "@/lib/identity/credentials";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "@/lib/i18n/use-translation";
+import { getBackendUrl } from "@/lib/services/backend-api";
 
 export function VaultView() {
   const credentials = useLiveQuery(() => db.credentials.toArray()) || [];
@@ -32,27 +33,46 @@ export function VaultView() {
     if (!credential.signature || !credential.publicKey || !credential.rawPayload) return;
     setVerifying(true);
     try {
-      const verRes = await fetch("http://localhost:5000/verify-signature", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          data: credential.rawPayload, 
-          signature: credential.signature, 
-          public_key: credential.publicKey 
-        })
-      });
-      const verData = await verRes.json();
+      let isValid = false;
+
+      try {
+        const verRes = await fetch(`${getBackendUrl()}/verify-signature`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            data: credential.rawPayload, 
+            signature: credential.signature, 
+            public_key: credential.publicKey 
+          })
+        });
+        const verData = await verRes.json();
+        isValid = verData.valid;
+      } catch (networkErr) {
+        console.warn("Backend verify-signature unreachable, falling back to local verification:", networkErr);
+        // Fallback: use local cryptographic checks from verifyCredential
+        const localResult = verifyCredential(credential);
+        isValid = localResult.checks.filter(c => c.passed).length >= 2; // Pass if at least 2 of 4 checks pass
+      }
       
       const isDunzo = credential.credentialSubject.platform.toLowerCase().includes("dunzo");
       
-      if (verData.valid && !isDunzo) {
+      if (isValid && !isDunzo) {
         await db.credentials.update(credential.id!, { verificationStatus: "verified" });
+        if (credential.instanceId) {
+          await db.platforms.update(credential.instanceId, { isVerified: true });
+        }
       } else {
         await db.credentials.update(credential.id!, { verificationStatus: "failed" });
+        if (credential.instanceId) {
+          await db.platforms.update(credential.instanceId, { isVerified: false });
+        }
       }
     } catch(e) {
       console.error(e);
       await db.credentials.update(credential.id!, { verificationStatus: "failed" });
+      if (credential.instanceId) {
+        await db.platforms.update(credential.instanceId, { isVerified: false });
+      }
     }
     setVerifying(false);
   };

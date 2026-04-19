@@ -88,7 +88,7 @@ export default function DashboardPage() {
       { label: "Capacity", value: parseFloat(b.E), weight: "25%", description: "Aggregated monthly average vs. local reference" },
       { label: "Consistency", value: parseFloat(b.C), weight: "25%", description: "Active work days and volume over time" },
       { label: "Regularity", value: parseFloat(b.Rt), weight: "20%", description: "Transaction frequency and interval health" },
-      { label: "Reliability", value: parseFloat(b.Rs) * parseFloat(b.AA.Raa), weight: "Multiplier", description: "Verification level of data sources" },
+      { label: "Reliability", value: parseFloat(b.Rs) * parseFloat(b.AA?.Raa ?? "1"), weight: "Multiplier", description: "Verification level of data sources" },
     ];
   }, [scoreData]);
 

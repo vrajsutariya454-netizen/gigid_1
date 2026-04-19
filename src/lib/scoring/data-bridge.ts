@@ -10,7 +10,7 @@ export async function getLiveTrustScore(): Promise<ScoreBreakdown> {
   const workRecords = await db.workRecords.toArray();
   const manualData = await db.manualScoringData.toArray();
   const allPlatforms = await db.platforms.toArray();
-  const platforms = allPlatforms.filter(p => p.connected);
+  const platforms = allPlatforms.filter(p => p.connected && p.isVerified);
   const credentials = await db.credentials.toArray();
   const documents = await db.documents.toArray();
 
@@ -120,11 +120,10 @@ export async function getLiveTrustScore(): Promise<ScoreBreakdown> {
   return computeFinalScore(
     monthlyIncomes.length ? monthlyIncomes : [0],
     activeDays.length ? activeDays : [0],
-    transactions.length ? transactions : [],
-    aaData,
-    kycVerified
+    transactions.length ? transactions : []
   );
 }
+
 
 /**
  * Generates a list of verified transactions to simulate Account Aggregator data

@@ -28,6 +28,7 @@ export interface Platform {
   totalEarnings?: number;
   activeMonths?: number;
   zone?: string;
+  isVerified: boolean;
 }
 
 export interface WorkRecord {
@@ -89,6 +90,7 @@ export interface VerifiableCredential {
   signedAt?: Date;
   rawPayload?: any;
   verificationStatus?: 'verified' | 'failed' | 'pending';
+  instanceId?: number; // Links credential back to platforms table entry
   status: "active" | "revoked" | "expired";
 }
 
@@ -129,6 +131,17 @@ export class GigIDDatabase extends Dexie {
       platforms: "++id, platformId, name, connected",
       workRecords: "++id, instanceId, platformId, month",
       credentials: "++id, credentialId, credentialSubject.platform",
+      syncQueue: "++id, action, status, createdAt",
+      settings: "++id, &key",
+      manualScoringData: "++id, &month",
+      documents: "++id, credentialId",
+    });
+
+    this.version(5).stores({
+      profiles: "++id, did",
+      platforms: "++id, platformId, name, connected, isVerified",
+      workRecords: "++id, instanceId, platformId, month",
+      credentials: "++id, credentialId, credentialSubject.platform, instanceId",
       syncQueue: "++id, action, status, createdAt",
       settings: "++id, &key",
       manualScoringData: "++id, &month",

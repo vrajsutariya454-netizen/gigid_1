@@ -150,6 +150,7 @@ export async function seedDemoPersona(personaId: string) {
       icon: "💼",
       color: "#3b82f6",
       connected: true,
+      isVerified: true, // Demo profiles are pre-verified
       totalEarnings: profile.monthly_incomes.reduce((a,b) => a+b, 0),
       avgRating: 4.8
     });

@@ -55,6 +55,9 @@ export const translations = {
     "plat.vaultUpdated": "Vault Updated",
     "plat.allowRead": "Allow GigID to read your verified history ({count}mo).",
     "plat.manualWarning": "Manual entries are marked as \"Self-Declared\" in your Trust Score. API-verified platforms receive a higher reliability multiplier.",
+    "plat.pendingVerification": "Pending Verification",
+    "plat.verifyNode": "Verify Node",
+    "plat.verifiedSuccess": "Node verified successfully!",
 
     // Vault
     "vault.title": "Verification Hub",
@@ -185,6 +188,7 @@ export const translations = {
     "score.capacity": "Capacity",
     "score.consistency": "Consistency",
     "score.regularity": "Regularity",
+    "score.reliability": "Reliability",
     "score.verificationRatio": "Verification Ratio",
     "score.cashFlowHealth": "Cash Flow Health",
     "score.balanceHealth": "Balance Health",
@@ -192,6 +196,7 @@ export const translations = {
     "score.desc.capacity": "Market benchmark",
     "score.desc.consistency": "Work day pattern",
     "score.desc.regularity": "Transaction cadence",
+    "score.desc.reliability": "Source verification level",
     "score.desc.verificationRatio": "Income verified via AA",
     "score.desc.cashFlowHealth": "Bank inflow stability",
     "score.desc.balanceHealth": "Balance vs Expenses",
@@ -319,6 +324,9 @@ export const translations = {
     "plat.vaultUpdated": "तिजोरी अपडेट की गई",
     "plat.allowRead": "GigID को अपना सत्यापित इतिहास ({count}mo) पढ़ने की अनुमति दें।",
     "plat.manualWarning": "मैनुअल प्रविष्टियों को आपके ट्रस्ट स्कोर में \"स्व-घोषित\" के रूप में चिह्नित किया जाता है। API-सत्यापित प्लेटफॉर्म उच्च विश्वसनीयता गुणक प्राप्त करते हैं।",
+    "plat.pendingVerification": "सत्यापन लंबित",
+    "plat.verifyNode": "नोड सत्यापित करें",
+    "plat.verifiedSuccess": "नोड सफलतापूर्वक सत्यापित!",
 
     // Vault
     "vault.title": "सत्यापन केंद्र",
@@ -417,6 +425,7 @@ export const translations = {
     "score.capacity": "क्षमता",
     "score.consistency": "संगति",
     "score.regularity": "नियमितता",
+    "score.reliability": "विश्वसनीयता",
     "score.verificationRatio": "सत्यापन अनुपात",
     "score.cashFlowHealth": "कैश फ्लो स्वास्थ्य",
     "score.balanceHealth": "बैलेंस स्वास्थ्य",
@@ -424,6 +433,7 @@ export const translations = {
     "score.desc.capacity": "बाजार बेंचमार्क",
     "score.desc.consistency": "कार्य दिवस पैटर्न",
     "score.desc.regularity": "लेनदेन की आवृत्ति",
+    "score.desc.reliability": "स्रोत सत्यापन स्तर",
     "score.desc.verificationRatio": "AA के माध्यम से सत्यापित आय",
     "score.desc.cashFlowHealth": "बैंक इनफ्लो स्थिरता",
     "score.desc.balanceHealth": "शेष बनाम व्यय",
@@ -551,6 +561,9 @@ export const translations = {
     "plat.vaultUpdated": "வால்ட் புதுப்பிக்கப்பட்டது",
     "plat.allowRead": "உங்கள் சரிபார்க்கப்பட்ட வரலாற்றைப் ({count}mo) படிக்க GigID ஐ அனுமதிக்கவும்.",
     "plat.manualWarning": "கைமுறை உள்ளீடுகள் உங்கள் நம்பிக்கை மதிப்பெண்ணில் \"சுயமாக அறிவிக்கப்பட்டவை\" எனக் குறிக்கப்படும். API-சரிபார்க்கப்பட்ட தளங்கள் அதிக நம்பகத்தன்மை மதிப்பைப் பெறுகின்றன.",
+    "plat.pendingVerification": "சரிபார்ப்பு நிலுவையில் உள்ளது",
+    "plat.verifyNode": "முனையத்தை சரிபார்க்கவும்",
+    "plat.verifiedSuccess": "முனையம் வெற்றிகரமாக சரிபார்க்கப்பட்டது!",
 
     // Vault
     "vault.title": "சரிபார்ப்பு மையம்",
@@ -649,6 +662,7 @@ export const translations = {
     "score.capacity": "திறன்",
     "score.consistency": "சீரான தன்மை",
     "score.regularity": "ஒழுங்குமுறை",
+    "score.reliability": "நம்பகத்தன்மை",
     "score.verificationRatio": "சரிபார்ப்பு விகிதம்",
     "score.cashFlowHealth": "பணப்புழக்க ஆரோக்கியம்",
     "score.balanceHealth": "இருப்பு ஆரோக்கியம்",
@@ -656,6 +670,7 @@ export const translations = {
     "score.desc.capacity": "சந்தை தரநிலை",
     "score.desc.consistency": "வேலை நாள் முறை",
     "score.desc.regularity": "பரிவர்த்தனை வேகம்",
+    "score.desc.reliability": "ஆதார சரிபார்ப்பு நிலை",
     "score.desc.verificationRatio": "AA மூலம் சரிபார்க்கப்பட்ட வருமானம்",
     "score.desc.cashFlowHealth": "வங்கி வரத்து நிலைத்தன்மை",
     "score.desc.balanceHealth": "இருப்பு மற்றும் செலவுகள்",
@@ -783,6 +798,9 @@ export const translations = {
     "plat.vaultUpdated": "ভল্ট আপডেট করা হয়েছে",
     "plat.allowRead": "GigID-কে আপনার যাচাইকৃত ইতিহাস ({count}mo) পড়ার অনুমতি দিন।",
     "plat.manualWarning": "ম্যানুয়াল এন্ট্রিগুলি আপনার ট্রাস্ট স্কোরে \"স্ব-ঘোষিত\" হিসাবে চিহ্নিত করা হয়। API-যাচাইকৃত প্ল্যাটফর্মগুলি উচ্চতর নির্ভরযোগ্যতা গুণক পায়।",
+    "plat.pendingVerification": "Pending Verification",
+    "plat.verifyNode": "Verify Node",
+    "plat.verifiedSuccess": "Node verified successfully!",
 
     // Vault
     "vault.title": "যাচাইকরণ কেন্দ্র",
@@ -881,6 +899,7 @@ export const translations = {
     "score.capacity": "ক্ষমতা",
     "score.consistency": "সংগতি",
     "score.regularity": "নিয়মিততা",
+    "score.reliability": "নির্ভরযোগ্যতা",
     "score.verificationRatio": "যাচাইকরণের অনুপাত",
     "score.cashFlowHealth": "ক্যাশ ফ্লো স্বাস্থ্য",
     "score.balanceHealth": "ব্যালেন্স স্বাস্থ্য",
@@ -888,6 +907,7 @@ export const translations = {
     "score.desc.capacity": "মার্কেট বেঞ্চমার্ক",
     "score.desc.consistency": "কাজের দিনের প্যাটার্ন",
     "score.desc.regularity": "লেনদেনের ক্যাডেন্স",
+    "score.desc.reliability": "উৎস যাচাইকরণ স্তর",
     "score.desc.verificationRatio": "AA-এর মাধ্যমে যাচাইকৃত আয়",
     "score.desc.cashFlowHealth": "ব্যাঙ্ক ইনফ্লো স্থায়িত্ব",
     "score.desc.balanceHealth": "ব্যালেন্স বনাম খরচ",

@@ -31,28 +31,30 @@
 Our Trust Score ($T$) is a statistical model audited for transparency.
 
 **Formula**:  
-$$T = \text{clamp}(T_{core}) \times R_s \times R_{aa} \times 100$$
+$$T = 100 \times \text{clamp}(T_{core}) \times R_s$$
 
 **Components**:
-1.  **Stability ($S$)**: Income variance (standard deviation over mean).
-2.  **Capacity ($E$)**: Earnings power relative to local benchmarks.
-3.  **Consistency ($C$)**: Work intensity (active days).
-4.  **Regularity ($R_t$)**: Pattern of transaction frequency.
-5.  **Reliability ($R_s / R_{aa}$)**: Multiplier based on source integrity (API vs Manual vs Bank-Verified).
+1.  **Stability ($S$)**: $\max(0, 1 - \sigma / \mu)$. Measures income variance.
+2.  **Capacity ($E$)**: $\min(1, \mu / 50000)$. Earnings power relative to local benchmarks.
+3.  **Consistency ($C$)**: $(\mu_d / 30) \times (1 - \sigma_d / \mu_d)$. Work intensity.
+4.  **Regularity ($R_t$)**: $1 - (\sigma_g / \mu_g)$. Pattern of transaction frequency.
+5.  **Source Reliability ($R_s$)**: $\sum(\text{amount} \times \text{weight}) / \sum(\text{amount})$.
+    - **Weights**: Platform API (1.0), Bank Matched (0.7), Unknown/CSV (0.5), Manual (0.3).
+
+**The Moat**:
+By weighting data based on its source integrity, we ensure that $R_s$ acts as a "Trust Filter." You can't achieve a high score with manual entries alone.
 
 ---
 
 ### 5. Feature Spotlights
 
 #### A. Multilingual Local Awareness (i18n)
-We don't just "translate"; we localize. The app uses a **Reactive Translation Hook (`useTranslation`)** that detects global state changes. 
-- **Tech Detail**: Translations are stored in a nested dictionary. When a user switches to Hindi or Tamil, the entire UI re-renders instantly without a page reload, ensuring accessibility for the next billion users in India.
+We don't just "translate"; we localize. The app uses a **Reactive Translation Hook (`useTranslation`)** that detects global state changes instantly.
 
 #### B. The Account Aggregator (AA) Deep-Dive
 In the **"Data Hub > Statement Explorer"** section, we implement the AA protocol:
-- **What it does**: It fetches cryptographically signed bank statements directly from the bank's FIP (Financial Information Provider).
-- **The Magic**: We perform **Income Reconciliation**. If a worker claims they earned $50,000 on Zomato, we scan the bank statements to find matching inflows.
-- **Verification**: A "Green Shield" appears when a transaction is matched. This transforms "user-claimed data" into "bank-verified evidence."
+- **What it does**: It fetches cryptographically signed bank statements directly from the bank's FIP.
+- **The Magic**: We perform **Income Reconciliation**. We scan bank statements to match gig-reported earnings, transforming "user-claimed data" into "bank-verified evidence" with a specific 0.7 reliability anchor.
 
 ---
 

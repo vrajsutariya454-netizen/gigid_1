@@ -3,39 +3,21 @@
  * for various data origins in the GigID ecosystem.
  */
 export const SOURCE_CONFIG = {
-  uber_api: {
-    type: "platform",
-    reliability: 0.95,
-    verification: "high"
-  },
-  swiggy_api: {
-    type: "platform",
-    reliability: 0.9,
-    verification: "high"
-  },
-  zomato_api: {
-    type: "platform",
-    reliability: 0.9,
-    verification: "high"
-  },
-  ola_api: {
-    type: "platform",
-    reliability: 0.92,
-    verification: "high"
-  },
-  aa_bank: {
-    type: "aa",
+  platform: {
     reliability: 1.0,
-    verification: "very_high"
+    verification: "high"
   },
-  manual_entry: {
-    type: "manual",
-    reliability: 0.3,
-    verification: "low"
+  bank: {
+    reliability: 0.7,
+    verification: "high"
   },
-  csv_upload: {
-    type: "upload",
+  unknown: {
     reliability: 0.5,
     verification: "medium"
+  },
+  manual: {
+    reliability: 0.3,
+    verification: "low"
   }
 };
+

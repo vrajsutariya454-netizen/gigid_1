@@ -7,6 +7,7 @@ import gigRoutes from "./routes/gigs.js";
 import txnRoutes from "./routes/transactions.js";
 import scoringRoutes from "./routes/scoring.js";
 import authRoutes from "./routes/auth.js";
+import kycRoutes from "./routes/kyc.js";
 import { verifySignature } from "./utils/cryptoConfig.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -24,8 +25,10 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/users", userRoutes);
 app.use("/gigs", gigRoutes);
 app.use("/transactions", txnRoutes);
+app.use("/trust-score", scoringRoutes);
 app.use("/calculate", scoringRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/kyc", kycRoutes);
 
 app.post("/verify-signature", (req, res) => {
   const { data, signature, public_key } = req.body;

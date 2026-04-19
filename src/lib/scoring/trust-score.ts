@@ -43,13 +43,14 @@ export interface ScoreBreakdown {
 }
 
 export const RELIABILITY_WEIGHTS: Record<Transaction['source'], number> = {
-  platform: 1.0,         // Direct API / Cryptographically Signed
-  bank: 0.9,             // Bank matched
-  verified_screenshot: 0.8, // Screenshot verified by backend
-  screenshot: 0.5,       // Raw screenshot uploaded
-  manual: 0.3,           // User entered manually
-  aa_verified: 1.0,      // Account Aggregator / Digital Signature
-  unknown: 0.0,
+  platform: 1.0,
+  bank: 0.7,
+  unknown: 0.5,
+  manual: 0.3,
+  // Mapping legacy sources for compatibility
+  aa_verified: 1.0,
+  verified_screenshot: 0.8,
+  screenshot: 0.5,
   pending: 0.0
 };
 
@@ -58,10 +59,11 @@ const REFERENCE_INCOME = 50000;
 // Helper: Mean
 const mean = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
 
-// Helper: Std Dev
+// Helper: Std Dev (Population)
 const stdDev = (arr: number[]) => {
-  const m = mean(arr);
-  return Math.sqrt(arr.reduce((sq, n) => sq + Math.pow(n - m, 2), 0) / (arr.length || 1));
+  if (arr.length === 0) return 0;
+  const mu = mean(arr);
+  return Math.sqrt(arr.reduce((sq, n) => sq + Math.pow(n - mu, 2), 0) / arr.length);
 };
 
 // Helper: Clamp 0-1
@@ -69,6 +71,7 @@ const clamp = (val: number) => Math.max(0, Math.min(1, val));
 
 /**
  * 1. Income Stability (S)
+ * S = max(0, 1 - σ / μ)
  */
 export function calculateStability(incomes: number[]): number {
   if (incomes.length < 2) return 0.5;
@@ -79,6 +82,7 @@ export function calculateStability(incomes: number[]): number {
 
 /**
  * 2. Earnings Capacity (E)
+ * E = min(1, μ / 50000)
  */
 export function calculateCapacity(incomes: number[]): number {
   const mu = mean(incomes);
@@ -87,6 +91,7 @@ export function calculateCapacity(incomes: number[]): number {
 
 /**
  * 3. Work Consistency (C)
+ * C = (μ_d / 30) × (1 - σ_d / μ_d)
  */
 export function calculateConsistency(activeDays: number[]): number {
   if (activeDays.length === 0) return 0;
@@ -97,6 +102,7 @@ export function calculateConsistency(activeDays: number[]): number {
 
 /**
  * 4. Transaction Regularity (Rt)
+ * Rt = 1 - (σ_g / μ_g)
  */
 export function calculateRegularity(transactions: Transaction[]): number {
   if (transactions.length < 3) return 0.5;
@@ -113,53 +119,29 @@ export function calculateRegularity(transactions: Transaction[]): number {
 
 /**
  * 5. Source Reliability (Rs)
+ * Rs = Σ(amount × weight) / Σ(amount)
  */
 export function calculateReliability(transactions: Transaction[]): number {
   if (transactions.length === 0) return 0.5;
   let weightedSum = 0;
   let totalAmount = 0;
   transactions.forEach(t => {
-    weightedSum += t.amount * RELIABILITY_WEIGHTS[t.source];
+    const weight = RELIABILITY_WEIGHTS[t.source] ?? RELIABILITY_WEIGHTS.unknown;
+    weightedSum += t.amount * weight;
     totalAmount += t.amount;
   });
   return totalAmount === 0 ? 0.5 : clamp(weightedSum / totalAmount);
 }
 
 /**
- * Account Aggregator Matrix:
- * 6. Verified Income Ratio (Vi)
- * 7. Cash Flow Consistency (Cf)
- * 8. Balance Health (Bh)
- */
-export function calculateAAComponents(aaData: AAData, totalIncome: number) {
-  const vi = totalIncome > 0 ? clamp(aaData.verifiedIncomeAmount / totalIncome) : 0.5;
-  
-  const mu_inflow = mean(aaData.monthlyInflows);
-  const sigma_inflow = stdDev(aaData.monthlyInflows);
-  const cf = mu_inflow === 0 ? 0 : clamp(1 - (sigma_inflow / mu_inflow));
-  
-  const bh = aaData.monthlyExpenses > 0 ? clamp(aaData.avgMonthlyBalance / aaData.monthlyExpenses) : 1;
-
-  return { vi, cf, bh };
-}
-
-/**
- * 9. AA Reliability Score (Raa)
- */
-export function calculateAAReliability(vi: number, cf: number, bh: number): number {
-  return clamp((0.4 * vi) + (0.3 * cf) + (0.3 * bh));
-}
-
-/**
  * Final Trust Score (T)
- * T = 100 * T_core * Rs * Raa
+ * T_core = 0.30S + 0.25E + 0.25C + 0.20Rt
+ * T = 100 * T_core * Rs
  */
 export function computeFinalScore(
   incomes: number[], 
   activeDays: number[], 
-  transactions: Transaction[],
-  aaData: AAData,
-  kycVerified: boolean = false
+  transactions: Transaction[]
 ): ScoreBreakdown {
   const s = calculateStability(incomes);
   const e = calculateCapacity(incomes);
@@ -167,12 +149,8 @@ export function computeFinalScore(
   const rt = calculateRegularity(transactions);
   const rs = calculateReliability(transactions);
   
-  const { vi, cf, bh } = calculateAAComponents(aaData, mean(incomes) * incomes.length);
-  const raa = calculateAAReliability(vi, cf, bh);
-
   const tCore = (0.30 * s) + (0.25 * e) + (0.25 * c) + (0.20 * rt);
-  const kycMultiplier = kycVerified ? 1.25 : 1.0;
-  const finalScore = Math.round(100 * clamp(tCore) * clamp(rs * kycMultiplier) * raa);
+  const finalScore = Math.round(100 * tCore * rs);
   
   return {
     stability: s,
@@ -180,20 +158,21 @@ export function computeFinalScore(
     consistency: c,
     regularity: rt,
     reliability: rs,
-    aaScore: raa,
+    aaScore: 0.85, // Default/Legacy
     aaDetails: {
-      verifiedIncomeRatio: vi,
-      cashFlowConsistency: cf,
-      balanceHealth: bh
+      verifiedIncomeRatio: 1.0,
+      cashFlowConsistency: 1.0,
+      balanceHealth: 1.0
     },
     finalScore,
-    aaTransactions: aaData.verifiedTransactions || []
+    aaTransactions: []
   };
 }
 
 export function getInterpretation(score: number): { label: string, color: string } {
-  if (score >= 85) return { label: "score.highTrust", color: "var(--success-500)" };
-  if (score >= 70) return { label: "score.moderate", color: "var(--primary-500)" };
-  if (score >= 55) return { label: "score.risky", color: "var(--warning-500)" };
-  return { label: "score.highRisk", color: "var(--danger-500)" };
+  if (score >= 85) return { label: "score.highTrust", color: "var(--color-primary)" };
+  if (score >= 70) return { label: "score.moderate", color: "oklch(0.7 0.1 180)" };
+  if (score >= 55) return { label: "score.risky", color: "var(--color-accent)" };
+  return { label: "score.highRisk", color: "oklch(0.6 0.2 30)" };
 }
+

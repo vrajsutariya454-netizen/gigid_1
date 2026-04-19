@@ -4,19 +4,39 @@ import { calculateTrust } from "../utils/trustScore.js";
 const router = express.Router();
 
 /**
+ * GET /trust-score
+ * Returns a score + breakdown using high-fidelity mock data.
+ * Adheres to the fintech formula: T = 100 * T_core * Rs
+ */
+router.get("/", (req, res) => {
+  const mockIncomes = [45000, 52000, 48000, 55000, 50000, 51000];
+  const mockDays = [22, 24, 21, 25, 23, 22];
+  const mockTxns = [
+    { amount: 1500, date: new Date(), source: "platform" },
+    { amount: 5000, date: new Date(Date.now() - 86400000 * 2), source: "bank" },
+    { amount: 200, date: new Date(Date.now() - 86400000 * 5), source: "manual" }
+  ];
+
+  try {
+    const result = calculateTrust(mockTxns, mockIncomes, mockDays);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Scoring services unavailable" });
+  }
+});
+
+/**
  * POST /calculate
  * Performs a high-fidelity trust calculation on a provided snapshot of data.
- * Used for "Global Audit" without persisting data.
  */
 router.post("/", (req, res) => {
-  const { transactions, incomes, activeDays, aa_data } = req.body;
+  const { transactions, incomes, activeDays } = req.body;
 
   try {
     const result = calculateTrust(
       transactions || [], 
       incomes || [], 
-      activeDays || [], 
-      aa_data || null
+      activeDays || []
     );
     
     res.json(result);
@@ -25,6 +45,7 @@ router.post("/", (req, res) => {
     res.status(500).json({ error: "Failed to compute Trust Score" });
   }
 });
+
 
 /**
  * POST /estimate

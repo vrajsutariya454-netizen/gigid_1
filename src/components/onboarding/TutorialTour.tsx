@@ -156,6 +156,7 @@ const CustomTooltip = ({
   backProps,
   closeProps,
   primaryProps,
+  skipProps,
   tooltipProps,
   isLastStep,
   size,
@@ -271,12 +272,37 @@ const CustomTooltip = ({
             </div>
 
             {/* Buttons */}
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              {!isLastStep && (
+                <button
+                  {...skipProps}
+                  onClick={(e) => {
+                    const state = useAppStore.getState();
+                    const accountId = state.did || state.email || "guest";
+                    if (accountId) localStorage.setItem(`gigid-global-tour-done-${accountId}`, "true");
+                    if (skipProps?.onClick) skipProps.onClick(e);
+                  }}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: 12,
+                    border: "none",
+                    background: "transparent",
+                    color: "#f43f5e",
+                    fontSize: 11,
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                    cursor: "pointer",
+                  }}
+                >
+                  Skip
+                </button>
+              )}
               {index > 0 && (
                 <button
                   {...backProps}
                   style={{
-                    padding: "8px 16px",
+                    padding: "8px 12px",
                     borderRadius: 12,
                     border: "none",
                     background: "transparent",
@@ -293,6 +319,14 @@ const CustomTooltip = ({
               )}
               <button
                 {...primaryProps}
+                onClick={(e) => {
+                  if (isLastStep) {
+                    const state = useAppStore.getState();
+                    const accountId = state.did || state.email || "guest";
+                    if (accountId) localStorage.setItem(`gigid-global-tour-done-${accountId}`, "true");
+                  }
+                  if (primaryProps?.onClick) primaryProps.onClick(e);
+                }}
                 style={{
                   padding: "10px 24px",
                   borderRadius: 12,
@@ -326,6 +360,12 @@ const CustomTooltip = ({
           {/* Close X */}
           <button
             {...closeProps}
+            onClick={(e) => {
+              const state = useAppStore.getState();
+              const accountId = state.did || state.email || "guest";
+              if (accountId) localStorage.setItem(`gigid-global-tour-done-${accountId}`, "true");
+              if (closeProps?.onClick) closeProps.onClick(e);
+            }}
             style={{
               position: "absolute",
               top: -10,
@@ -351,22 +391,29 @@ const CustomTooltip = ({
   );
 };
 
-// Persist in localStorage — tours show only once per signup, forever
-function hasPageBeenToured(route: string): boolean {
+// Persist in localStorage — tours show only once per signup globally, per user account
+function hasPageBeenToured(route: string, accountId: string | null): boolean {
+  if (!accountId) return true; // Safety check
   try {
-    const pages = JSON.parse(localStorage.getItem("gigid-toured-pages") || "[]");
+    const isGloballyDone = localStorage.getItem(`gigid-global-tour-done-${accountId}`);
+    if (isGloballyDone === "true") return true;
+
+    const pages = JSON.parse(localStorage.getItem(`gigid-toured-pages-${accountId}`) || "[]");
     return pages.includes(route);
   } catch {
     return false;
   }
 }
 
-function markPageToured(route: string) {
+function markPageToured(route: string, accountId: string | null) {
+  if (!accountId) return;
   try {
-    const pages = JSON.parse(localStorage.getItem("gigid-toured-pages") || "[]");
+    localStorage.setItem(`gigid-global-tour-done-${accountId}`, "true");
+    
+    const pages = JSON.parse(localStorage.getItem(`gigid-toured-pages-${accountId}`) || "[]");
     if (!pages.includes(route)) {
       pages.push(route);
-      localStorage.setItem("gigid-toured-pages", JSON.stringify(pages));
+      localStorage.setItem(`gigid-toured-pages-${accountId}`, JSON.stringify(pages));
     }
   } catch { }
 }
@@ -380,7 +427,8 @@ export const TutorialTour = () => {
   const [run, setRun] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [currentSteps, setCurrentSteps] = useState([]);
-  const { hasCompletedOnboarding } = useAppStore();
+  const { hasCompletedOnboarding, did, email } = useAppStore();
+  const accountId = did || email || "guest"; // Fallback to email if DID isn't generated yet
 
   // Only render on client
   useEffect(() => {
@@ -389,7 +437,7 @@ export const TutorialTour = () => {
 
   // Reset and re-check tour on every route change
   useEffect(() => {
-    if (!mounted || !hasCompletedOnboarding) return;
+    if (!mounted || !hasCompletedOnboarding || !accountId) return;
 
     // Stop any currently running tour when route changes
     setRun(false);
@@ -398,8 +446,8 @@ export const TutorialTour = () => {
     // Normalise pathname
     const normPath = pathname === "/" ? "/home" : pathname;
 
-    // Check if this page has already been toured
-    if (hasPageBeenToured(normPath)) return;
+    // Check if this page has already been toured for this user
+    if (hasPageBeenToured(normPath, accountId)) return;
 
     // Get steps for this route
     const steps = ROUTE_STEPS[normPath];
@@ -412,28 +460,28 @@ export const TutorialTour = () => {
     }, 1200);
 
     return () => clearTimeout(timer);
-  }, [pathname, mounted, hasCompletedOnboarding]);
+  }, [pathname, mounted, hasCompletedOnboarding, accountId]);
 
   const handleCallback = useCallback(
-    (data) => {
-      const { status } = data;
+    (data: any) => {
+      const { status, action } = data;
 
-      if (status === STATUS.FINISHED || status === "finished") {
+      // STATUS.FINISHED, STATUS.SKIPPED, or explicit 'close' / 'skip' action
+      if (
+        status === "finished" ||
+        status === STATUS.FINISHED ||
+        status === "skipped" ||
+        status === STATUS.SKIPPED ||
+        action === "close" ||
+        action === "skip"
+      ) {
         setRun(false);
         setCurrentSteps([]);
-        // Mark this page as toured
         const normPath = pathname === "/" ? "/home" : pathname;
-        markPageToured(normPath);
-      }
-
-      if (status === STATUS.SKIPPED || status === "skipped") {
-        setRun(false);
-        setCurrentSteps([]);
-        const normPath = pathname === "/" ? "/home" : pathname;
-        markPageToured(normPath);
+        markPageToured(normPath, accountId);
       }
     },
-    [pathname]
+    [pathname, accountId]
   );
 
   if (!mounted || !hasCompletedOnboarding) return null;

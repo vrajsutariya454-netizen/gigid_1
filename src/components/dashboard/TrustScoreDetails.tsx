@@ -18,6 +18,7 @@ export function TrustScoreDetails({ breakdown }: TrustScoreDetailsProps) {
     { label: t('score.capacity'), key: 'score.capacity', value: breakdown.earnings, icon: Zap, color: "var(--warning-400)", desc: t('score.desc.capacity') },
     { label: t('score.consistency'), key: 'score.consistency', value: breakdown.consistency, icon: Calendar, color: "var(--success-400)", desc: t('score.desc.consistency') },
     { label: t('score.regularity'), key: 'score.regularity', value: breakdown.regularity, icon: Award, color: "var(--primary-600)", desc: t('score.desc.regularity') },
+    { label: t('score.reliability'), key: 'score.reliability', value: breakdown.reliability, icon: Shield, color: "var(--success-600)", desc: t('score.desc.reliability') },
   ];
 
   const aaMetrics = [
