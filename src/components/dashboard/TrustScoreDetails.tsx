@@ -74,7 +74,7 @@ function MetricCard({ m, index }: { m: any, index: number }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05 * index }}
-      className="card p-4 bg-[var(--bg-elevated)] border-white/5 rounded-2xl flex flex-col gap-3 shadow-sm"
+      className="glass-card p-4 rounded-2xl flex flex-col gap-3 shadow-sm bg-muted/30"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

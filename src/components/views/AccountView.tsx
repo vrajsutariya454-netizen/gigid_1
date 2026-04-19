@@ -45,7 +45,7 @@ export function AccountView() {
         <h4 className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-3">
           Verifiable Identifier (DID)
         </h4>
-        <div className="p-3 rounded-lg bg-black/20 border border-white/5 font-mono text-[10px] text-[var(--text-secondary)] break-all leading-relaxed">
+        <div className="p-3 rounded-lg bg-muted border border-border font-mono text-[10px] text-muted-foreground break-all leading-relaxed">
           {did || "Loading ID..."}
         </div>
       </div>

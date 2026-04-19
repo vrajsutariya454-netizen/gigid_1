@@ -92,17 +92,17 @@ export default function ProfilePage() {
     <div className="page-content pb-32">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => router.back()} className="p-2 rounded-full bg-[var(--bg-elevated)] border-0 text-[var(--text-secondary)] shadow-sm">
+        <button onClick={() => router.back()} className="p-2 rounded-full bg-muted border border-border text-muted-foreground shadow-sm">
           <ChevronLeft size={20} />
         </button>
-        <h1 className="text-2xl font-black text-[var(--text-primary)]">Manage Account</h1>
+        <h1 className="text-2xl font-black text-foreground">Manage Account</h1>
       </div>
 
       {/* Avatar & Trusted Badge */}
       <div className="flex flex-col items-center mb-16">
         <div className="relative">
-          <div className="w-32 h-32 flex items-center justify-center shadow-2xl text-4xl font-black text-white" style={{ borderRadius: "2rem", background: "linear-gradient(135deg, var(--primary-600), var(--primary-400))", border: "6px solid var(--bg-primary)" }}>{initials}</div>
-          <div className="absolute -bottom-4 -right-4 p-2.5 rounded-2xl bg-teal-500 border-[4px] border-[var(--bg-primary)] text-white shadow-xl">
+          <div className="w-32 h-32 flex items-center justify-center shadow-2xl text-4xl font-black text-white rounded-[2rem] bg-gradient-to-br from-primary to-accent border-[6px] border-background">{initials}</div>
+          <div className="absolute -bottom-4 -right-4 p-2.5 rounded-2xl bg-emerald-500 border-[4px] border-background text-white shadow-xl">
             <ShieldCheck size={24} />
           </div>
         </div>
@@ -139,20 +139,20 @@ export default function ProfilePage() {
 
           <AnimatePresence>
             {showFinancialForm && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="p-6 rounded-[2rem] bg-blue-500/5 border border-blue-500/10 mb-6 space-y-5 overflow-hidden">
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="p-6 rounded-[2rem] bg-primary/5 border border-primary/20 mb-6 space-y-5 overflow-hidden">
                 <div className="space-y-4">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[9px] font-bold text-blue-500/70 uppercase tracking-widest ml-1">Month Name (e.g. 2024-03)</label>
-                    <input type="text" value={newMonth} onChange={e => setNewMonth(e.target.value)} placeholder="YYYY-MM" className="w-full bg-white/5 border-0 p-4 rounded-xl text-sm font-bold text-[var(--text-primary)]" />
+                    <input type="text" value={newMonth} onChange={e => setNewMonth(e.target.value)} placeholder="YYYY-MM" className="w-full bg-muted border border-border p-4 rounded-xl text-sm font-bold text-foreground" />
                   </div>
                   <div className="flex gap-4">
                     <div className="flex-1 space-y-1.5">
-                      <label className="text-[9px] font-bold text-blue-500/70 uppercase tracking-widest ml-1">Income</label>
-                      <input type="number" value={newIncome} onChange={e => setNewIncome(e.target.value)} placeholder="₹" className="w-full bg-white/5 border-0 p-4 rounded-xl text-sm font-bold text-[var(--text-primary)]" />
+                      <label className="text-[9px] font-bold text-primary/70 uppercase tracking-widest ml-1">Income</label>
+                      <input type="number" value={newIncome} onChange={e => setNewIncome(e.target.value)} placeholder="₹" className="w-full bg-muted border border-border p-4 rounded-xl text-sm font-bold text-foreground" />
                     </div>
                     <div className="flex-1 space-y-1.5">
-                      <label className="text-[9px] font-bold text-blue-500/70 uppercase tracking-widest ml-1">Active Days</label>
-                      <input type="number" value={newDays} onChange={e => setNewDays(e.target.value)} placeholder="Max 31" className="w-full bg-white/5 border-0 p-4 rounded-xl text-sm font-bold text-[var(--text-primary)]" />
+                      <label className="text-[9px] font-bold text-primary/70 uppercase tracking-widest ml-1">Active Days</label>
+                      <input type="number" value={newDays} onChange={e => setNewDays(e.target.value)} placeholder="Max 31" className="w-full bg-muted border border-border p-4 rounded-xl text-sm font-bold text-foreground" />
                     </div>
                   </div>
                 </div>
@@ -161,11 +161,11 @@ export default function ProfilePage() {
             )}
           </AnimatePresence>
 
-          <div onClick={() => router.push('/data-hub')} className="p-6 rounded-[2rem] bg-[var(--bg-elevated)] border-white/5 flex items-center gap-4 cursor-pointer hover:border-blue-500/20 transition-all">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500"><History size={20}/></div>
+          <div onClick={() => router.push('/data-hub')} className="p-6 rounded-[2rem] bg-muted border border-border flex items-center gap-4 cursor-pointer hover:border-primary/20 transition-all">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary"><History size={20}/></div>
             <div className="flex-1">
-               <h4 className="text-sm font-black text-[var(--text-primary)]">Manage All Statement Data</h4>
-               <p className="text-[10px] font-bold text-[var(--text-tertiary)]">Edit your 6-month transaction and work history</p>
+               <h4 className="text-sm font-black text-foreground">Manage All Statement Data</h4>
+               <p className="text-[10px] font-bold text-muted-foreground">Edit your 6-month transaction and work history</p>
             </div>
           </div>
         </section>
@@ -184,8 +184,8 @@ function InputField({ label, value, onChange, readOnly, icon }: any) {
           type="text" value={value} 
           onChange={readOnly ? undefined : (e) => onChange(e.target.value)}
           readOnly={readOnly}
-          className="w-full border-0 text-[var(--text-primary)] pr-6 py-5 rounded-2xl text-base font-bold transition-all h-14"
-          style={{ backgroundColor: "var(--bg-tertiary)", paddingLeft: "4.5rem", cursor: readOnly ? 'not-allowed' : 'text' }}
+          className="w-full border border-border text-foreground pr-6 py-5 rounded-2xl text-base font-bold transition-all h-14"
+          style={{ backgroundColor: "var(--color-muted)", paddingLeft: "4.5rem", cursor: readOnly ? 'not-allowed' : 'text' }}
         />
       </div>
     </div>

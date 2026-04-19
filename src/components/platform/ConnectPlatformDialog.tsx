@@ -202,9 +202,9 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
             <p className="text-sm font-bold text-[var(--text-tertiary)] mb-8">Choose history length to verify via API.</p>
             <div className="grid grid-cols-1 gap-4">
               {[3, 6, 12].map((m) => (
-                <button key={m} onClick={() => handleDurationSelect(m as any)} className="flex items-center justify-between p-6 rounded-[2rem] bg-[var(--bg-secondary)] border border-white/5 hover:border-blue-500/40 hover:bg-blue-500/5 transition-all group">
+                <button key={m} onClick={() => handleDurationSelect(m as any)} className="flex items-center justify-between p-6 rounded-[2rem] bg-muted border border-border hover:border-primary/40 hover:bg-muted transition-all group">
                   <div className="flex items-center gap-5">
-                    <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                    <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center text-primary">
                       <Calendar size={20} />
                     </div>
                     <div className="text-left">
@@ -230,7 +230,7 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
             </div>
             <div className="space-y-4 mb-10">
               {["Work history & deliveries", "Customer ratings", `Earnings (${selectedDuration}MO)`, "Verified status"].map((item) => (
-                <div key={item} className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5">
+                <div key={item} className="flex items-center gap-3 p-4 rounded-2xl bg-muted border border-border">
                   <ShieldCheck size={18} className="text-teal-500" strokeWidth={3} />
                   <span className="text-xs font-bold text-[var(--text-primary)]">{item}</span>
                 </div>
@@ -249,8 +249,8 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
               <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mb-2">Manual Proof</h2>
               <p className="text-sm font-bold text-[var(--text-tertiary)] mb-8">Upload a screenshot to verify unlisted work.</p>
               <div className="flex flex-col gap-6">
-                <input type="text" placeholder="Platform Name" value={manualName} onChange={(e) => setManualName(e.target.value)} className="w-full p-5 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-4 ring-blue-500/10" />
-                <label className="cursor-pointer flex flex-col items-center justify-center p-12 rounded-[2rem] border-2 border-dashed border-white/10 bg-white/5 hover:bg-blue-500/5 hover:border-blue-500/30 transition-all">
+                <input type="text" placeholder="Platform Name" value={manualName} onChange={(e) => setManualName(e.target.value)} className="w-full p-5 rounded-2xl bg-muted border border-border text-foreground font-bold outline-none focus:ring-4 ring-primary/10" />
+                <label className="cursor-pointer flex flex-col items-center justify-center p-12 rounded-[2rem] border-2 border-dashed border-border bg-muted/30 hover:bg-primary/5 hover:border-primary/30 transition-all">
                   <input type="file" hidden accept="image/*" onChange={(e) => setManualFile(e.target.files?.[0] || null)} />
                   <ImageIcon size={36} className="text-blue-500/50 mb-3" />
                   <span className="text-sm font-black text-[var(--text-secondary)]">{manualFile ? manualFile.name : "Select Proof Image"}</span>

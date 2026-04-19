@@ -147,7 +147,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* NEW: TRUST FACTOR ENGINE */}
-      <section className="card p-8 bg-[var(--bg-elevated)] border border-white/5 rounded-[3rem] shadow-2xl overflow-hidden">
+      <section className="glass-card p-8 rounded-[3rem] shadow-2xl overflow-hidden">
         <div className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -157,7 +157,7 @@ export default function DashboardPage() {
             <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight">Trust Factor Engine</h2>
           </div>
 
-          <div className="flex bg-black/40 p-1.5 rounded-2xl gap-1">
+          <div className="flex bg-muted p-1.5 rounded-2xl gap-1">
             <button 
               onClick={() => setViewMode("bars")}
               className={`p-2.5 rounded-xl transition-all ${viewMode === "bars" ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-[var(--text-tertiary)] hover:text-white"}`}
@@ -186,7 +186,7 @@ export default function DashboardPage() {
               <TrustRadarChart data={factorsData.map(f => ({ label: f.label, value: f.value, weight: f.weight }))} />
             )}
             
-            <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-between">
+            <div className="mt-8 pt-8 border-t border-border flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-tertiary)]">Data Syncing Via</span>
                 <span className="text-xs font-bold text-teal-500 flex items-center gap-1.5 mt-0.5">
@@ -196,7 +196,7 @@ export default function DashboardPage() {
               <button 
                 onClick={refreshScore}
                 disabled={isRefreshing}
-                className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 border border-white/5 hover:border-blue-500/30 text-xs font-black uppercase tracking-widest transition-all active:scale-95"
+                className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-muted border border-border hover:border-primary/30 text-xs font-black uppercase tracking-widest transition-all active:scale-95"
               >
                 {isRefreshing ? <Loader2 size={14} className="animate-spin" /> : <History size={14} />}
                 Re-Audit
@@ -204,8 +204,8 @@ export default function DashboardPage() {
             </div>
           </motion.div>
         ) : (
-          <div className="py-20 flex items-center justify-center flex-col gap-5 text-center px-10 border border-dashed border-white/10 rounded-[2.5rem] bg-white/[0.02]">
-             <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center text-white/20">
+          <div className="py-20 flex items-center justify-center flex-col gap-5 text-center px-10 border border-dashed border-border rounded-[2.5rem] bg-muted/10">
+             <div className="w-16 h-16 rounded-3xl bg-muted flex items-center justify-center text-muted-foreground/20">
                <Database size={32} />
              </div>
              <div>
@@ -233,7 +233,7 @@ export default function DashboardPage() {
         
         <div className="grid grid-cols-1 gap-3">
           {connectedPlatforms.map(p => (
-            <div key={p.id} className="card p-5 bg-[var(--bg-elevated)] border-white/5 rounded-3xl flex items-center justify-between group shadow-lg">
+            <div key={p.id} className="glass-card p-5 rounded-3xl flex items-center justify-between group shadow-lg">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-2xl">💼</div>
                 <div className="flex flex-col">
@@ -256,7 +256,7 @@ export default function DashboardPage() {
           {/* ADD PLATFORM CARD */}
           <button 
             onClick={() => setShowConnect(true)}
-            className="flex items-center gap-4 p-5 rounded-[2rem] border-2 border-dashed border-white/5 hover:border-blue-500/30 hover:bg-blue-500/5 transition-all group overflow-hidden relative"
+            className="flex items-center gap-4 p-5 rounded-[2rem] border-2 border-dashed border-border hover:border-primary/30 hover:bg-primary/5 transition-all group overflow-hidden relative"
           >
             <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
               <Plus size={24} />

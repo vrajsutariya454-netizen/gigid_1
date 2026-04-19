@@ -105,13 +105,13 @@ export default function SyncVaultPage() {
       </div>
 
       {/* Input Section */}
-      <div className="card p-6 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border border-white/5 rounded-[2rem] mb-12 shadow-xl">
+      <div className="glass-card p-6 bg-gradient-to-r from-primary/10 to-accent/10 rounded-[2rem] mb-12 shadow-xl">
         <div className="flex gap-4">
           <input 
             value={newPlatformName}
             onChange={(e) => setNewPlatformName(e.target.value)}
             placeholder="Platform Name (e.g. Uber, Swiggy)"
-            className="flex-1 bg-black/20 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-blue-500/50 transition-all"
+            className="flex-1 bg-muted/30 border border-border rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-blue-500/50 transition-all"
             onKeyDown={(e) => e.key === "Enter" && addGig()}
           />
           <button 
@@ -146,7 +146,7 @@ export default function SyncVaultPage() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="card p-6 bg-[var(--bg-elevated)] border-white/5 rounded-[2rem] flex items-center justify-between group hover:border-blue-500/30 transition-all shadow-lg"
+                  className="glass-card p-6 rounded-[2rem] flex items-center justify-between group hover:border-primary/30 transition-all shadow-lg bg-muted/50"
                 >
                   <div className="flex items-center gap-5">
                     <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-3xl font-bold text-blue-500">
@@ -171,7 +171,7 @@ export default function SyncVaultPage() {
                 </motion.div>
               ))}
               {gigs.length === 0 && (
-                <motion.div className="p-20 border border-dashed border-white/10 rounded-[3rem] text-center text-[var(--text-tertiary)] font-bold italic">
+                <motion.div className="p-20 border border-dashed border-border rounded-[3rem] text-center text-[var(--text-tertiary)] font-bold italic">
                   No platforms connected. Add one to start syncing.
                 </motion.div>
               )}
@@ -220,7 +220,7 @@ export default function SyncVaultPage() {
                     {gig.documents.map(doc => (
                       <div 
                         key={doc.id}
-                        className="p-5 rounded-3xl bg-black/20 border border-white/5 flex items-center justify-between group hover:bg-black/30 transition-all"
+                        className="p-5 rounded-3xl bg-muted/30 border border-border flex items-center justify-between group hover:bg-muted/50 transition-all"
                       >
                         <div className="flex items-center gap-4">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${doc.status === "uploaded" ? "bg-teal-500/10 text-teal-500" : "bg-orange-500/10 text-orange-500"}`}>
@@ -260,7 +260,7 @@ export default function SyncVaultPage() {
             </AnimatePresence>
 
             {gigs.length === 0 && (
-              <div className="p-20 rounded-[3rem] bg-white/5 border border-dashed border-white/10 flex flex-col items-center gap-4">
+              <div className="p-20 rounded-[3rem] bg-muted/30 border border-dashed border-border flex flex-col items-center gap-4">
                 <Database className="text-[var(--text-tertiary)]" size={48} />
                 <p className="text-sm text-[var(--text-tertiary)] font-bold italic">Integrate a platform to begin your vault</p>
               </div>
