@@ -6,6 +6,7 @@ import { useAppStore } from "@/lib/store/app-store";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { TopBar } from "@/components/layout/TopBar";
 import { VoiceFAB } from "@/components/voice/VoiceFAB";
+import { ChatbotFAB } from "@/components/chat/ChatbotFAB";
 import { usePathname } from "next/navigation";
 import { TutorialTour } from "@/components/onboarding/TutorialTour";
 
@@ -48,26 +49,27 @@ function AppShell({ children }: { children: ReactNode }) {
   const isLoginPage = pathname === "/";
 
   return (
-    <div 
+    <div
       className="min-h-screen relative overflow-x-hidden transition-colors duration-500 selection:bg-blue-500/30"
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
       {/* Universal Background Glows */}
-      <div 
-        className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] blur-[120px] rounded-full pointer-events-none z-0" 
+      <div
+        className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] blur-[120px] rounded-full pointer-events-none z-0"
         style={{ backgroundColor: "var(--primary-500)", opacity: 0.15 }}
       />
-      <div 
-        className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] blur-[120px] rounded-full pointer-events-none z-0" 
+      <div
+        className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] blur-[120px] rounded-full pointer-events-none z-0"
         style={{ backgroundColor: "var(--success-500)", opacity: 0.1 }}
       />
-      
+
       <div className="relative z-10">
         {!isLoginPage && <TopBar />}
         <main className={!isLoginPage ? "page-container" : "min-h-screen flex flex-col items-center justify-center"}>
           {children}
         </main>
         {!isLoginPage && <VoiceFAB />}
+        <ChatbotFAB />
         {!isLoginPage && <BottomNav />}
         {!isLoginPage && <TutorialTour />}
       </div>
