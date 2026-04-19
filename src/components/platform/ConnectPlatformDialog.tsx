@@ -28,7 +28,7 @@ const fileToBase64 = (file: File): Promise<string> => {
 export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPlatformDialogProps) {
   const { did, removeConnectedPlatform } = useAppStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Real-time parity with database
   const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
   const dbConnectedIds = platforms.filter(p => p.connected).map(p => p.platformId);
@@ -154,14 +154,14 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
       if (manualFiles.length > 0) {
         const formData = new FormData();
         manualFiles.forEach(f => formData.append("screenshots", f));
-        
+
         try {
           const uploadRes = await fetch(`http://localhost:5000/gigs/${platformId}/documents`, {
             method: "POST",
             body: formData
           });
           const uploadData = await uploadRes.json();
-          
+
           if (uploadData.documents) {
             for (const doc of uploadData.documents) {
               await db.documents.add({
@@ -243,7 +243,7 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
     try {
       const estimate = await performEstimate(selectedPlatform.id, selectedDuration);
       const result = await connectPlatform(selectedPlatform.id, did);
-      
+
       if (result.success) {
         const instanceId = await db.platforms.add({
           platformId: selectedPlatform.id,
@@ -419,174 +419,159 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
           </div>
         )}
 
-        {/* 4. MANUAL PROOF — FULL DATA ENTRY */}
+        {/* 4. MANUAL PROOF */}
         {step === "manual" && (
-           <div className="animate-in fade-in slide-in-from-bottom-4">
-<<<<<<< HEAD
-              <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mb-1">Manual Proof</h2>
-              <p className="text-sm font-bold text-[var(--text-tertiary)] mb-6">Add platform details and upload proof screenshots.</p>
-              
-              <div className="flex flex-col gap-4">
-                {/* Platform Name */}
-                <div>
-                  <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 block ml-1">Platform Name *</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. BigBasket, Porter, Freelance" 
-                    value={manualName} 
-                    onChange={(e) => setManualName(e.target.value)} 
-                    className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
-                  />
-                </div>
+          <div className="animate-in fade-in slide-in-from-bottom-4">
+            <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mb-1">Manual Proof</h2>
+            <p className="text-sm font-bold text-[var(--text-tertiary)] mb-6">Add platform details and upload proof screenshots.</p>
+            
+            <div className="flex flex-col gap-4">
+              {/* Platform Name */}
+              <div>
+                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 block ml-1">Platform Name *</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. BigBasket, Porter, Freelance" 
+                  value={manualName} 
+                  onChange={(e) => setManualName(e.target.value)} 
+                  className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
+                />
+              </div>
 
-                {/* Data Fields — 2-column grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 flex items-center gap-1 ml-1">
-                      <IndianRupee size={10} /> Total Earnings *
-                    </label>
-                    <input 
-                      type="number" 
-                      placeholder="₹75,000" 
-                      value={manualEarnings} 
-                      onChange={(e) => setManualEarnings(e.target.value)} 
-                      className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 flex items-center gap-1 ml-1">
-                      <Bike size={10} /> Total Trips *
-                    </label>
-                    <input 
-                      type="number" 
-                      placeholder="400" 
-                      value={manualTrips} 
-                      onChange={(e) => setManualTrips(e.target.value)} 
-                      className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 flex items-center gap-1 ml-1">
-                      <Star size={10} /> Avg Rating *
-                    </label>
-                    <input 
-                      type="number" 
-                      step="0.1"
-                      min="1" max="5"
-                      placeholder="4.5" 
-                      value={manualRating} 
-                      onChange={(e) => setManualRating(e.target.value)} 
-                      className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 flex items-center gap-1 ml-1">
-                      <Calendar size={10} /> Months Active *
-                    </label>
-                    <input 
-                      type="number"
-                      min="1" max="36"
-                      placeholder="6" 
-                      value={manualMonths} 
-                      onChange={(e) => setManualMonths(e.target.value)} 
-                      className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
-                    />
-                  </div>
-                </div>
-
-                {/* Active Days */}
+              {/* Data Fields — 2-column grid */}
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 flex items-center gap-1 ml-1">
-                    <Clock size={10} /> Avg Active Days / Month *
+                    <IndianRupee size={10} /> Total Earnings *
                   </label>
                   <input 
                     type="number" 
-                    min="1" max="31"
-                    placeholder="22" 
-                    value={manualActiveDays} 
-                    onChange={(e) => setManualActiveDays(e.target.value)} 
+                    placeholder="₹75,000" 
+                    value={manualEarnings} 
+                    onChange={(e) => setManualEarnings(e.target.value)} 
                     className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
                   />
                 </div>
-
-                {/* Multiple Proof Images */}
                 <div>
-                  <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-2 block ml-1">
-                    Proof Screenshots * ({manualFiles.length} added)
+                  <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 flex items-center gap-1 ml-1">
+                    <Bike size={10} /> Total Trips *
                   </label>
-                  
-                  {/* Uploaded files list */}
-                  {manualFiles.length > 0 && (
-                    <div className="flex flex-col gap-2 mb-3">
-                      {manualFiles.map((file, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <ImageIcon size={14} className="text-blue-500 shrink-0" />
-                            <span className="text-xs font-bold text-[var(--text-primary)] truncate">{file.name}</span>
-                            <span className="text-[10px] font-bold text-[var(--text-tertiary)] shrink-0">
-                              {(file.size / 1024).toFixed(0)}KB
-                            </span>
-                          </div>
-                          <button 
-                            onClick={() => removeManualFile(idx)} 
-                            className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors shrink-0 ml-2"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Add more images button */}
-                  <button 
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="cursor-pointer w-full flex items-center justify-center gap-3 p-5 rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02] hover:bg-blue-500/5 hover:border-blue-500/30 transition-all"
-                  >
-                    <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleManualFileAdd} />
-                    <Plus size={18} className="text-blue-500/60" />
-                    <span className="text-xs font-black text-[var(--text-secondary)]">
-                      {manualFiles.length === 0 ? "Add Proof Screenshots" : "Add More Screenshots"}
-                    </span>
-                  </button>
+                  <input 
+                    type="number" 
+                    placeholder="400" 
+                    value={manualTrips} 
+                    onChange={(e) => setManualTrips(e.target.value)} 
+                    className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
+                  />
                 </div>
-
-                {/* Info badge */}
-                <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
-                  <ShieldCheck size={14} className="text-amber-500 mt-0.5 shrink-0" />
-                  <p className="text-[10px] font-bold text-amber-500/80 leading-relaxed">
-                    Manual entries are marked as &quot;Self-Declared&quot; in your Trust Score. API-verified platforms receive a higher reliability multiplier.
-                  </p>
+                <div>
+                  <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 flex items-center gap-1 ml-1">
+                    <Star size={10} /> Avg Rating *
+                  </label>
+                  <input 
+                    type="number" 
+                    step="0.1"
+                    min="1" max="5"
+                    placeholder="4.5" 
+                    value={manualRating} 
+                    onChange={(e) => setManualRating(e.target.value)} 
+                    className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
+                  />
                 </div>
-
-                {/* Actions */}
-                <div className="flex gap-3 mt-1">
-                  <button onClick={() => setStep("select")} className="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] text-[var(--text-primary)] bg-[var(--bg-tertiary)]">Back</button>
-                  <button 
-                    onClick={handleManualSubmit} 
-                    disabled={!isManualFormValid()} 
-                    className="flex-[2] py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] text-white bg-gradient-to-r from-indigo-600 to-blue-600 disabled:opacity-30 shadow-xl shadow-blue-600/20 transition-all active:scale-[0.98]"
-                  >
-                    Verify & Add
-                  </button>
-=======
-              <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mb-2">Manual Proof</h2>
-              <p className="text-sm font-bold text-[var(--text-tertiary)] mb-8">Upload a screenshot to verify unlisted work.</p>
-              <div className="flex flex-col gap-6">
-                <input type="text" placeholder="Platform Name" value={manualName} onChange={(e) => setManualName(e.target.value)} className="w-full p-5 rounded-2xl bg-muted border border-border text-foreground font-bold outline-none focus:ring-4 ring-primary/10" />
-                <label className="cursor-pointer flex flex-col items-center justify-center p-12 rounded-[2rem] border-2 border-dashed border-border bg-muted/30 hover:bg-primary/5 hover:border-primary/30 transition-all">
-                  <input type="file" hidden accept="image/*" onChange={(e) => setManualFile(e.target.files?.[0] || null)} />
-                  <ImageIcon size={36} className="text-blue-500/50 mb-3" />
-                  <span className="text-sm font-black text-[var(--text-secondary)]">{manualFile ? manualFile.name : "Select Proof Image"}</span>
-                </label>
-                <div className="flex gap-4">
-                  <button onClick={() => setStep("select")} className="flex-1 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-[var(--text-primary)] bg-[var(--bg-tertiary)]">Back</button>
-                  <button onClick={handleManualSubmit} disabled={!manualName || !manualFile} className="flex-[2] py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-white bg-blue-600 disabled:opacity-30">Submit</button>
->>>>>>> ad071fab70798dd5837da421775d51333ce9eb07
+                <div>
+                  <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 flex items-center gap-1 ml-1">
+                    <Calendar size={10} /> Months Active *
+                  </label>
+                  <input 
+                    type="number"
+                    min="1" max="36"
+                    placeholder="6" 
+                    value={manualMonths} 
+                    onChange={(e) => setManualMonths(e.target.value)} 
+                    className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
+                  />
                 </div>
               </div>
-           </div>
+
+              {/* Active Days */}
+              <div>
+                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 flex items-center gap-1 ml-1">
+                  <Clock size={10} /> Avg Active Days / Month *
+                </label>
+                <input 
+                  type="number" 
+                  min="1" max="31"
+                  placeholder="22" 
+                  value={manualActiveDays} 
+                  onChange={(e) => setManualActiveDays(e.target.value)} 
+                  className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
+                />
+              </div>
+
+              {/* Multiple Proof Images */}
+              <div>
+                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-2 block ml-1">
+                  Proof Screenshots * ({manualFiles.length} added)
+                </label>
+                
+                {/* Uploaded files list */}
+                {manualFiles.length > 0 && (
+                  <div className="flex flex-col gap-2 mb-3">
+                    {manualFiles.map((file, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <ImageIcon size={14} className="text-blue-500 shrink-0" />
+                          <span className="text-xs font-bold text-[var(--text-primary)] truncate">{file.name}</span>
+                          <span className="text-[10px] font-bold text-[var(--text-tertiary)] shrink-0">
+                            {(file.size / 1024).toFixed(0)}KB
+                          </span>
+                        </div>
+                        <button 
+                          onClick={() => removeManualFile(idx)} 
+                          className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors shrink-0 ml-2"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add more images button */}
+                <button 
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="cursor-pointer w-full flex items-center justify-center gap-3 p-5 rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02] hover:bg-blue-500/5 hover:border-blue-500/30 transition-all"
+                >
+                  <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleManualFileAdd} />
+                  <Plus size={18} className="text-blue-500/60" />
+                  <span className="text-xs font-black text-[var(--text-secondary)]">
+                    {manualFiles.length === 0 ? "Add Proof Screenshots" : "Add More Screenshots"}
+                  </span>
+                </button>
+              </div>
+
+              {/* Info badge */}
+              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                <ShieldCheck size={14} className="text-amber-500 mt-0.5 shrink-0" />
+                <p className="text-[10px] font-bold text-amber-500/80 leading-relaxed">
+                  Manual entries are marked as &quot;Self-Declared&quot; in your Trust Score. API-verified platforms receive a higher reliability multiplier.
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 mt-1">
+                <button onClick={() => setStep("select")} className="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] text-[var(--text-primary)] bg-[var(--bg-tertiary)]">Back</button>
+                <button 
+                  onClick={handleManualSubmit} 
+                  disabled={!isManualFormValid()} 
+                  className="flex-[2] py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] text-white bg-gradient-to-r from-indigo-600 to-blue-600 disabled:opacity-30 shadow-xl shadow-blue-600/20 transition-all active:scale-[0.98]"
+                >
+                  Verify & Add
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* LOADING & SUCCESS */}
