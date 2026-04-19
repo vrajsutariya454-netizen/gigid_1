@@ -7,10 +7,15 @@ import { generateMockHistory } from "./mock-service";
  * Prioritizes: Platform Data > Manual Data > Mock Fallback
  */
 export async function getLiveTrustScore(): Promise<ScoreBreakdown> {
-  const workRecords = await db.workRecords.toArray();
+  const allWorkRecords = await db.workRecords.toArray();
   const manualData = await db.manualScoringData.toArray();
   const allPlatforms = await db.platforms.toArray();
   const platforms = allPlatforms.filter(p => p.connected && p.isVerified);
+  
+  // Only include work records from VERIFIED platforms — unverified platforms must not affect the score
+  const verifiedInstanceIds = new Set(platforms.map(p => p.id!));
+  const workRecords = allWorkRecords.filter(w => verifiedInstanceIds.has(w.instanceId));
+  
   const credentials = await db.credentials.toArray();
   const documents = await db.documents.toArray();
 
