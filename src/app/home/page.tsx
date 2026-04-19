@@ -129,6 +129,7 @@ export default function DashboardPage() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            id="trust-score-section"
             className="noise bg-card p-10 rounded-[3rem] shadow-xl shadow-primary/5 flex flex-col items-center justify-center relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 p-8 opacity-10">
@@ -245,7 +246,7 @@ export default function DashboardPage() {
           className="relative"
         >
           <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 blur-2xl -z-10" />
-          <div className="noise bg-card p-10 rounded-[3.5rem] shadow-2xl shadow-primary/5 overflow-hidden group">
+          <div id="data-hub-section" className="noise bg-card p-10 rounded-[3.5rem] shadow-2xl shadow-primary/5 overflow-hidden group">
             <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
               <div className="flex flex-col gap-5 max-w-lg">
                 <div className="flex items-center gap-3">
@@ -303,13 +304,14 @@ export default function DashboardPage() {
         </motion.section>
 
         {/* --- INTEGRATIONS SECTION --- */}
-        <section className="flex flex-col gap-6">
+        <section id="platforms-section" className="flex flex-col gap-6">
           <div className="flex items-end justify-between px-2">
             <div>
               <h2 className="text-2xl font-black tracking-tight text-foreground/90">Linked Platforms</h2>
               <p className="text-xs font-medium text-muted-foreground">Manage your verifiable work history sources.</p>
             </div>
             <button 
+              id="add-platform-btn"
               onClick={() => setShowConnect(true)}
               className="px-5 py-2.5 rounded-full glass border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-primary/5 transition-all"
             >

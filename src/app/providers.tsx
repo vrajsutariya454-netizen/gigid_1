@@ -7,6 +7,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { TopBar } from "@/components/layout/TopBar";
 import { VoiceFAB } from "@/components/voice/VoiceFAB";
 import { usePathname } from "next/navigation";
+import { TutorialTour } from "@/components/onboarding/TutorialTour";
 
 function ThemeInitializer({ children }: { children: ReactNode }) {
   const { theme, textSize, setOnline } = useAppStore();
@@ -68,6 +69,7 @@ function AppShell({ children }: { children: ReactNode }) {
         </main>
         {!isLoginPage && <VoiceFAB />}
         {!isLoginPage && <BottomNav />}
+        {!isLoginPage && <TutorialTour />}
       </div>
     </div>
   );

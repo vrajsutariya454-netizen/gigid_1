@@ -99,7 +99,7 @@ export function VaultView() {
       )}
 
       {/* Credentials List */}
-      <div className="grid grid-cols-1 gap-6">
+      <div id="vault-list-container" className="grid grid-cols-1 gap-6">
         {credentials.length === 0 ? (
           <motion.div 
             initial={{ opacity: 0, scale: 0.98 }}
@@ -154,6 +154,7 @@ export function VaultView() {
                           <div className="flex gap-3">
                             {credential.verificationStatus === 'pending' && (
                               <button 
+                                id="verify-credential-btn"
                                 onClick={() => handleVerifySignature(credential)}
                                 disabled={verifying}
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"

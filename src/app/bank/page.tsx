@@ -184,7 +184,7 @@ export default function BankPage() {
           {activeTab === "direct" ? (
             <>
               {/* Earnings Card */}
-              <div className="noise glass-card p-10 rounded-[3rem] border-accent/20 bg-accent/5 flex flex-col items-center text-center gap-2">
+              <div id="financial-stats-card" className="noise glass-card p-10 rounded-[3rem] border-accent/20 bg-accent/5 flex flex-col items-center text-center gap-2">
                 <p className="text-[10px] font-black text-accent uppercase tracking-[0.25em]">Verified Inflow (30D)</p>
                 <p className="font-display text-6xl tracking-tight text-foreground">₹48,500</p>
                 <div className="flex items-center gap-2 px-4 py-1.5 rounded-full glass border-accent/20 text-accent text-[9px] font-black uppercase mt-4">
@@ -388,7 +388,7 @@ export default function BankPage() {
         </div>
 
         {/* Bank List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div id="bank-list-container" className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {BANKS.map((bank) => (
             <div
               key={bank.id}

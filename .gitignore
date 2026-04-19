@@ -57,3 +57,32 @@ public/workbox-*.js.map
 
 # Supabase
 .supabase/
+
+# Backend
+backend/node_modules/
+backend/uploads/
+
+# Error / build logs
+build-error.log
+errors.txt
+ts_errors.txt
+*.log
+
+# Gemini AI
+.gemini/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# OS files
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Editor configs
+*.sublime-project
+*.sublime-workspace
+.history/
+*.code-workspace

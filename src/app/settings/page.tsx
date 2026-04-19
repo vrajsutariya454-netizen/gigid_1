@@ -85,7 +85,7 @@ export default function SettingsPage() {
         <div className="grid lg:grid-cols-1 gap-12">
           
           {/* Appearance Section */}
-          <Section title="Interface Layer" icon={Palette}>
+          <Section title="Interface Layer" icon={Palette} id="settings-theme-section">
             <div className="grid gap-8">
               {/* Theme Grid */}
               <div className="grid grid-cols-3 gap-4">
@@ -139,7 +139,7 @@ export default function SettingsPage() {
           </Section>
 
           {/* Localization Section */}
-          <Section title="Localization Hub" icon={Globe}>
+          <Section title="Localization Hub" icon={Globe} id="settings-language-section">
             <div className="grid sm:grid-cols-2 gap-4">
               {LANGUAGES.map((lang) => {
                 const isActive = language === lang.id;
@@ -172,7 +172,7 @@ export default function SettingsPage() {
           </Section>
 
           {/* Account Security Section */}
-          <Section title="Decentralized Identity" icon={ShieldCheck}>
+          <Section title="Decentralized Identity" icon={ShieldCheck} id="settings-did-section">
             <div className="flex flex-col gap-6">
               {/* DID Box */}
               <div className="noise glass-card p-10 rounded-[2.5rem] flex flex-col gap-6">
@@ -267,9 +267,9 @@ export default function SettingsPage() {
   );
 }
 
-function Section({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) {
+function Section({ title, icon: Icon, children, id }: { title: string; icon: any; children: React.ReactNode; id?: string }) {
   return (
-    <div className="flex flex-col gap-8">
+    <div id={id} className="flex flex-col gap-8">
       <div className="flex items-center gap-3 px-2">
         <div className="w-1.5 h-6 bg-gradient-to-b from-primary to-accent rounded-full shadow-[0_0_12px_rgba(var(--primary),0.5)]" />
         <Icon size={18} className="text-primary" />

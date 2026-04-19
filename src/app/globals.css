@@ -160,4 +160,69 @@
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
+
+  /* Video Game Tutorial Speech Bubble - Premium Solid Box */
+  .speech-bubble {
+    background: white !important;
+    color: #1a1a1a !important;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    border-radius: 2rem;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    font-family: inherit;
+    z-index: 10001;
+  }
+
+  .speech-bubble::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -12px;
+    transform: translateY(-50%);
+    border-width: 12px 12px 12px 0;
+    border-style: solid;
+    border-color: transparent white transparent transparent;
+  }
+
+  .animate-mascot {
+    animation: mascot-float 3s ease-in-out infinite;
+  }
+
+  @keyframes mascot-float {
+    0%, 100% { transform: translateY(0) scale(1.05); filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); }
+    50% { transform: translateY(-10px) scale(1.08); filter: drop-shadow(0 20px 25px rgba(0,0,0,0.15)); }
+  }
+
+  /* Joyride Overlay Blur */
+  .joyride-overlay {
+    backdrop-filter: blur(8px);
+    transition: all 0.5s ease-in-out;
+  }
+
+  .game-text {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  @keyframes bounce-subtle {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(-10px) rotate(2deg); }
+  }
+
+  .animate-mascot {
+    animation: bounce-subtle 3s ease-in-out infinite;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
 }

@@ -236,7 +236,7 @@ function SharePageContent() {
             className="pt-4"
           >
             <button
-              id="generate-proof-btn"
+              id="mint-zk-proof-btn"
               onClick={handleGenerateProof}
               disabled={isGenerating}
               className={`w-full h-20 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-4 shadow-2xl transition-all ${
