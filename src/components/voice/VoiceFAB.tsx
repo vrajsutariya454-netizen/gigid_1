@@ -135,8 +135,8 @@ export function VoiceFAB() {
         onClick={toggleListening}
         style={{
           position: "fixed",
-          bottom: "calc(var(--nav-height) + 24px)",
-          right: "16px",
+          bottom: "calc(var(--nav-height) + 32px)",
+          right: "32px",
           width: "56px",
           height: "56px",
           borderRadius: "50%",

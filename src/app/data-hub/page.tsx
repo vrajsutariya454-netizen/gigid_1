@@ -52,7 +52,7 @@ export default function DataHubPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex p-1.5 rounded-2xl bg-[var(--bg-elevated)] border border-white/5 mx-auto w-full">
+      <div className="flex p-1.5 rounded-2xl bg-muted border border-border mx-auto w-full">
         <TabButton 
           active={activeTab === 'work'} 
           onClick={() => setActiveTab('work')} 
@@ -149,7 +149,7 @@ export default function DataHubPage() {
               className="space-y-4"
             >
               <SectionHeader title="Backend Source (JSON)" icon={<Code size={14} />} />
-              <div className="p-6 rounded-[2.5rem] bg-[var(--bg-tertiary)] border border-white/5 overflow-x-auto">
+              <div className="p-6 rounded-[2.5rem] bg-muted/30 border border-border overflow-x-auto">
                 <pre className="text-[10px] text-blue-400 font-mono leading-relaxed">
                   {JSON.stringify(currentPersona || "No Persona Selected", null, 2)}
                 </pre>
@@ -191,11 +191,11 @@ function SectionHeader({ title, icon }: { title: string, icon: any }) {
 
 function DataCard({ title, subtitle, value, detail, badge, badgeColor, onDelete }: any) {
   return (
-    <div className="card p-5 bg-[var(--bg-elevated)] border-white/5 rounded-3xl flex items-center justify-between group shadow-sm transition-all hover:border-white/10">
+    <div className="glass-card p-5 bg-muted/50 rounded-3xl flex items-center justify-between group shadow-sm transition-all hover:border-primary/20">
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
           <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">{title}</span>
-          <span className={`text-[8px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded-md bg-white/5 ${badgeColor}`}>
+          <span className={`text-[8px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded-md bg-muted/50 ${badgeColor}`}>
             {badge}
           </span>
         </div>
@@ -242,7 +242,7 @@ function IntegrationCard({ name, status, lastSync, onDisconnect }: any) {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="p-8 rounded-3xl bg-white/5 border border-dashed border-white/10 text-center">
+    <div className="p-8 rounded-3xl bg-muted/30 border border-dashed border-border text-center">
       <p className="text-xs font-bold text-[var(--text-tertiary)] leading-relaxed italic">{message}</p>
     </div>
   );

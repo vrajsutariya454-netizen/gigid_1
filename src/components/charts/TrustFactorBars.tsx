@@ -33,7 +33,7 @@ export function TrustFactorBars({ data }: FactorBarsProps) {
             </span>
           </div>
           
-          <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
+          <div className="h-2 w-full bg-muted rounded-full overflow-hidden border border-border">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${factor.value * 100}%` }}

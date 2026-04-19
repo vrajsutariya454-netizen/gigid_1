@@ -48,7 +48,7 @@ export function TopBar() {
           {/* Hamburger Menu Trigger */}
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="flex items-center justify-center p-2 rounded-xl text-[var(--text-secondary)] hover:bg-white/5 transition-colors"
+            className="flex items-center justify-center p-2 rounded-xl text-muted-foreground hover:bg-muted transition-colors"
             aria-label="Open global menu"
           >
             <Menu size={22} />
