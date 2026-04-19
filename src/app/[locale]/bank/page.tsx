@@ -20,8 +20,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
-import { KYCForm } from "@/components/KYCForm";
-
 const BANKS = [
   { id: "hdfc", name: "HDFC Bank", icon: "🏦" },
   { id: "icici", name: "ICICI Bank", icon: "🏛️" },
@@ -41,9 +39,6 @@ export default function BankPage() {
   const [activeTab, setActiveTab] = useState<"direct" | "private">("direct");
   const router = useRouter();
 
-  const [kycStatus, setKycStatus] = useState<"idle" | "loading" | "success" | "failed">("idle");
-  const [isKycVerified, setIsKycVerified] = useState(false);
-
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -53,7 +48,6 @@ export default function BankPage() {
     };
     checkAuth();
   }, [router]);
-
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
@@ -190,7 +184,7 @@ export default function BankPage() {
           {activeTab === "direct" ? (
             <>
               {/* Earnings Card */}
-              <div id="financial-stats-card" className="noise glass-card p-10 rounded-[3rem] border-accent/20 bg-accent/5 flex flex-col items-center text-center gap-2">
+              <div className="noise glass-card p-10 rounded-[3rem] border-accent/20 bg-accent/5 flex flex-col items-center text-center gap-2">
                 <p className="text-[10px] font-black text-accent uppercase tracking-[0.25em]">Verified Inflow (30D)</p>
                 <p className="font-display text-6xl tracking-tight text-foreground">₹48,500</p>
                 <div className="flex items-center gap-2 px-4 py-1.5 rounded-full glass border-accent/20 text-accent text-[9px] font-black uppercase mt-4">
@@ -361,25 +355,6 @@ export default function BankPage() {
     );
   }
 
-  // 🏦 KYC GATE
-  if (!isKycVerified) {
-    return (
-      <main className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
-        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] rounded-full bg-primary/15 blur-[120px] animate-float opacity-30" />
-          <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-accent/10 blur-[130px] animate-float [animation-delay:3s] opacity-20" />
-        </div>
-        
-        <div className="relative z-10 page-content flex flex-col gap-10 min-h-screen justify-center pb-20">
-          <div className="flex flex-col gap-4 text-center">
-             {pageHeader}
-          </div>
-          <KYCForm onSuccess={() => setIsKycVerified(true)} />
-        </div>
-      </main>
-    );
-  }
-
   // 🏦 MAIN SCREEN
   return (
     <main className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -413,7 +388,7 @@ export default function BankPage() {
         </div>
 
         {/* Bank List */}
-        <div id="bank-list-container" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {BANKS.map((bank) => (
             <div
               key={bank.id}

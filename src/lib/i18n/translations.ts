@@ -2,6 +2,7 @@ export type TranslationKey = keyof typeof translations.en;
 
 export const translations = {
   en: {
+
     // Navigation
     "nav.dashboard": "Dashboard",
     "nav.home": "Home",
@@ -233,6 +234,7 @@ export const translations = {
     "auth.or": "or"
   },
   hi: {
+
     // Navigation
     "nav.dashboard": "डैशबोर्ड",
     "nav.home": "होम",
@@ -464,6 +466,7 @@ export const translations = {
     "auth.or": "या"
   },
   ta: {
+
     // Navigation
     "nav.dashboard": "டாஷ்போர்டு",
     "nav.home": "முகப்பு",
@@ -695,6 +698,7 @@ export const translations = {
     "auth.or": "அல்லது"
   },
   bn: {
+
     // Navigation
     "nav.dashboard": "ড্যাশবোর্ড",
     "nav.home": "হোম",

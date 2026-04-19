@@ -1,5 +1,10 @@
 export type VoiceCommand =
   | "GO_HOME"
+  | "GO_DASHBOARD"
+  | "GO_PLATFORMS"
+  | "GO_DATA_HUB"
+  | "GO_BANK"
+  | "GO_KYC"
   | "SHOW_CREDENTIALS"
   | "SHARE_PROOF"
   | "SHOW_SETTINGS"
@@ -16,8 +21,55 @@ const COMMAND_MAPPINGS: CommandMapping[] = [
   {
     command: "GO_HOME",
     patterns: {
-      en: ["go home", "home", "dashboard", "main page", "go back"],
+      en: ["go home", "home", "main page", "go back", "home page", "take me home"],
       hi: ["घर जाओ", "होम", "मुख्य पृष्ठ", "वापस जाओ", "घर"],
+      ta: ["முகப்பு", "வீடு", "முகப்பு பக்கம்"],
+      bn: ["হোম", "বাড়ি", "মূল পাতা"],
+    },
+  },
+  {
+    command: "GO_DASHBOARD",
+    patterns: {
+      en: ["dashboard", "go to dashboard", "show dashboard", "open dashboard"],
+      hi: ["डैशबोर्ड", "डैशबोर्ड दिखाओ"],
+      ta: ["டாஷ்போர்டு", "டாஷ்போர்டு காட்டு"],
+      bn: ["ড্যাশবোর্ড", "ড্যাশবোর্ড দেখাও"],
+    },
+  },
+  {
+    command: "GO_PLATFORMS",
+    patterns: {
+      en: ["platforms", "go to platforms", "show platforms", "my platforms", "nodes"],
+      hi: ["प्लेटफॉर्म", "प्लेटफॉर्म दिखाओ", "नोड्स"],
+      ta: ["தளங்கள்", "தளங்கள் காட்டு"],
+      bn: ["প্ল্যাটফর্ম", "প্ল্যাটফর্ম দেখাও"],
+    },
+  },
+  {
+    command: "GO_DATA_HUB",
+    patterns: {
+      en: ["data hub", "go to data hub", "data", "show data", "vault", "records"],
+      hi: ["डेटा हब", "डेटा दिखाओ", "रिकॉर्ड"],
+      ta: ["தரவு மையம்", "தரவு காட்டு"],
+      bn: ["ডেটা হাব", "ডেটা দেখাও"],
+    },
+  },
+  {
+    command: "GO_BANK",
+    patterns: {
+      en: ["bank", "go to bank", "wallet", "gig wallet", "banking", "show bank", "open bank"],
+      hi: ["बैंक", "वॉलेट", "गिग वॉलेट", "बैंक दिखाओ"],
+      ta: ["வங்கி", "கிக் வாலட்", "வங்கி காட்டு"],
+      bn: ["ব্যাংক", "গিগ ওয়ালেট", "ব্যাংক দেখাও"],
+    },
+  },
+  {
+    command: "GO_KYC",
+    patterns: {
+      en: ["kyc", "go to kyc", "verification", "verify identity", "kyc center"],
+      hi: ["केवाईसी", "सत्यापन", "पहचान सत्यापित करो"],
+      ta: ["KYC", "KYC மையம்", "சரிபார்ப்பு"],
+      bn: ["KYC", "KYC সেন্টার", "যাচাইকরণ"],
     },
   },
   {
@@ -26,19 +78,19 @@ const COMMAND_MAPPINGS: CommandMapping[] = [
       en: [
         "show credentials",
         "my credentials",
+        "credentials",
         "documents",
         "show documents",
-        "wallet",
-        "my wallet",
         "certificates",
       ],
       hi: [
         "दस्तावेज़ दिखाओ",
         "मेरे दस्तावेज़",
         "प्रमाणपत्र",
-        "वॉलेट",
         "कागजात",
       ],
+      ta: ["சான்றிதழ்கள்", "ஆவணங்கள்"],
+      bn: ["শংসাপত্র", "নথিপত্র"],
     },
   },
   {
@@ -58,6 +110,8 @@ const COMMAND_MAPPINGS: CommandMapping[] = [
         "प्रूफ बनाओ",
         "शेयर करो",
       ],
+      ta: ["பகிர்", "சான்று உருவாக்கு"],
+      bn: ["শেয়ার করো", "প্রমাণ পাঠাও"],
     },
   },
   {
@@ -71,6 +125,8 @@ const COMMAND_MAPPINGS: CommandMapping[] = [
         "change theme",
       ],
       hi: ["सेटिंग्स", "सेटिंग दिखाओ", "भाषा बदलो", "थीम बदलो"],
+      ta: ["அமைப்புகள்", "மொழி மாற்று"],
+      bn: ["সেটিংস", "ভাষা পরিবর্তন করো"],
     },
   },
   {
@@ -93,6 +149,8 @@ const COMMAND_MAPPINGS: CommandMapping[] = [
         "ज़ोमैटो जोड़ो",
         "उबर जोड़ो",
       ],
+      ta: ["தளம் இணை", "புதிய தளம்"],
+      bn: ["প্ল্যাটফর্ম যোগ করো", "নতুন প্ল্যাটফর্ম"],
     },
   },
   {
@@ -100,6 +158,8 @@ const COMMAND_MAPPINGS: CommandMapping[] = [
     patterns: {
       en: ["profile", "my profile", "show profile", "account"],
       hi: ["प्रोफाइल", "मेरी प्रोफाइल", "खाता"],
+      ta: ["சுயவிவரம்", "என் சுயவிவரம்"],
+      bn: ["প্রোফাইল", "আমার প্রোফাইল"],
     },
   },
 ];

@@ -1,79 +1,214 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Mic, MicOff, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { SpeechEngine, type VoiceCommand } from "@/lib/voice/speech-engine";
+import { Mic, X } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
 import { useAppStore } from "@/lib/store/app-store";
 
-const ROUTE_MAP: Record<VoiceCommand, string> = {
-  GO_HOME: "/home",
-  SHOW_CREDENTIALS: "/credentials",
-  SHARE_PROOF: "/share",
-  SHOW_SETTINGS: "/settings",
-  CONNECT_PLATFORM: "/home",
-  SHOW_PROFILE: "/settings",
-  UNKNOWN: "",
-};
+// Simple keyword → route mapping (works with partial matches too)
+const VOICE_ROUTES: { keywords: string[]; route: string; label: string }[] = [
+  { keywords: ["home", "go home", "home page", "take me home", "main page", "go back", "होम", "घर", "முகப்பு", "হোম"],  route: "/home", label: "Home" },
+  { keywords: ["dashboard", "dash board", "open dashboard", "show dashboard", "डैशबोर्ड", "டாஷ்போர்டு", "ড্যাশবোর্ড"], route: "/dashboard", label: "Dashboard" },
+  { keywords: ["platform", "platforms", "nodes", "प्लेटफॉर्म", "தளங்கள்", "প্ল্যাটফর্ম"], route: "/platforms", label: "Platforms" },
+  { keywords: ["data hub", "data", "vault", "records", "डेटा", "தரவு", "ডেটা"], route: "/data-hub", label: "Data Hub" },
+  { keywords: ["bank", "banking", "wallet", "gig wallet", "बैंक", "வங்கி", "ব্যাংক"], route: "/bank", label: "Bank" },
+  { keywords: ["kyc", "verification", "verify", "verify identity", "केवाईसी", "சரிபார்ப்பு", "যাচাই"], route: "/kyc", label: "KYC" },
+  { keywords: ["credential", "credentials", "documents", "certificates", "दस्तावेज", "சான்றிதழ்", "নথিপত্র"], route: "/credentials", label: "Credentials" },
+  { keywords: ["share", "share proof", "send proof", "साझा", "பகிர்", "শেয়ার"], route: "/share", label: "Share" },
+  { keywords: ["setting", "settings", "preferences", "सेटिंग", "அமைப்பு", "সেটিংস"], route: "/settings", label: "Settings" },
+  { keywords: ["profile", "my profile", "account", "प्रोफाइल", "சுயவிவரம்", "প্রোফাইল"], route: "/profile", label: "Profile" },
+];
+
+function matchVoiceCommand(transcript: string): { route: string; label: string } | null {
+  const text = transcript.toLowerCase().trim();
+  if (!text) return null;
+
+  // 1. Try exact match first
+  for (const entry of VOICE_ROUTES) {
+    for (const keyword of entry.keywords) {
+      if (text === keyword.toLowerCase()) {
+        return { route: entry.route, label: entry.label };
+      }
+    }
+  }
+
+  // 2. Try "contains" match (e.g., "go to home page" contains "home page")
+  for (const entry of VOICE_ROUTES) {
+    for (const keyword of entry.keywords) {
+      if (text.includes(keyword.toLowerCase())) {
+        return { route: entry.route, label: entry.label };
+      }
+    }
+  }
+
+  // 3. Try reverse contains (e.g., keyword "home" is in "take me to home")
+  for (const entry of VOICE_ROUTES) {
+    for (const keyword of entry.keywords) {
+      if (keyword.toLowerCase().includes(text) && text.length >= 3) {
+        return { route: entry.route, label: entry.label };
+      }
+    }
+  }
+
+  return null;
+}
 
 export function VoiceFAB() {
   const router = useRouter();
+  const pathname = usePathname();
   const { isVoiceActive, setVoiceActive, language } = useAppStore();
   const [transcript, setTranscript] = useState("");
+  const [matchedLabel, setMatchedLabel] = useState("");
   const [status, setStatus] = useState<"idle" | "listening" | "success" | "error">("idle");
-  const engineRef = useRef<SpeechEngine | null>(null);
+  const recognitionRef = useRef<any>(null);
+  const statusRef = useRef(status);
 
+  // Keep statusRef in sync with status state
   useEffect(() => {
-    engineRef.current = new SpeechEngine();
-    return () => engineRef.current?.destroy();
+    statusRef.current = status;
+  }, [status]);
+
+  // Extract locale from current URL path
+  const getLocale = useCallback(() => {
+    const segments = pathname?.split("/") || [];
+    return segments[1] || "en";
+  }, [pathname]);
+
+  // Cleanup recognition on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch {}
+        recognitionRef.current = null;
+      }
+    };
   }, []);
 
-  const handleResult = useCallback(
-    (text: string, command: VoiceCommand) => {
-      setTranscript(text);
+  const startListening = useCallback(() => {
+    const SpeechRecognitionAPI =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognitionAPI) return;
 
-      if (command !== "UNKNOWN") {
-        setStatus("success");
-        const route = ROUTE_MAP[command];
-        if (route) {
-          setTimeout(() => {
-            router.push(route);
-            setStatus("idle");
-            setVoiceActive(false);
-            setTranscript("");
-          }, 1000);
+    // Create a fresh recognition instance each time
+    const recognition = new SpeechRecognitionAPI();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 3;
+
+    // Set language based on app language
+    const langMap: Record<string, string> = {
+      en: "en-IN",
+      hi: "hi-IN",
+      ta: "ta-IN",
+      bn: "bn-IN",
+    };
+    recognition.lang = langMap[language] || "en-IN";
+
+    recognition.onresult = (event: any) => {
+      // Get the latest transcript (including interim results)
+      let finalTranscript = "";
+      let interimTranscript = "";
+      
+      for (let i = 0; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) {
+          finalTranscript += result[0].transcript;
+        } else {
+          interimTranscript += result[0].transcript;
         }
-      } else {
-        setStatus("error");
-        setTimeout(() => {
-          setStatus("idle");
-          setTranscript("");
-        }, 2000);
       }
-    },
-    [router, setVoiceActive]
-  );
 
-  const toggleListening = useCallback(() => {
-    const engine = engineRef.current;
-    if (!engine?.isSupported) return;
+      const displayText = finalTranscript || interimTranscript;
+      setTranscript(displayText);
 
-    if (isVoiceActive) {
-      engine.stopListening();
+      // Only process final results for navigation
+      if (finalTranscript) {
+        console.log("[Voice] Final transcript:", finalTranscript);
+        const match = matchVoiceCommand(finalTranscript);
+        
+        if (match) {
+          console.log("[Voice] Matched:", match.label, "→", match.route);
+          setStatus("success");
+          setMatchedLabel(match.label);
+
+          const locale = getLocale();
+          const fullRoute = `/${locale}${match.route}`;
+          
+          setTimeout(() => {
+            router.push(fullRoute);
+            // Reset after navigation
+            setTimeout(() => {
+              setStatus("idle");
+              setVoiceActive(false);
+              setTranscript("");
+              setMatchedLabel("");
+            }, 500);
+          }, 800);
+        } else {
+          console.log("[Voice] No match for:", finalTranscript);
+          setStatus("error");
+          setTimeout(() => {
+            setStatus("idle");
+            setTranscript("");
+          }, 2500);
+        }
+      }
+    };
+
+    recognition.onstart = () => {
+      setVoiceActive(true);
+      setStatus("listening");
+      setTranscript("");
+      setMatchedLabel("");
+    };
+
+    recognition.onend = () => {
+      recognitionRef.current = null;
+      // Use the ref to read the *current* status, not the stale closure value
+      if (statusRef.current === "listening") {
+        // Recognition ended without a match (silence / no speech)
+        setVoiceActive(false);
+        setStatus("idle");
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.log("[Voice] Error:", event.error);
+      recognitionRef.current = null;
       setVoiceActive(false);
       setStatus("idle");
       setTranscript("");
-    } else {
-      engine.setOnResult(handleResult);
-      engine.setOnStateChange((listening) => {
-        setVoiceActive(listening);
-        if (listening) setStatus("listening");
-      });
-      const locale = language === "hi" ? "hi-IN" : "en-IN";
-      engine.startListening(locale);
-    }
-  }, [isVoiceActive, setVoiceActive, handleResult, language]);
+    };
 
+    recognitionRef.current = recognition;
+
+    try {
+      recognition.start();
+    } catch (e) {
+      console.log("[Voice] Failed to start:", e);
+    }
+  }, [language, getLocale, router, setVoiceActive]);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch {}
+      recognitionRef.current = null;
+    }
+    setVoiceActive(false);
+    setStatus("idle");
+    setTranscript("");
+    setMatchedLabel("");
+  }, [setVoiceActive]);
+
+  const toggleListening = useCallback(() => {
+    if (isVoiceActive) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  }, [isVoiceActive, stopListening, startListening]);
+
+  // Don't render if speech not supported
   if (typeof window !== "undefined" && !(window as any).SpeechRecognition && !(window as any).webkitSpeechRecognition) {
     return null;
   }
@@ -85,43 +220,44 @@ export function VoiceFAB() {
         <div
           style={{
             position: "fixed",
-            bottom: "calc(var(--nav-height) + 80px)",
+            bottom: "calc(var(--nav-height, 72px) + 80px)",
             left: "50%",
             transform: "translateX(-50%)",
-            background: "var(--bg-elevated)",
-            border: "1px solid var(--border-color)",
-            borderRadius: "var(--radius-lg)",
-            padding: "12px 20px",
-            boxShadow: "var(--shadow-xl)",
+            background: "rgba(15, 15, 25, 0.95)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "20px",
+            padding: "14px 24px",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
             zIndex: 60,
-            maxWidth: "300px",
+            maxWidth: "320px",
+            minWidth: "200px",
             textAlign: "center",
+            backdropFilter: "blur(20px)",
           }}
-          className="animate-slide-up"
         >
           {status === "listening" && !transcript && (
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
               <div className="voice-wave">
                 <span /><span /><span /><span /><span />
               </div>
-              <span style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
+              <span style={{ color: "#a0a0b0", fontSize: "14px", fontWeight: 500 }}>
                 Listening...
               </span>
             </div>
           )}
           {transcript && (
             <div>
-              <p style={{ color: "var(--text-primary)", fontSize: "14px", fontWeight: 500 }}>
+              <p style={{ color: "#ffffff", fontSize: "15px", fontWeight: 600 }}>
                 &quot;{transcript}&quot;
               </p>
               {status === "success" && (
-                <p style={{ color: "var(--success-500)", fontSize: "12px", marginTop: "4px" }}>
-                  ✓ Got it!
+                <p style={{ color: "#22c55e", fontSize: "13px", marginTop: "6px", fontWeight: 600 }}>
+                  ✓ Navigating to {matchedLabel}...
                 </p>
               )}
               {status === "error" && (
-                <p style={{ color: "var(--warning-500)", fontSize: "12px", marginTop: "4px" }}>
-                  Didn&apos;t catch that. Try again.
+                <p style={{ color: "#f59e0b", fontSize: "13px", marginTop: "6px", fontWeight: 500 }}>
+                  Didn&apos;t recognize that. Try saying &quot;home&quot; or &quot;dashboard&quot;.
                 </p>
               )}
             </div>
@@ -135,25 +271,25 @@ export function VoiceFAB() {
         onClick={toggleListening}
         style={{
           position: "fixed",
-          bottom: "calc(var(--nav-height) + 32px)",
+          bottom: "calc(var(--nav-height, 72px) + 32px)",
           right: "32px",
           width: "56px",
           height: "56px",
           borderRadius: "50%",
-          border: "1px solid rgba(255,255,255,0.1)",
+          border: "none",
           background: isVoiceActive
-            ? "linear-gradient(135deg, var(--danger-500), var(--danger-600))"
-            : "linear-gradient(135deg, var(--primary-500), var(--primary-700))",
+            ? "linear-gradient(135deg, #ef4444, #b91c1c)"
+            : "linear-gradient(135deg, #3b82f6, #1d4ed8)",
           color: "white",
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           boxShadow: isVoiceActive
-            ? "0 0 20px rgba(239, 68, 68, 0.4)"
-            : "0 0 20px rgba(59, 130, 246, 0.4)",
+            ? "0 4px 30px rgba(239, 68, 68, 0.5)"
+            : "0 4px 30px rgba(59, 130, 246, 0.5)",
           zIndex: 60,
-          transition: "all var(--transition-base)",
+          transition: "all 0.3s ease",
           transform: isVoiceActive ? "scale(1.1)" : "scale(1)",
         }}
         aria-label={isVoiceActive ? "Stop listening" : "Start voice command"}
@@ -166,25 +302,35 @@ export function VoiceFAB() {
                 position: "absolute",
                 inset: "-4px",
                 borderRadius: "50%",
-                border: "2px solid var(--danger-400)",
-                opacity: 0.6,
+                border: "2px solid rgba(239, 68, 68, 0.6)",
+                animation: "pulse-ring 1.5s ease-out infinite",
               }}
-              className="animate-pulse-ring"
             />
             <span
               style={{
                 position: "absolute",
-                inset: "-8px",
+                inset: "-10px",
                 borderRadius: "50%",
-                border: "2px solid var(--danger-400)",
-                opacity: 0.3,
+                border: "2px solid rgba(239, 68, 68, 0.3)",
+                animation: "pulse-ring 1.5s ease-out infinite 0.3s",
               }}
-              className="animate-pulse-ring"
             />
           </>
         )}
-        {isVoiceActive ? <X size={24} /> : <Mic size={24} />}
+        {isVoiceActive ? (
+          <X size={24} strokeWidth={2.5} color="white" />
+        ) : (
+          <Mic size={24} strokeWidth={2.5} color="white" />
+        )}
       </button>
+
+      {/* Inline keyframe for pulse animation */}
+      <style jsx global>{`
+        @keyframes pulse-ring {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(1.4); opacity: 0; }
+        }
+      `}</style>
     </>
   );
 }

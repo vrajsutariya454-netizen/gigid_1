@@ -71,6 +71,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 220 }}
             className="fixed top-0 left-0 h-full w-[320px] bg-background shadow-2xl z-[101] flex flex-col noise"
+
           >
             {/* Header / Brand */}
             <div className="p-8 pb-4 flex items-center justify-between">

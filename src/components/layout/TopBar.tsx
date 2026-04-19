@@ -35,13 +35,14 @@ export function TopBar() {
           left: 0,
           right: 0,
           height: "var(--top-bar-height)",
-          background: "var(--bg-elevated)",
+          background: "var(--bg-elevated)", // Solid background
+          backgroundColor: "var(--bg-elevated)", // Fallback for some browsers
           borderBottom: "1px solid var(--border-color)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           padding: "0 16px",
-          zIndex: 50,
+          zIndex: 40, // Reduced to be safely behind sidebar backdrop (100)
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
         }}
