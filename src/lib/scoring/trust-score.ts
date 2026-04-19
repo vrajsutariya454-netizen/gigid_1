@@ -147,7 +147,8 @@ export function computeFinalScore(
   incomes: number[], 
   activeDays: number[], 
   transactions: Transaction[],
-  aaData: AAData
+  aaData: AAData,
+  kycVerified: boolean = false
 ): ScoreBreakdown {
   const s = calculateStability(incomes);
   const e = calculateCapacity(incomes);
@@ -159,7 +160,8 @@ export function computeFinalScore(
   const raa = calculateAAReliability(vi, cf, bh);
 
   const tCore = (0.30 * s) + (0.25 * e) + (0.25 * c) + (0.20 * rt);
-  const finalScore = Math.round(100 * clamp(tCore) * rs * raa);
+  const kycMultiplier = kycVerified ? 1.25 : 1.0;
+  const finalScore = Math.round(100 * clamp(tCore) * clamp(rs * kycMultiplier) * raa);
   
   return {
     stability: s,

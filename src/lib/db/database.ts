@@ -7,6 +7,9 @@ export interface UserProfile {
   name: string;
   phone: string;
   avatar?: string;
+  kycLevel?: 0 | 1 | 2;
+  kycStatus?: "unverified" | "pending" | "verified";
+  idVerifiedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

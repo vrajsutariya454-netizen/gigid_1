@@ -5,7 +5,7 @@ import {
   X, Home, FileText, Share2, Settings, 
   Moon, Sun, LogOut, HelpCircle, Shield, 
   User, CheckCircle2, LayoutTemplate, Landmark,
-  QrCode, ExternalLink
+  QrCode, ExternalLink, Fingerprint
 } from "lucide-react";
 import { useAppStore } from "@/lib/store/app-store";
 import { useRouter, usePathname } from "next/navigation";
@@ -21,7 +21,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { 
     theme, setTheme, logout, 
-    did, name, email, role, trustScore 
+    did, name, email, role, trustScore, kycStatus 
   } = useAppStore();
 
   const navItems = [
@@ -30,6 +30,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     { label: "Platforms", icon: LayoutTemplate, path: "/platforms" },
     { label: "Gig Wallet", icon: Landmark, path: "/bank" },
     { label: "Credentials", icon: FileText, path: "/credentials" },
+    { label: "KYC Center", icon: Fingerprint, path: "/kyc" },
     { label: "Data Sharing", icon: Share2, path: "/share" },
     { label: "Settings", icon: Settings, path: "/settings" },
   ];
@@ -114,7 +115,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   <div className="h-4 w-px bg-border" />
                   <div className="flex flex-col gap-1 items-end">
                     <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">Status</span>
-                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest leading-none mt-1">Verified</span>
+                    <span className={`text-[10px] font-bold uppercase tracking-widest leading-none mt-1 ${
+                      kycStatus === 'verified' ? 'text-emerald-400' : 
+                      kycStatus === 'pending' ? 'text-amber-400' : 'text-muted-foreground/40'
+                    }`}>
+                      {kycStatus || "Unverified"}
+                    </span>
                   </div>
                 </div>
               </div>

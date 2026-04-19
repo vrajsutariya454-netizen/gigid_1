@@ -112,10 +112,14 @@ export async function getLiveTrustScore(): Promise<ScoreBreakdown> {
     });
   });
 
+  const profile = await db.profiles.toCollection().first();
+  const kycVerified = profile?.kycStatus === 'verified';
+
   return computeFinalScore(
     monthlyIncomes.length ? monthlyIncomes : [0],
     activeDays.length ? activeDays : [0],
     transactions.length ? transactions : [],
-    aaData
+    aaData,
+    kycVerified
   );
 }

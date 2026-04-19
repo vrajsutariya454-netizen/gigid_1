@@ -16,6 +16,8 @@ interface UserState {
   isAuthenticated: boolean;
   hasCompletedOnboarding: boolean;
   trustScore: number;
+  kycLevel: 0 | 1 | 2;
+  kycStatus: "unverified" | "pending" | "verified";
 }
 
 interface UIState {
@@ -80,6 +82,8 @@ export const useAppStore = create<AppState>()(
       isAuthenticated: false,
       hasCompletedOnboarding: false,
       trustScore: 0,
+      kycLevel: 0,
+      kycStatus: "unverified",
 
       // Initial UI state
       theme: "dark",
@@ -110,6 +114,8 @@ export const useAppStore = create<AppState>()(
           role: null,
           isAuthenticated: false,
           trustScore: 0,
+          kycLevel: 0,
+          kycStatus: "unverified",
           connectedPlatforms: [],
         }),
 
@@ -158,6 +164,8 @@ export const useAppStore = create<AppState>()(
         isAuthenticated: state.isAuthenticated,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
         trustScore: state.trustScore,
+        kycLevel: state.kycLevel,
+        kycStatus: state.kycStatus,
         theme: state.theme,
         textSize: state.textSize,
         language: state.language,
