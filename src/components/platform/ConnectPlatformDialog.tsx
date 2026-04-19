@@ -257,9 +257,9 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
         const vc = await createCredential({
           subjectDid: did,
           platform: `${selectedPlatform.name} (${selectedDuration}m)`,
-          totalDeliveries: estimate.deliveries,
-          avgRating: parseFloat(estimate.rating),
-          last6MonthsEarnings: estimate.earnings
+          totalDeliveries: estimate.deliveries || (estimate.limit ? Math.floor(estimate.limit / 100) : 100),
+          avgRating: parseFloat(estimate.rating || "4.5"),
+          last6MonthsEarnings: estimate.earnings || estimate.limit || 0
         });
 
         if (result.verificationData) {
@@ -272,9 +272,12 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
 
         await db.credentials.add(vc);
 
-        const baseMonthlyEarnings = Math.round(estimate.earnings / selectedDuration);
-        const baseMonthlyTrips = Math.round(estimate.deliveries / selectedDuration);
-        const baseRating = parseFloat(estimate.rating);
+        const earningsToUse = estimate.earnings || estimate.limit || 0;
+        const deliveriesToUse = estimate.deliveries || (estimate.limit ? Math.floor(estimate.limit / 100) : 100);
+        
+        const baseMonthlyEarnings = Math.round(earningsToUse / selectedDuration);
+        const baseMonthlyTrips = Math.round(deliveriesToUse / selectedDuration);
+        const baseRating = parseFloat(estimate.rating || "4.5");
         const now = new Date();
 
         for (let i = 0; i < selectedDuration; i++) {

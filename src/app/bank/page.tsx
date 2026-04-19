@@ -13,7 +13,8 @@ import {
   ArrowRight,
   TrendingUp,
   Fingerprint,
-  Wallet
+  Wallet,
+  Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -50,6 +51,24 @@ export default function BankPage() {
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
+
+  // ZKP Simulation State
+  const [zkpLoading, setZkpLoading] = useState(false);
+  const [zkpResult, setZkpResult] = useState<{ approved: boolean; limit: number } | null>(null);
+
+  const handleGenerateZKP = async () => {
+    setZkpLoading(true);
+    setZkpResult(null);
+    
+    // Simulate complex cryptographic proof generation
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    
+    setZkpResult({
+      approved: (trustScore || 0) >= 50,
+      limit: (trustScore || 0) * 1000,
+    });
+    setZkpLoading(false);
+  };
 
   const pageHeader = (
     <section className="pt-6 flex flex-col gap-6">
@@ -161,40 +180,153 @@ export default function BankPage() {
             </div>
           </section>
 
-          {/* Earnings Card */}
-          <div className="noise glass-card p-10 rounded-[3rem] border-accent/20 bg-accent/5 flex flex-col items-center text-center gap-2">
-            <p className="text-[10px] font-black text-accent uppercase tracking-[0.25em]">Verified Inflow (30D)</p>
-            <p className="font-display text-6xl tracking-tight text-foreground">₹48,500</p>
-            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full glass border-accent/20 text-accent text-[9px] font-black uppercase mt-4">
-               <TrendingUp size={10} strokeWidth={3} /> +12.4% vs last period
-            </div>
-          </div>
+          {/* Main Content: Transactions (Direct) OR ZKP (Private) */}
+          {activeTab === "direct" ? (
+            <>
+              {/* Earnings Card */}
+              <div className="noise glass-card p-10 rounded-[3rem] border-accent/20 bg-accent/5 flex flex-col items-center text-center gap-2">
+                <p className="text-[10px] font-black text-accent uppercase tracking-[0.25em]">Verified Inflow (30D)</p>
+                <p className="font-display text-6xl tracking-tight text-foreground">₹48,500</p>
+                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full glass border-accent/20 text-accent text-[9px] font-black uppercase mt-4">
+                  <TrendingUp size={10} strokeWidth={3} /> +12.4% vs last period
+                </div>
+              </div>
 
-          {/* Transactions List */}
-          <div className="flex flex-col gap-4">
-            <div className="px-2">
-              <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">Recent Proofs</h3>
-            </div>
-            {[1, 2, 3, 4, 5].map((t) => (
-              <div
-                key={t}
-                className="noise glass-card p-5 rounded-[1.5rem] flex justify-between items-center group hover:border-primary/40 transition-all"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                    <Zap size={18} />
+              {/* Transactions List */}
+              <div className="flex flex-col gap-4">
+                <div className="px-2">
+                  <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">Recent Proofs</h3>
+                </div>
+                {[1, 2, 3, 4, 5].map((t) => (
+                  <div
+                    key={t}
+                    className="noise glass-card p-5 rounded-[1.5rem] flex justify-between items-center group hover:border-primary/40 transition-all"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                        <Zap size={18} />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-black text-foreground">Ride Payment ID:{t}492</span>
+                        <span className="text-[9px] font-bold text-muted-foreground uppercase">Verified on-chain</span>
+                      </div>
+                    </div>
+                    <span className="text-sm font-black text-accent">+₹580</span>
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-black text-foreground">Ride Payment ID:{t}492</span>
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase">Verified on-chain</span>
+                ))}
+              </div>
+            </>
+          ) : (
+            /* ZKP MODE UI */
+            <div className="flex flex-col gap-6">
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="noise glass-card p-10 rounded-[3rem] border-emerald-500/20 bg-emerald-500/5 relative overflow-hidden"
+              >
+                <div className="flex flex-col items-center text-center gap-8">
+                  <div className="w-24 h-24 rounded-[2.5rem] glass border-emerald-500/20 bg-emerald-500/5 flex items-center justify-center text-emerald-500 shadow-2xl">
+                    <Lock size={36} strokeWidth={2.5} />
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-display text-3xl tracking-tight text-foreground">Privacy Shield Active</h3>
+                    <p className="text-xs font-medium text-muted-foreground mt-3 leading-relaxed max-w-xs mx-auto">
+                      Your raw transactions are HIDDEN from the bank. <br />
+                      Only the <span className="text-emerald-500 font-black">cryptographic proof</span> is shared.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 px-6 py-2.5 rounded-full glass border-emerald-500/20 text-emerald-500">
+                    <ShieldCheck size={14} strokeWidth={3} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Zero-Knowledge Proof Mode</span>
                   </div>
                 </div>
-                <span className="text-sm font-black text-accent">+₹580</span>
-              </div>
-            ))}
-          </div>
+              </motion.div>
 
-          {/* Trust Indicators */}
+              <AnimatePresence mode="wait">
+                {!zkpResult && !zkpLoading ? (
+                  <motion.button
+                    key="generate"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={handleGenerateZKP}
+                    className="w-full h-20 rounded-[1.5rem] bg-emerald-500 text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-xl shadow-emerald-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-4"
+                  >
+                    <Zap size={20} fill="currentColor" />
+                    Compute Eligibility Proof
+                  </motion.button>
+                ) : zkpLoading ? (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="noise glass-card py-12 rounded-[2.5rem] flex flex-col items-center gap-6"
+                  >
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="w-10 h-10 rounded-full border-4 border-emerald-500/20 border-t-emerald-500"
+                    />
+                    <div className="text-center">
+                      <p className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.3em] animate-pulse">
+                        Generating Proof...
+                      </p>
+                      <p className="text-[9px] text-muted-foreground font-bold uppercase mt-2">Solving circuit constraints</p>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="result"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="noise glass-card p-10 rounded-[3rem] text-center border-primary/20"
+                  >
+                     {zkpResult?.approved ? (
+                       <>
+                         <div className="w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-8 text-emerald-500 border border-emerald-500/20 shadow-xl">
+                           <CheckCircle2 size={40} strokeWidth={3} />
+                         </div>
+                         <h4 className="font-display text-4xl text-emerald-500 mb-2">Approved</h4>
+                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-10">Proof of Eligibility Verified ✅</p>
+
+                         <div className="p-8 rounded-[2rem] bg-muted/20 border border-border">
+                           <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Max Lending Limit</p>
+                           <p className="font-display text-5xl text-foreground">₹{zkpResult.limit.toLocaleString()}</p>
+                         </div>
+                         
+                         <button className="w-full mt-8 h-16 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black uppercase tracking-widest text-[11px] shadow-lg shadow-emerald-600/20 hover:scale-[1.02] active:scale-95 transition-all">
+                           Claim Credit Line
+                         </button>
+                       </>
+                     ) : (
+                       <>
+                          <div className="w-20 h-20 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-8 text-rose-500 border border-rose-500/20 shadow-xl">
+                           <ShieldAlert size={40} strokeWidth={3} />
+                         </div>
+                         <h4 className="font-display text-4xl text-rose-500 mb-2">Denied</h4>
+                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-8">Score Below Protocol Threshold</p>
+                         <div className="p-6 rounded-2xl bg-muted/10 border border-border text-xs text-muted-foreground leading-relaxed text-left">
+                           To increase eligibility, aggregate more history from gig platforms and maintain high consistency for 14+ days. 
+                         </div>
+                       </>
+                     )}
+                     
+                     <button 
+                       onClick={() => setZkpResult(null)}
+                       className="mt-8 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] hover:text-emerald-500 transition-colors"
+                     >
+                       ← Reset Proof Session
+                     </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* Trust Indicators (Always visible context) */}
           <div className="noise glass-card p-8 rounded-[2.5rem] flex flex-col gap-6">
             <div className="flex items-center gap-2">
               <ShieldCheck className="text-primary" size={16} />
@@ -206,6 +338,7 @@ export default function BankPage() {
                 { label: "Income Stability", value: "98.4%", desc: "Strong consistency history" },
                 { label: "Work Frequency", value: "26 Days", desc: "Monthly active engagement" },
                 { label: "Earnings Growth", value: "+18%", desc: "High trajectory verified" },
+                { label: "Identity Score", value: `${trustScore}%`, desc: "Cryptographic trust percentile" },
               ].map((item) => (
                 <div key={item.label} className="flex justify-between items-center p-4 rounded-2xl bg-muted/20 border border-border">
                   <div>
@@ -250,7 +383,7 @@ export default function BankPage() {
               activeTab === "private" ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            ZK Credit Hub
+            ZK Credit Hub 🔐
           </button>
         </div>
 
