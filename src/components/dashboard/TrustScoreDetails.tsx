@@ -3,32 +3,34 @@
 import { ScoreBreakdown, getInterpretation } from "@/lib/scoring/trust-score";
 import { motion } from "framer-motion";
 import { Shield, TrendingUp, Calendar, Zap, Award, Landmark, CheckCircle2, Waves, HeartPulse } from "lucide-react";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 interface TrustScoreDetailsProps {
   breakdown: ScoreBreakdown;
 }
 
 export function TrustScoreDetails({ breakdown }: TrustScoreDetailsProps) {
+  const { t } = useTranslation();
   const interpretation = getInterpretation(breakdown.finalScore);
 
   const coreMetrics = [
-    { label: "Stability", value: breakdown.stability, icon: TrendingUp, color: "var(--primary-400)", desc: "Income variance" },
-    { label: "Capacity", value: breakdown.earnings, icon: Zap, color: "var(--warning-400)", desc: "Market benchmark" },
-    { label: "Consistency", value: breakdown.consistency, icon: Calendar, color: "var(--success-400)", desc: "Work day pattern" },
-    { label: "Regularity", value: breakdown.regularity, icon: Award, color: "var(--primary-600)", desc: "Transaction cadence" },
+    { label: t('score.stability'), key: 'score.stability', value: breakdown.stability, icon: TrendingUp, color: "var(--primary-400)", desc: t('score.desc.stability') },
+    { label: t('score.capacity'), key: 'score.capacity', value: breakdown.earnings, icon: Zap, color: "var(--warning-400)", desc: t('score.desc.capacity') },
+    { label: t('score.consistency'), key: 'score.consistency', value: breakdown.consistency, icon: Calendar, color: "var(--success-400)", desc: t('score.desc.consistency') },
+    { label: t('score.regularity'), key: 'score.regularity', value: breakdown.regularity, icon: Award, color: "var(--primary-600)", desc: t('score.desc.regularity') },
   ];
 
   const aaMetrics = [
-    { label: "Verification Ratio", value: breakdown.aaDetails.verifiedIncomeRatio, icon: CheckCircle2, color: "var(--success-500)", desc: "Income verified via AA" },
-    { label: "Cash Flow Health", value: breakdown.aaDetails.cashFlowConsistency, icon: Waves, color: "var(--primary-400)", desc: "Bank inflow stability" },
-    { label: "Balance Health", value: breakdown.aaDetails.balanceHealth, icon: HeartPulse, color: "var(--success-600)", desc: "Balance vs Expenses" },
+    { label: t('score.verificationRatio'), key: 'score.verificationRatio', value: breakdown.aaDetails.verifiedIncomeRatio, icon: CheckCircle2, color: "var(--success-500)", desc: t('score.desc.verificationRatio') },
+    { label: t('score.cashFlowHealth'), key: 'score.cashFlowHealth', value: breakdown.aaDetails.cashFlowConsistency, icon: Waves, color: "var(--primary-400)", desc: t('score.desc.cashFlowHealth') },
+    { label: t('score.balanceHealth'), key: 'score.balanceHealth', value: breakdown.aaDetails.balanceHealth, icon: HeartPulse, color: "var(--success-600)", desc: t('score.desc.balanceHealth') },
   ];
 
   return (
     <div className="flex flex-col gap-8 w-full">
       {/* Risk Badge */}
       <div className="flex items-center justify-between px-4">
-        <span className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-[0.2em]">Risk Assessment</span>
+        <span className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-[0.2em]">{t('score.riskAssessment')}</span>
         <div 
           className="px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-widest border shadow-lg"
           style={{ 
@@ -37,14 +39,14 @@ export function TrustScoreDetails({ breakdown }: TrustScoreDetailsProps) {
             color: interpretation.color 
           }}
         >
-          {interpretation.label}
+          {t(interpretation.label as any)}
         </div>
       </div>
 
       {/* Core Score Section */}
       <section className="space-y-4">
         <h3 className="px-4 text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest flex items-center gap-2">
-          <Zap size={14} /> Core Behavioral Metrics
+          <Zap size={14} /> {t('score.coreMetrics')}
         </h3>
         <div className="grid grid-cols-1 gap-3">
           {coreMetrics.map((m, i) => (
@@ -56,7 +58,7 @@ export function TrustScoreDetails({ breakdown }: TrustScoreDetailsProps) {
       {/* AA Verified Section */}
       <section className="space-y-4">
         <h3 className="px-4 text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
-          <Landmark size={14} /> Financial Reliability (AA Verified)
+          <Landmark size={14} /> {t('score.financialReliability')}
         </h3>
         <div className="p-1.5 rounded-3xl bg-blue-500/5 border border-blue-500/10 space-y-2">
           {aaMetrics.map((m, i) => (

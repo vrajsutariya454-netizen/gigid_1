@@ -30,7 +30,8 @@ export async function getLiveTrustScore(): Promise<ScoreBreakdown> {
         cashFlowConsistency: 0,
         balanceHealth: 0
       },
-      finalScore: 0
+      finalScore: 0,
+      aaTransactions: []
     };
   }
 
@@ -96,7 +97,8 @@ export async function getLiveTrustScore(): Promise<ScoreBreakdown> {
     monthlyInflows: aaInflows.length ? aaInflows : [0],
     avgMonthlyBalance: storedBal ? parseFloat(storedBal) : (monthlyIncomes.length ? (monthlyIncomes.reduce((a, b) => a + b, 0) / monthlyIncomes.length * 0.4) : 0),
     monthlyExpenses: storedExp ? parseFloat(storedExp) : (monthlyIncomes.length ? (monthlyIncomes.reduce((a, b) => a + b, 0) / monthlyIncomes.length * 0.6) : 0),
-    verifiedIncomeAmount: storedVer ? parseFloat(storedVer) : aaInflows.reduce((a, b) => a + b, 0)
+    verifiedIncomeAmount: storedVer ? parseFloat(storedVer) : aaInflows.reduce((a, b) => a + b, 0),
+    verifiedTransactions: generateMockAATransactions(aaInflows.reduce((a, b) => a + b, 0))
   };
 
   // 5. Build Transactions
@@ -122,4 +124,39 @@ export async function getLiveTrustScore(): Promise<ScoreBreakdown> {
     aaData,
     kycVerified
   );
+}
+
+/**
+ * Generates a list of verified transactions to simulate Account Aggregator data
+ */
+function generateMockAATransactions(totalIncome: number) {
+  const transactions = [];
+  const banks = ["HDFC Bank", "ICICI Bank", "SBI", "Axis Bank"];
+  const selectedBank = banks[Math.floor(Math.random() * banks.length)];
+  const descriptions = [
+    "NEFT: Uber India Systems",
+    "IMPS: Zomato Payments",
+    "RTGS: Swiggy Delivery",
+    "UPI: Amazon Flex Pay",
+    "UPI: Porter Services",
+    "CMS: Rapido Logistics"
+  ];
+
+  const count = 12; // Show last 12 verified events
+  const baseAmount = totalIncome / 6 / 2; // Split monthly income into two big chunks
+
+  const now = new Date();
+  for (let i = 0; i < count; i++) {
+    const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (i * 15) - Math.floor(Math.random() * 5));
+    transactions.push({
+      id: `aa-tx-${Math.random().toString(36).substring(7)}`,
+      date: date.toISOString().split('T')[0],
+      amount: Math.round(baseAmount * (0.9 + Math.random() * 0.2)),
+      description: descriptions[Math.floor(Math.random() * descriptions.length)],
+      bank: selectedBank,
+      type: 'credit' as const
+    });
+  }
+
+  return transactions.sort((a, b) => b.date.localeCompare(a.date));
 }

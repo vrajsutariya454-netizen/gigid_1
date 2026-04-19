@@ -3,10 +3,12 @@
 import { useAppStore } from "@/lib/store/app-store";
 import { Globe, Fingerprint, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import { Sidebar } from "./Sidebar";
 
 export function TopBar() {
   const { isOnline, setOnline, name } = useAppStore();
+  const { t } = useTranslation();
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -113,7 +115,7 @@ export function TopBar() {
                 color: mounted && isOnline ? "var(--success-500)" : "var(--danger-500)",
               }}
             >
-              {!mounted ? "---" : isOnline ? "Online" : "Offline"}
+              {!mounted ? "---" : isOnline ? t('common.online') : t('common.offline')}
             </span>
           </div>
 

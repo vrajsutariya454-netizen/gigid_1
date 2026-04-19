@@ -9,6 +9,7 @@ import { useAppStore } from "@/lib/store/app-store";
 import { X, ShieldCheck, Check, Loader2, Upload, Trash2, Image as ImageIcon, Calendar, ChevronRight, Plus, IndianRupee, Star, Bike, Clock } from "lucide-react";
 import { performEstimate } from "@/lib/services/backend-api";
 import { createCredential } from "@/lib/identity/credentials";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 interface ConnectPlatformDialogProps {
   open: boolean;
@@ -28,6 +29,7 @@ const fileToBase64 = (file: File): Promise<string> => {
 export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPlatformDialogProps) {
   const { did, removeConnectedPlatform } = useAppStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   // Real-time parity with database
   const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
@@ -73,9 +75,6 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
     }
   };
 
-  // ==========================================
-  //  MANUAL PROOF SUBMISSION (Full Data Entry)
-  // ==========================================
   const handleManualFileAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -105,19 +104,15 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
     setStep("connecting");
 
     try {
-      // Simulate document verification delay
       await new Promise(resolve => setTimeout(resolve, 2000));
-
       const totalEarnings = parseFloat(manualEarnings);
       const totalTrips = parseInt(manualTrips);
       const rating = parseFloat(manualRating);
       const months = parseInt(manualMonths);
       const activeDays = parseInt(manualActiveDays);
 
-      // Generate a safe platformId from the name
       let platformId = `manual_${manualName.toLowerCase().replace(/[^a-z0-9]/g, "_")}`;
 
-      // Create gig in backend
       try {
         const gigRes = await fetch("http://localhost:5000/gigs", {
           method: "POST",
@@ -130,7 +125,6 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
         console.warn("Failed to sync gig to backend, using local ID", err);
       }
 
-      // 1. Create platform entry
       const instanceId = await db.platforms.add({
         platformId,
         name: `${manualName} (${months}m)`,
@@ -140,7 +134,6 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
         lastSynced: new Date()
       });
 
-      // 2. Create credential with proof count
       const vc = await createCredential({
         subjectDid: did,
         platform: `${manualName} (${months}m)`,
@@ -150,7 +143,6 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
       });
       await db.credentials.add(vc);
 
-      // Save proof images to backend and Dexie
       if (manualFiles.length > 0) {
         const formData = new FormData();
         manualFiles.forEach(f => formData.append("screenshots", f));
@@ -190,14 +182,12 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
         }
       }
 
-      // 3. Distribute data across months as work records
       const baseMonthlyEarnings = Math.round(totalEarnings / months);
       const baseMonthlyTrips = Math.round(totalTrips / months);
       const now = new Date();
 
       for (let i = 0; i < months; i++) {
         const month = new Date(now.getFullYear(), now.getMonth() - i, 1).toISOString().slice(0, 7);
-        // Add natural monthly variance (+-15%)
         const variance = 0.85 + Math.random() * 0.3;
         const monthTrips = Math.round(baseMonthlyTrips * variance);
         await db.workRecords.add({
@@ -211,7 +201,6 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
         });
       }
 
-      // 4. Store manual scoring data for each month too (used by data-bridge)
       for (let i = 0; i < months; i++) {
         const month = new Date(now.getFullYear(), now.getMonth() - i, 1).toISOString().slice(0, 7);
         const existing = await db.manualScoringData.where("month").equals(month).first();
@@ -220,7 +209,7 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
             month,
             income: Math.round(baseMonthlyEarnings * (0.85 + Math.random() * 0.3)),
             activeDays: Math.min(30, activeDays + Math.floor(Math.random() * 4 - 2)),
-            verifiedInflow: 0 // Manual = not bank-verified
+            verifiedInflow: 0
           });
         }
       }
@@ -321,34 +310,22 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "16px" }}>
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(12px)" }} onClick={handleClose} />
+    <div className="fixed inset-0 z-[100] flex items-end justify-center p-4">
+      <div className="absolute inset-0 bg-primary/20 backdrop-blur-3xl" onClick={handleClose} />
 
       <div 
-        style={{ 
-          position: "relative", 
-          width: "100%", 
-          maxWidth: "500px", 
-          maxHeight: "85vh", 
-          borderRadius: "3rem", 
-          padding: "40px", 
-          overflowY: "auto",
-          border: "1px solid var(--color-border)",
-        }} 
-        className="animate-slide-up noise glass-card shadow-2xl"
+        className="relative w-full max-w-lg max-h-[90vh] rounded-[3.5rem] p-10 overflow-y-auto bg-card shadow-2xl animate-in slide-in-from-bottom-10 duration-500"
       >
-        {/* Drag Handle */}
-        <div style={{ width: "48px", height: "5px", borderRadius: "5px", background: "var(--color-border)", margin: "0 auto 40px", opacity: 0.5 }} />
+        <div className="w-12 h-1.5 rounded-full bg-secondary mx-auto mb-10" />
 
-        <button onClick={handleClose} style={{ position: "absolute", top: "24px", right: "24px", background: "var(--bg-tertiary)", border: "none", borderRadius: "50%", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-secondary)", zIndex: 10 }}>
+        <button onClick={handleClose} className="absolute top-8 right-8 bg-secondary text-muted-foreground hover:text-foreground w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 z-10">
           <X size={20} />
         </button>
 
-        {/* 1. SELECT PLATFORM */}
         {step === "select" && (
           <>
-            <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mb-1">Connect Work</h2>
-            <p className="text-sm font-bold text-[var(--text-tertiary)] mb-8">Link your accounts to verify your history.</p>
+            <h2 className="text-3xl font-display font-black text-primary tracking-tight mb-1">{t('plat.connectHub')}</h2>
+            <p className="text-sm font-medium text-muted-foreground mb-8">{t('plat.linkNodes')}</p>
             <div className="grid grid-cols-2 gap-4">
               {AVAILABLE_PLATFORMS.map((platform) => {
                 const isConnected = dbConnectedIds.includes(platform.id);
@@ -356,22 +333,22 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
                   <div key={platform.id} style={{ position: "relative" }}>
                     <button
                       onClick={() => handleSelect(platform)}
-                      className={`w-full flex flex-col items-center gap-3 p-6 rounded-[2rem] border transition-all hover:scale-[1.05] active:scale-95 ${
+                      className={`w-full flex flex-col items-center gap-3 p-6 rounded-[2.5rem] transition-all hover:scale-[1.02] active:scale-95 shadow-sm ${
                         isConnected 
-                          ? "border-accent/40 bg-accent/5" 
-                          : "border-border bg-muted/30 hover:border-primary/50 hover:bg-muted"
+                          ? "bg-secondary text-primary" 
+                          : "bg-secondary/40 text-foreground hover:bg-secondary hover:shadow-md"
                       }`}
                     >
                       <span className="text-4xl mb-1">{platform.icon}</span>
-                      <span className="text-xs font-black uppercase tracking-widest text-[var(--text-primary)]">{platform.name}</span>
+                      <span className="text-xs font-black uppercase tracking-widest">{platform.name}</span>
                       {isConnected && (
                         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-[9px] font-black uppercase">
-                          <Check size={10} strokeWidth={4} /> Active
+                          <Check size={10} strokeWidth={4} /> {t('common.active')}
                         </div>
                       )}
                     </button>
                     {isConnected && (
-                      <button onClick={(e) => handleDisconnect(e, platform.id)} className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg border-2 border-[#1a1a1a] active:scale-90 transition-transform">
+                      <button onClick={(e) => handleDisconnect(e, platform.id)} className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg active:scale-90 transition-transform">
                         <Trash2 size={12} strokeWidth={3} />
                       </button>
                     )}
@@ -380,22 +357,21 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
               })}
               <button 
                 onClick={() => setStep("manual")} 
-                className="flex flex-col items-center gap-3 p-6 rounded-[2rem] border-2 border-dashed border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/40 transition-all group"
+                className="flex flex-col items-center gap-3 p-6 rounded-[2.5rem] bg-secondary/30 hover:bg-secondary/60 hover:shadow-md transition-all group"
               >
                 <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                  <Upload size={20} strokeWidth={3} />
+                  <Plus size={20} strokeWidth={3} />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-primary">Other Method</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-primary">{t('plat.otherNode')}</span>
               </button>
             </div>
           </>
         )}
 
-        {/* 2. DURATION SELECTION */}
         {step === "duration" && selectedPlatform && (
           <div className="animate-in fade-in slide-in-from-bottom-4">
-            <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mb-2">Sync Duration</h2>
-            <p className="text-sm font-bold text-[var(--text-tertiary)] mb-8">Choose history length to verify via API.</p>
+            <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mb-2">{t('plat.syncDuration')}</h2>
+            <p className="text-sm font-bold text-[var(--text-tertiary)] mb-8">{t('plat.chooseHistory')}</p>
             <div className="grid grid-cols-1 gap-4">
               {[3, 6, 12].map((m) => (
                 <button key={m} onClick={() => handleDurationSelect(m as any)} className="flex items-center justify-between p-6 rounded-[2rem] bg-muted border border-border hover:border-primary/40 hover:bg-muted transition-all group">
@@ -404,25 +380,24 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
                       <Calendar size={20} />
                     </div>
                     <div className="text-left">
-                      <p className="text-sm font-black text-[var(--text-primary)]">{m} Months History</p>
-                      <p className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase">{m === 12 ? "Full Year" : m === 6 ? "Medium Term" : "Short Term"}</p>
+                      <p className="text-sm font-black text-[var(--text-primary)]">{t('plat.monthsHistory', { count: m.toString() })}</p>
+                      <p className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase">{m === 12 ? t('plat.fullYear') : m === 6 ? t('plat.mediumTerm') : t('plat.shortTerm')}</p>
                     </div>
                   </div>
                   <ChevronRight size={20} className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
               ))}
             </div>
-            <button onClick={() => setStep("select")} className="w-full mt-6 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-[var(--text-primary)] bg-[var(--bg-tertiary)]">Back</button>
+            <button onClick={() => setStep("select")} className="w-full mt-6 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-[var(--text-primary)] bg-[var(--bg-tertiary)]">{t('nav.back')}</button>
           </div>
         )}
 
-        {/* 3. CONSENT SCREEN */}
         {step === "consent" && selectedPlatform && (
           <div className="animate-in fade-in slide-in-from-bottom-4">
             <div className="text-center mb-8">
               <span style={{ fontSize: "64px" }}>{selectedPlatform.icon}</span>
               <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mt-6">Connect {selectedPlatform.name}?</h2>
-              <p className="text-sm font-bold text-[var(--text-tertiary)] mt-2">Allow GigID to read your verified history ({selectedDuration}mo).</p>
+              <p className="text-sm font-bold text-[var(--text-tertiary)] mt-2">{t('plat.allowRead', { count: selectedDuration.toString() })}</p>
             </div>
             <div className="space-y-4 mb-10">
               {["Work history & deliveries", "Customer ratings", `Earnings (${selectedDuration}MO)`, "Verified status"].map((item) => (
@@ -433,90 +408,91 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
               ))}
             </div>
             <div className="flex gap-4">
-              <button onClick={() => setStep("duration")} className="flex-1 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-[var(--text-primary)] bg-[var(--bg-tertiary)]">Back</button>
-              <button onClick={handleConnect} style={{ background: `linear-gradient(135deg, ${selectedPlatform.color}, ${selectedPlatform.color}cc)` }} className="flex-[2] py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-white shadow-2xl">Confirm Sync</button>
+              <button onClick={() => setStep("duration")} className="flex-1 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-primary bg-secondary hover:bg-muted-foreground/5 transition-all">{t('nav.back')}</button>
+              <button 
+                onClick={handleConnect} 
+                className="flex-[2] py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-white shadow-xl transition-all active:scale-[0.98]"
+                style={{ backgroundColor: selectedPlatform.color }}
+              >
+                {t('plat.confirmSync')}
+              </button>
             </div>
           </div>
         )}
 
-        {/* 4. MANUAL PROOF */}
         {step === "manual" && (
           <div className="animate-in fade-in slide-in-from-bottom-4">
-            <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mb-1">Manual Proof</h2>
-            <p className="text-sm font-bold text-[var(--text-tertiary)] mb-6">Add platform details and upload proof screenshots.</p>
+            <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mb-1">{t('plat.manualProof')}</h2>
+            <p className="text-sm font-bold text-[var(--text-tertiary)] mb-6">{t('plat.addManualDetails')}</p>
             
             <div className="flex flex-col gap-4">
-              {/* Platform Name */}
               <div>
-                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 block ml-1">Platform Name *</label>
+                <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 block ml-1">{t('plat.nameLabel')}</label>
                 <input 
                   type="text" 
                   placeholder="e.g. BigBasket, Porter, Freelance" 
                   value={manualName} 
                   onChange={(e) => setManualName(e.target.value)} 
-                  className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
+                  className="w-full p-4 rounded-2xl bg-secondary/50 border border-white/5 text-foreground font-bold outline-none focus:bg-white focus:shadow-xl focus:shadow-primary/5 text-sm transition-all" 
                 />
               </div>
 
-              {/* Data Fields — 2-column grid */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 flex items-center gap-1 ml-1">
-                    <IndianRupee size={10} /> Total Earnings *
+                    <IndianRupee size={10} /> {t('plat.earningsLabel')}
                   </label>
                   <input 
                     type="number" 
                     placeholder="₹75,000" 
                     value={manualEarnings} 
                     onChange={(e) => setManualEarnings(e.target.value)} 
-                    className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
+                    className="w-full p-4 rounded-2xl bg-secondary/50 border border-white/5 text-foreground font-bold outline-none focus:bg-white focus:shadow-xl focus:shadow-primary/5 text-sm transition-all" 
                   />
                 </div>
                 <div>
                   <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 flex items-center gap-1 ml-1">
-                    <Bike size={10} /> Total Trips *
+                    <Bike size={10} /> {t('plat.tripsLabel')}
                   </label>
                   <input 
                     type="number" 
                     placeholder="400" 
                     value={manualTrips} 
                     onChange={(e) => setManualTrips(e.target.value)} 
-                    className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
+                    className="w-full p-4 rounded-2xl bg-secondary/50 border border-white/5 text-foreground font-bold outline-none focus:bg-white focus:shadow-xl focus:shadow-primary/5 text-sm transition-all" 
                   />
                 </div>
                 <div>
                   <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 flex items-center gap-1 ml-1">
-                    <Star size={10} /> Avg Rating *
+                    <Star size={10} /> {t('plat.ratingLabel')}
                   </label>
                   <input 
                     type="number" 
-                    step="0.1"
-                    min="1" max="5"
+                    step="0.1" min="1" max="5"
                     placeholder="4.5" 
                     value={manualRating} 
                     onChange={(e) => setManualRating(e.target.value)} 
-                    className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
+                    className="w-full p-4 rounded-2xl bg-secondary/50 border border-white/5 text-foreground font-bold outline-none focus:bg-white focus:shadow-xl focus:shadow-primary/5 text-sm transition-all" 
                   />
                 </div>
                 <div>
                   <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 flex items-center gap-1 ml-1">
-                    <Calendar size={10} /> Months Active *
+                    <Calendar size={10} /> {t('plat.monthsLabel')}
                   </label>
-                  <input 
-                    type="number"
-                    min="1" max="36"
-                    placeholder="6" 
-                    value={manualMonths} 
-                    onChange={(e) => setManualMonths(e.target.value)} 
-                    className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
-                  />
+                    <input 
+                      type="number"
+                      min="1" max="36"
+                      placeholder="6" 
+                      value={manualMonths} 
+                      onChange={(e) => setManualMonths(e.target.value)} 
+                      className="w-full p-4 rounded-2xl bg-secondary/50 border border-white/5 text-foreground font-bold outline-none focus:bg-white focus:shadow-xl focus:shadow-primary/5 text-sm transition-all" 
+                    />
                 </div>
               </div>
 
-              {/* Active Days */}
               <div>
                 <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-1.5 flex items-center gap-1 ml-1">
-                  <Clock size={10} /> Avg Active Days / Month *
+                  <Clock size={10} /> {t('plat.activeDaysLabel')}
                 </label>
                 <input 
                   type="number" 
@@ -524,25 +500,23 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
                   placeholder="22" 
                   value={manualActiveDays} 
                   onChange={(e) => setManualActiveDays(e.target.value)} 
-                  className="w-full p-4 rounded-2xl bg-[var(--bg-secondary)] border border-white/5 text-[var(--text-primary)] font-bold outline-none focus:ring-2 ring-blue-500/20 text-sm" 
+                  className="w-full p-4 rounded-2xl bg-secondary/50 border border-white/5 text-foreground font-bold outline-none focus:bg-white focus:shadow-xl focus:shadow-primary/5 text-sm transition-all" 
                 />
               </div>
 
-              {/* Multiple Proof Images */}
               <div>
                 <label className="text-[10px] font-black text-[var(--text-tertiary)] uppercase tracking-widest mb-2 block ml-1">
-                  Proof Screenshots * ({manualFiles.length} added)
+                  {t('plat.proofScreenshots', { count: manualFiles.length.toString() })}
                 </label>
                 
-                {/* Uploaded files list */}
                 {manualFiles.length > 0 && (
                   <div className="flex flex-col gap-2 mb-3">
                     {manualFiles.map((file, idx) => (
                       <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
                         <div className="flex items-center gap-2 min-w-0">
                           <ImageIcon size={14} className="text-blue-500 shrink-0" />
-                          <span className="text-xs font-bold text-[var(--text-primary)] truncate">{file.name}</span>
-                          <span className="text-[10px] font-bold text-[var(--text-tertiary)] shrink-0">
+                          <span className="text-xs font-bold text-foreground truncate">{file.name}</span>
+                          <span className="text-[10px] font-bold text-muted-foreground shrink-0">
                             {(file.size / 1024).toFixed(0)}KB
                           </span>
                         </div>
@@ -557,7 +531,6 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
                   </div>
                 )}
 
-                {/* Add more images button */}
                 <button 
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
@@ -565,41 +538,38 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
                 >
                   <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleManualFileAdd} />
                   <Plus size={18} className="text-blue-500/60" />
-                  <span className="text-xs font-black text-[var(--text-secondary)]">
-                    {manualFiles.length === 0 ? "Add Proof Screenshots" : "Add More Screenshots"}
+                  <span className="text-xs font-black text-muted-foreground">
+                    {manualFiles.length === 0 ? t('plat.addProof') : t('plat.addMoreProof')}
                   </span>
                 </button>
               </div>
 
-              {/* Info badge */}
               <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
                 <ShieldCheck size={14} className="text-amber-500 mt-0.5 shrink-0" />
                 <p className="text-[10px] font-bold text-amber-500/80 leading-relaxed">
-                  Manual entries are marked as &quot;Self-Declared&quot; in your Trust Score. API-verified platforms receive a higher reliability multiplier.
+                  {t('plat.manualWarning')}
                 </p>
               </div>
 
-              {/* Actions */}
               <div className="flex gap-3 mt-1">
-                <button onClick={() => setStep("select")} className="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] text-[var(--text-primary)] bg-[var(--bg-tertiary)]">Back</button>
+                <button onClick={() => setStep("select")} className="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] text-foreground bg-secondary hover:bg-muted-foreground/10">{t('nav.back')}</button>
                 <button 
                   onClick={handleManualSubmit} 
                   disabled={!isManualFormValid()} 
                   className="flex-[2] py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] text-white bg-gradient-to-r from-indigo-600 to-blue-600 disabled:opacity-30 shadow-xl shadow-blue-600/20 transition-all active:scale-[0.98]"
                 >
-                  Verify & Add
+                  {t('plat.verifyAndAdd')}
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* LOADING & SUCCESS */}
         {step === "connecting" && (
           <div className="text-center py-12">
             <Loader2 size={56} className="text-primary animate-spin mx-auto" strokeWidth={3} />
-            <p className="font-display text-4xl text-gradient mt-8">
-              {manualName ? "Verifying Proof" : "Syncing Node"}
+            <p className="font-display text-4xl text-foreground mt-8">
+              {manualName ? t('plat.verifyingProof') : t('plat.syncingNode')}
             </p>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-4">
               {manualName ? "Processing cryptographic evidence" : "Establishing secure data tunnel"}
@@ -612,9 +582,9 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
             <div className="w-20 h-20 rounded-[2.5rem] bg-accent/20 border border-accent/20 flex items-center justify-center mx-auto shadow-2xl shadow-accent/20 animate-in zoom-in">
               <Check size={40} className="text-accent" strokeWidth={4} />
             </div>
-            <p className="font-display text-4xl text-gradient mt-8">Success</p>
+            <p className="font-display text-4xl text-foreground mt-8">{t('common.success')}</p>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-accent mt-4">
-              Vault Updated
+              {t('plat.vaultUpdated')}
             </p>
           </div>
         )}

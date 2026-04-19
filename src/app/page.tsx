@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { seedDemoPersona } from "@/lib/scoring/demo-profiles";
 import { useAppStore } from "@/lib/store/app-store";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 export default function Page() {
   return (
@@ -36,6 +37,7 @@ export default function Page() {
 /* ---------------- NAV ---------------- */
 
 function Nav() {
+  const { t } = useTranslation();
   return (
     <header className="mx-auto w-full max-w-7xl px-6 py-8 flex items-center justify-between">
       <div className="flex items-center gap-3 group cursor-pointer">
@@ -62,6 +64,7 @@ function Nav() {
 /* ---------------- HERO ---------------- */
 
 function Hero() {
+  const { t } = useTranslation();
   return (
     <section className="flex-1 mx-auto w-full max-w-7xl px-6 py-12 lg:py-24">
       <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-16 lg:gap-24 items-center">
@@ -77,26 +80,28 @@ function Hero() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/80 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
-            <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Now in private beta</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">{t('hero.beta')}</span>
           </div>
 
-          <h1 className="font-display text-[clamp(3.5rem,8vw,6.5rem)] text-gradient tracking-tight leading-[0.9] mt-2">
-            Your work, <br />
-            <span className="italic font-normal">your identity.</span>
+          <h1 className="font-display text-[clamp(2.5rem,8vw,5rem)] text-primary tracking-tighter leading-[0.9] mt-2 group">
+            {t('hero.title').split(',')[0]}, <br />
+            <span className="italic font-light text-primary/80 group-hover:text-primary transition-colors">
+              {t('hero.title').split(',')[1]}
+            </span>
           </h1>
 
           <p className="text-lg lg:text-xl text-muted-foreground/80 max-w-xl leading-relaxed">
-            The premium digital hub for gig workers to track earnings, build verifiable trust, and showcase experience with complete privacy.
+            {t('hero.subtitle')}
           </p>
 
           <div className="flex flex-wrap items-center gap-4 pt-4">
             <button className="group relative px-8 py-4 rounded-xl bg-primary text-white font-bold tracking-widest text-sm transition-all hover:scale-105 active:scale-95 shadow-lg shadow-primary/25">
               <span className="flex items-center gap-2 uppercase">
-                Claim your hub <ArrowUpRight className="w-5 h-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+                {t('hero.cta')} <ArrowUpRight className="w-5 h-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
               </span>
             </button>
-            <button className="px-8 py-4 rounded-xl glass border-border text-foreground/70 font-bold tracking-widest text-sm transition-all hover:bg-muted hover:text-foreground uppercase">
-              Watch the demo
+            <button className="px-8 py-4 rounded-xl bg-secondary text-primary font-bold tracking-widest text-sm transition-all hover:bg-muted-foreground/10 hover:text-foreground uppercase">
+              {t('hero.demo')}
             </button>
           </div>
 
@@ -111,7 +116,7 @@ function Hero() {
           className="relative"
         >
           {/* Card Halo */}
-          <div className="absolute -inset-4 bg-gradient-to-tr from-primary/20 via-accent/20 to-accent-2/20 blur-3xl opacity-50 -z-10 animate-pulse" />
+          <div className="absolute -inset-8 bg-primary/10 blur-3xl opacity-50 -z-10 animate-pulse" />
           <SignInCard />
         </motion.div>
       </div>
@@ -122,10 +127,11 @@ function Hero() {
 /* ---------------- STATS ---------------- */
 
 function StatsStrip() {
+  const { t } = useTranslation();
   const stats = [
-    { value: "$2.4B", label: "Earnings tracked" },
-    { value: "184k", label: "Verified workers" },
-    { value: "99.9%", label: "Platform uptime" },
+    { value: "$2.4B", label: t('stats.earnings') },
+    { value: "184k", label: t('stats.workers') },
+    { value: "99.9%", label: t('stats.uptime') },
   ];
 
   return (
@@ -152,6 +158,8 @@ function SignInCard() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { setUser, setOnboardingCompleted } = useAppStore();
+
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -210,19 +218,19 @@ function SignInCard() {
   };
 
   return (
-    <div className="noise glass-card rounded-[2rem] p-10 lg:p-12 shadow-2xl relative overflow-hidden">
+    <div className="noise bg-card rounded-[3rem] p-10 lg:p-14 shadow-2xl relative overflow-hidden">
       <div className="flex justify-between items-start mb-10">
         <div className="flex flex-col gap-2">
           <h2 className="font-display text-4xl text-foreground tracking-tight">
-            {isSignUp ? "Create profile" : "Welcome back"}
+            {isSignUp ? t('auth.createProfile') : t('auth.welcome')}
           </h2>
           <p className="text-sm text-muted-foreground font-medium">
-            {isSignUp ? "Start your professional journey" : "Sign in to manage your digital identity"}
+            {isSignUp ? t('auth.startJourney') : t('auth.signInToManage')}
           </p>
         </div>
         {!isSignUp && (
-          <div className="p-2.5 rounded-full bg-muted border border-border backdrop-blur-sm">
-            <Lock className="w-5 h-5 text-muted-foreground/50" />
+          <div className="p-3 rounded-full bg-secondary text-primary">
+            <Lock className="w-5 h-5" />
           </div>
         )}
       </div>
@@ -237,18 +245,18 @@ function SignInCard() {
         {isSignUp && (
           <div className="grid gap-6">
             <div className="flex flex-col gap-2.5">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/70 ml-1">Full Name</label>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/50 ml-1">Full Name</label>
               <input
                 type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required
-                className="w-full px-5 py-4 rounded-xl bg-muted/30 border border-border outline-none focus:border-primary/50 focus:bg-muted transition-all text-foreground text-sm"
+                className="w-full px-6 py-5 rounded-2xl bg-secondary/50 outline-none focus:bg-white focus:shadow-xl focus:shadow-primary/5 transition-all text-foreground text-sm font-bold"
                 placeholder="John Doe"
               />
             </div>
             <div className="flex flex-col gap-2.5">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/70 ml-1">Username</label>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/50 ml-1">Username</label>
               <input
                 type="text" value={username} onChange={(e) => setUsername(e.target.value)} required
-                className="w-full px-5 py-4 rounded-xl bg-muted/30 border border-border outline-none focus:border-primary/50 focus:bg-muted transition-all text-foreground text-sm"
+                className="w-full px-6 py-5 rounded-2xl bg-secondary/50 outline-none focus:bg-white focus:shadow-xl focus:shadow-primary/5 transition-all text-foreground text-sm font-bold"
                 placeholder="johndoe"
               />
             </div>
@@ -256,30 +264,30 @@ function SignInCard() {
         )}
 
         <div className="flex flex-col gap-2.5">
-          <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/70 ml-1">Email address</label>
+          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/50 ml-1">Email address</label>
           <input
             type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-            className="w-full px-5 py-4 rounded-xl bg-muted/30 border border-border outline-none focus:border-primary/50 focus:bg-muted transition-all text-foreground text-sm"
+            className="w-full px-6 py-5 rounded-2xl bg-secondary/50 outline-none focus:bg-white focus:shadow-xl focus:shadow-primary/5 transition-all text-foreground text-sm font-bold"
             placeholder="you@example.com"
           />
         </div>
 
         <div className="flex flex-col gap-2.5">
           <div className="flex justify-between items-center ml-1">
-            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/70">Password</label>
-            <button type="button" className="text-[10px] font-bold uppercase tracking-[0.1em] text-primary hover:text-accent transition-colors">Forgot?</button>
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/50">Password</label>
+            <button type="button" className="text-[10px] font-black uppercase tracking-[0.1em] text-primary hover:opacity-70 transition-colors">Forgot?</button>
           </div>
           <input
             type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-            className="w-full px-5 py-4 rounded-xl bg-muted/30 border border-border outline-none focus:border-primary/50 focus:bg-muted transition-all text-foreground text-sm"
+            className="w-full px-6 py-5 rounded-2xl bg-secondary/50 outline-none focus:bg-white focus:shadow-xl focus:shadow-primary/5 transition-all text-foreground text-sm font-bold"
           />
         </div>
 
         <button
           type="submit" disabled={isLoading}
-          className="animate-shimmer w-full py-5 rounded-xl bg-gradient-to-r from-primary to-accent text-white font-bold tracking-[0.15em] text-xs uppercase shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 mt-2"
+          className="w-full py-5 rounded-2xl bg-primary text-white font-black tracking-[0.2em] text-[10px] uppercase shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 mt-4"
         >
-          {isLoading ? "Processing..." : isSignUp ? "Create Account" : "Access Hub"}
+          {isLoading ? t('common.processing') : isSignUp ? t('auth.establishIdentity') : t('auth.accessHub')}
           <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </button>
       </form>
@@ -296,7 +304,7 @@ function SignInCard() {
           <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
           <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
         </svg>
-        Continue with Google
+        {t('auth.google')}
       </button>
 
       <div className="mt-10 text-center">
@@ -304,7 +312,7 @@ function SignInCard() {
           onClick={() => setIsSignUp(!isSignUp)}
           className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 hover:text-primary transition-colors hover:scale-105"
         >
-          {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign up"}
+          {isSignUp ? t('auth.haveAccount') : t('auth.noAccount')}
         </button>
       </div>
     </div>

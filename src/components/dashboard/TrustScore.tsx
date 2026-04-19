@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 interface TrustScoreProps {
   score: number;
@@ -8,6 +9,7 @@ interface TrustScoreProps {
 }
 
 export function TrustScore({ score, size = 180 }: TrustScoreProps) {
+  const { t } = useTranslation();
   const [animatedScore, setAnimatedScore] = useState(0);
   const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
@@ -31,10 +33,10 @@ export function TrustScore({ score, size = 180 }: TrustScoreProps) {
   }, [score]);
 
   const getColor = (s: number) => {
-    if (s >= 75) return { main: "var(--color-accent)", glow: "var(--color-accent)" };
-    if (s >= 50) return { main: "var(--color-primary)", glow: "var(--color-primary)" };
-    if (s >= 25) return { main: "oklch(0.7 0.2 60)", glow: "oklch(0.7 0.2 60)" };
-    return { main: "oklch(0.6 0.2 20)", glow: "oklch(0.6 0.2 20)" };
+    if (s >= 75) return { main: "var(--color-primary)", bg: "var(--color-primary)" };
+    if (s >= 50) return { main: "var(--color-accent)", bg: "var(--color-accent)" };
+    if (s >= 25) return { main: "oklch(0.6 0.1 30)", bg: "oklch(0.6 0.1 30)" };
+    return { main: "oklch(0.5 0.1 10)", bg: "oklch(0.5 0.1 10)" };
   };
 
   const colors = getColor(animatedScore);
@@ -60,16 +62,16 @@ export function TrustScore({ score, size = 180 }: TrustScoreProps) {
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="var(--border-color)"
+          stroke="var(--color-secondary)"
           strokeWidth={strokeWidth}
-          opacity={0.3}
+          opacity={1}
         />
         {/* Gradient definition */}
         <defs>
           <linearGradient id="trustGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="var(--primary-400)" />
-            <stop offset="50%" stopColor="var(--success-400)" />
-            <stop offset="100%" stopColor="var(--success-600)" />
+            <stop offset="0%" stopColor="var(--color-primary)" />
+            <stop offset="50%" stopColor="var(--color-accent)" />
+            <stop offset="100%" stopColor="var(--color-primary)" />
           </linearGradient>
         </defs>
         {/* Progress circle */}
@@ -85,7 +87,6 @@ export function TrustScore({ score, size = 180 }: TrustScoreProps) {
           strokeDashoffset={offset}
           style={{
             transition: "stroke-dashoffset 0.3s ease",
-            filter: `drop-shadow(0 0 6px ${colors.glow})`,
           }}
         />
       </svg>
@@ -104,25 +105,26 @@ export function TrustScore({ score, size = 180 }: TrustScoreProps) {
         <span
           style={{
             fontSize: size * 0.28,
-            fontWeight: 800,
+            fontWeight: 900,
             color: colors.main,
             lineHeight: 1,
-            letterSpacing: "-0.02em",
+            letterSpacing: "-0.04em",
           }}
+          className="font-display"
         >
           {animatedScore}
         </span>
         <span
           style={{
             fontSize: size * 0.08,
-            fontWeight: 500,
-            color: "var(--text-tertiary)",
+            fontWeight: 700,
+            color: "var(--color-muted-foreground)",
             marginTop: "4px",
             textTransform: "uppercase",
-            letterSpacing: "0.1em",
+            letterSpacing: "0.2em",
           }}
         >
-          Trust Score
+          {t('score.title')}
         </span>
       </div>
     </div>

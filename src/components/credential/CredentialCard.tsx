@@ -29,126 +29,92 @@ const PLATFORM_ICONS: Record<string, string> = {
 
 export function CredentialCard({ credential, onTap, onShare, onDelete }: CredentialCardProps) {
   const { credentialSubject: cs } = credential;
-  const platformColor = PLATFORM_COLORS[cs.platform] || "var(--primary-500)";
+  const platformColor = PLATFORM_COLORS[cs.platform] || "var(--color-primary)";
   const platformIcon = PLATFORM_ICONS[cs.platform] || "📄";
 
   return (
     <div
       onClick={onTap}
-      className="card card-gradient"
-      style={{
-        padding: "0",
-        cursor: onTap ? "pointer" : "default",
-        overflow: "hidden",
-      }}
+      className={`relative overflow-hidden transition-all duration-300 ${onTap ? 'cursor-pointer active:scale-[0.98]' : 'cursor-default'} bg-card rounded-[2.5rem] shadow-xl shadow-primary/5 group hover:shadow-primary/10`}
     >
       {/* Header */}
       <div
+        className="px-6 py-5 flex items-center justify-between"
         style={{
-          background: `linear-gradient(135deg, ${platformColor}22, ${platformColor}08)`,
-          padding: "16px 20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: "1px solid var(--border-color)",
+          background: `linear-gradient(135deg, ${platformColor}12, ${platformColor}05)`,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <span style={{ fontSize: "28px" }}>{platformIcon}</span>
+        <div className="flex items-center gap-4">
+          <div className="text-3xl filter drop-shadow-sm group-hover:scale-110 transition-transform duration-500">
+            {platformIcon}
+          </div>
           <div>
-            <h3
-              style={{
-                fontSize: "16px",
-                fontWeight: 700,
-                color: "var(--text-primary)",
-              }}
-            >
+            <h3 className="text-lg font-display font-black text-foreground tracking-tight">
               {cs.platform}
             </h3>
-            <p style={{ fontSize: "12px", color: "var(--text-tertiary)" }}>
-              Gig Worker Credential
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
+              Verifiable Trust Packet
             </p>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className="flex items-center gap-3">
           <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              background: credential.verificationStatus === "failed" ? "rgba(239, 68, 68, 0.15)" : credential.verificationStatus === "pending" ? "rgba(245, 158, 11, 0.15)" : "rgba(16, 185, 129, 0.15)",
-              padding: "4px 10px",
-              borderRadius: "var(--radius-full)",
-              border: `1px solid ${credential.verificationStatus === "failed" ? "rgba(239, 68, 68, 0.3)" : credential.verificationStatus === "pending" ? "rgba(245, 158, 11, 0.3)" : "rgba(16, 185, 129, 0.3)"}`,
-            }}
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+              credential.verificationStatus === "failed" ? "bg-red-500/10 text-red-500" : 
+              credential.verificationStatus === "pending" ? "bg-amber-500/10 text-amber-500" : 
+              "bg-emerald-500/10 text-emerald-600"
+            }`}
           >
             {credential.verificationStatus === 'failed' ? (
-              <span className="text-[11px] font-bold text-red-500">❌ Not verified</span>
+              <span>Not verified</span>
             ) : credential.verificationStatus === 'pending' ? (
-              <span className="text-[11px] font-bold text-amber-500">⏳ Pending Verification</span>
-            ) : credential.verificationStatus === 'verified' ? (
-              <span className="text-[11px] font-bold text-teal-600 flex items-center gap-1">🔒 Signed by {cs.platform}</span>
+              <span>Verification Pending</span>
             ) : (
-              <>
-                <ShieldCheck size={14} color="var(--success-500)" />
-                <span className="text-[11px] font-bold text-teal-600">Verified</span>
-              </>
+              <span className="flex items-center gap-1.5">
+                <ShieldCheck size={12} strokeWidth={3} />
+                Signed {cs.platform}
+              </span>
             )}
           </div>
-          {onTap && <ChevronRight size={18} color="var(--text-tertiary)" />}
+          {onTap && <ChevronRight size={18} className="text-muted-foreground/30 group-hover:text-primary transition-colors" />}
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: "1px",
-          background: "var(--border-color)",
-        }}
-      >
+      <div className="grid grid-cols-3 bg-secondary/30">
         <StatItem
-          icon={<Truck size={18} color={platformColor} />}
+          icon={<Truck size={18} style={{ color: platformColor }} />}
           value={formatNumber(cs.totalDeliveries)}
           label="Deliveries"
         />
         <StatItem
-          icon={<Star size={18} color="#fbbf24" fill="#fbbf24" />}
+          icon={<Star size={18} className="text-amber-500 fill-amber-500" />}
           value={cs.avgRating.toFixed(1)}
           label="Rating"
         />
         <StatItem
-          icon={<IndianRupee size={18} color="var(--success-500)" />}
+          icon={<IndianRupee size={18} className="text-emerald-600" />}
           value={formatCurrency(cs.last6MonthsEarnings)}
-          label="6M Earnings"
+          label="Power Score"
         />
       </div>
 
       {/* Footer */}
-      <div
-        style={{
-          padding: "12px 20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <Calendar size={13} color="var(--text-tertiary)" />
-          <span style={{ fontSize: "11px", color: "var(--text-tertiary)" }}>
+      <div className="px-6 py-4 flex items-center justify-between bg-card text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <Calendar size={13} className="opacity-40" />
+          <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">
             Issued {new Date(credential.issuanceDate || Date.now()).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
           </span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div className="flex items-center gap-4">
           {onDelete && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();
               }}
-              className="p-2 text-red-500/30 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-all"
-              title="Remove Document"
+              className="p-2 text-red-500/20 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-all"
             >
               <Trash2 size={16} />
             </button>
@@ -159,25 +125,7 @@ export function CredentialCard({ credential, onTap, onShare, onDelete }: Credent
                 e.stopPropagation();
                 onShare();
               }}
-              style={{
-                padding: "6px 16px",
-                borderRadius: "var(--radius-full)",
-                border: "none",
-                background: `linear-gradient(135deg, ${platformColor}, ${platformColor}dd)`,
-                color: "white",
-                fontSize: "12px",
-                fontWeight: 600,
-                cursor: "pointer",
-                transition: "transform var(--transition-fast), box-shadow var(--transition-fast)",
-              }}
-              onMouseEnter={(e) => {
-                (e.target as HTMLElement).style.transform = "scale(1.05)";
-                (e.target as HTMLElement).style.boxShadow = `0 4px 12px ${platformColor}44`;
-              }}
-              onMouseLeave={(e) => {
-                (e.target as HTMLElement).style.transform = "scale(1)";
-                (e.target as HTMLElement).style.boxShadow = "none";
-              }}
+              className="px-6 py-2 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
             >
               Share Proof
             </button>
@@ -188,48 +136,12 @@ export function CredentialCard({ credential, onTap, onShare, onDelete }: Credent
   );
 }
 
-function StatItem({
-  icon,
-  value,
-  label,
-}: {
-  icon: React.ReactNode;
-  value: string;
-  label: string;
-}) {
+function StatItem({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
-    <div
-      style={{
-        background: "var(--bg-card)",
-        padding: "14px 12px",
-        textAlign: "center",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "6px",
-      }}
-    >
+    <div className="py-6 flex flex-col items-center gap-2 border-r border-background/20 last:border-0 hover:bg-muted-foreground/5 transition-colors">
       {icon}
-      <span
-        style={{
-          fontSize: "15px",
-          fontWeight: 700,
-          color: "var(--text-primary)",
-          lineHeight: 1,
-        }}
-      >
-        {value}
-      </span>
-      <span
-        style={{
-          fontSize: "10px",
-          color: "var(--text-tertiary)",
-          textTransform: "uppercase",
-          letterSpacing: "0.05em",
-        }}
-      >
-        {label}
-      </span>
+      <span className="text-base font-black text-foreground tracking-tight font-display">{value}</span>
+      <span className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest leading-none">{label}</span>
     </div>
   );
 }

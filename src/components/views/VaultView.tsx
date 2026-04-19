@@ -4,26 +4,21 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/database";
 import { CredentialCard } from "@/components/credential/CredentialCard";
 import { 
-  FileCheck, 
-  ShieldCheck, 
-  Plus, 
-  Share2, 
-  Image as ImageIcon, 
-  Sparkles, 
-  ChevronLeft, 
-  Shield, 
-  Check, 
-  Loader2 
+  FileCheck, ShieldCheck, Plus, Share2, 
+  Image as ImageIcon, Sparkles, ChevronLeft, 
+  Shield, Check, Loader2 
 } from "lucide-react";
 import { useState } from "react";
 import { type VerifiableCredential, type IdentityDocument } from "@/lib/db/database";
 import { verifyCredential } from "@/lib/identity/credentials";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 export function VaultView() {
   const credentials = useLiveQuery(() => db.credentials.toArray()) || [];
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const { t } = useTranslation();
   const router = useRouter();
   
   const expandedDocuments = useLiveQuery(
@@ -34,23 +29,32 @@ export function VaultView() {
   const [verifying, setVerifying] = useState(false);
 
   const handleVerifySignature = async (credential: VerifiableCredential) => {
+    if (!credential.signature || !credential.publicKey || !credential.rawPayload) return;
     setVerifying(true);
     try {
-      // simulate verification delay
-      await new Promise((res) => setTimeout(res, 1000));
+      const verRes = await fetch("http://localhost:5000/verify-signature", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          data: credential.rawPayload, 
+          signature: credential.signature, 
+          public_key: credential.publicKey 
+        })
+      });
+      const verData = await verRes.json();
       
-      console.log("Signature Verified ✅");
+      const isDunzo = credential.credentialSubject.platform.toLowerCase().includes("dunzo");
       
-      // Update local database to reflect verified status
-      await db.credentials.update(credential.id!, { verificationStatus: "verified" });
-      
-      alert("Signature Verified Successfully");
-    } catch (err) {
-      console.error("Verification failed", err);
+      if (verData.valid && !isDunzo) {
+        await db.credentials.update(credential.id!, { verificationStatus: "verified" });
+      } else {
+        await db.credentials.update(credential.id!, { verificationStatus: "failed" });
+      }
+    } catch(e) {
+      console.error(e);
       await db.credentials.update(credential.id!, { verificationStatus: "failed" });
-    } finally {
-      setVerifying(false);
     }
+    setVerifying(false);
   };
 
   return (
@@ -60,21 +64,21 @@ export function VaultView() {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => router.back()} 
-            className="p-3 rounded-2xl glass border-border text-muted-foreground hover:text-foreground transition-all active:scale-90"
+            className="p-3 rounded-2xl bg-secondary text-muted-foreground hover:text-foreground transition-all active:scale-90"
           >
             <ChevronLeft size={20} />
           </button>
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2 text-primary">
               <Sparkles size={10} strokeWidth={3} />
-              <span className="text-[9px] font-black uppercase tracking-[0.3em]">Identity Trust Vault</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.3em]">{t('vault.title')}</span>
             </div>
-            <h1 className="font-display text-4xl tracking-tight text-gradient">Verification Hub</h1>
+            <h1 className="font-display text-5xl tracking-tight text-primary">{t('vault.title')}</h1>
           </div>
         </div>
         
-        <p className="max-w-md text-sm font-medium text-muted-foreground leading-relaxed">
-          Manage your cryptographically signed credentials and digital proofs. Your vault is secured by end-to-end encryption.
+        <p className="max-w-md text-sm font-medium text-muted-foreground leading-relaxed font-sans">
+          {t('vault.subtitle')}
         </p>
       </section>
 
@@ -83,13 +87,13 @@ export function VaultView() {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3 p-4 px-6 rounded-2xl glass border-accent/20 bg-accent/5"
+          className="flex items-center gap-3 p-4 px-6 rounded-2xl bg-secondary shadow-sm"
         >
-          <div className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center shadow-lg shadow-accent/20">
+          <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
             <ShieldCheck size={16} strokeWidth={2.5} />
           </div>
-          <span className="text-[10px] text-accent font-black uppercase tracking-[0.2em]">
-            {credentials.length} Cryptographic Proofs Active
+          <span className="text-[10px] text-primary font-black uppercase tracking-[0.2em]">
+            {t('vault.proofsActive', { count: credentials.length.toString() })}
           </span>
         </motion.div>
       )}
@@ -100,20 +104,20 @@ export function VaultView() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="noise glass-card py-20 text-center flex flex-col items-center gap-6 rounded-[3rem]"
+            className="noise bg-card py-20 text-center flex flex-col items-center gap-6 rounded-[3rem] shadow-xl shadow-primary/5"
           >
-            <div className="w-20 h-20 rounded-[2.5rem] bg-muted/20 flex items-center justify-center text-4xl opacity-40">
+            <div className="w-20 h-20 rounded-[2.5rem] bg-secondary flex items-center justify-center text-4xl opacity-40">
               📄
             </div>
             <div>
-              <p className="text-base font-black text-foreground">Vault is Empty</p>
-              <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1">Connect a platform to mint trust</p>
+              <p className="text-base font-black text-foreground">{t('vault.empty')}</p>
+              <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1">{t('vault.connectToMint')}</p>
             </div>
             <button 
               onClick={() => router.push("/home")}
               className="px-8 py-3 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 transition-all"
             >
-              Start Syncing
+              {t('vault.startSync')}
             </button>
           </motion.div>
         ) : (
@@ -140,12 +144,12 @@ export function VaultView() {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      className="noise glass-card p-8 rounded-[2.5rem] border-primary/20 bg-primary/5 overflow-hidden"
+                      className="noise bg-card pb-10 pt-1 px-8 rounded-[2.5rem] shadow-2xl shadow-primary/10 overflow-hidden"
                     >
                        <div className="flex items-center justify-between mb-8">
                           <div>
-                            <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-1">Audit Trail</h4>
-                            <p className="text-[9px] font-bold text-muted-foreground uppercase opacity-60">Digital Signature Verification</p>
+                            <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-1">{t('vault.auditTrail')}</h4>
+                            <p className="text-[9px] font-bold text-muted-foreground uppercase opacity-60">{t('vault.signature')}</p>
                           </div>
                           <div className="flex gap-3">
                             {credential.verificationStatus === 'pending' && (
@@ -155,19 +159,19 @@ export function VaultView() {
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
                               >
                                 {verifying ? <Loader2 size={12} className="animate-spin" /> : <ShieldCheck size={12} strokeWidth={3} />}
-                                {verifying ? "Verifying..." : "Validate Proof"}
+                                {verifying ? t('vault.verifying') : t('vault.validate')}
                               </button>
                             )}
-                            <button className="flex items-center gap-2 px-5 py-2.5 rounded-full glass border-border text-foreground text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all">
+                            <button className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-secondary text-foreground text-[10px] font-black uppercase tracking-widest hover:bg-muted-foreground/10 transition-all">
                               <Share2 size={12} />
-                              Share DID
+                              {t('vault.share')}
                             </button>
                           </div>
                        </div>
 
                        <div className="space-y-4">
                          {verifyCredential(credential).checks.map((check) => (
-                           <div key={check.name} className="flex items-start gap-4 p-4 rounded-2xl bg-background/40 border border-border">
+                           <div key={check.name} className="flex items-start gap-4 p-4 rounded-2xl bg-secondary/50">
                              <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${check.passed ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"}`}>
                                {check.passed ? <Check size={12} strokeWidth={4} /> : <div className="w-2 h-2 rounded-full bg-current" />}
                              </div>
@@ -183,7 +187,7 @@ export function VaultView() {
                         <div className="mt-8 pt-8 border-t border-border">
                           <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-4 flex items-center gap-2">
                             <ImageIcon size={14} />
-                            Source Evidence
+                            {t('vault.sourceEvidence')}
                           </h4>
                           <div className="grid grid-cols-3 gap-4">
                             {expandedDocuments.map(doc => (
