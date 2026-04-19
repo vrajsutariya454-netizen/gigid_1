@@ -56,7 +56,7 @@ export const AVAILABLE_PLATFORMS: PlatformInfo[] = [
 export async function connectPlatform(
   platformId: string,
   userDid: string
-): Promise<{ success: boolean; data?: unknown; error?: string }> {
+): Promise<{ success: boolean; data?: any; error?: string; verificationData?: any }> {
   const platform = AVAILABLE_PLATFORMS.find((p) => p.id === platformId);
   if (!platform) {
     return { success: false, error: "Platform not found" };
@@ -66,17 +66,27 @@ export async function connectPlatform(
     // Simulate OAuth flow delay
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // Fetch mock data (used only for metadata, not for DB writes)
+    // Fetch mock data
     const response = await fetch(platform.apiEndpoint);
     if (!response.ok) throw new Error("Failed to fetch platform data");
 
-    const data = await response.json();
+    const payload = await response.json();
+    const { data, signature, public_key, signed_at } = payload;
+    
+    // All documents start as 'pending' until the user manually triggers verification
+    const verificationStatus = "pending";
 
-    // NOTE: All DB writes (platform entry, work records, credentials)
-    // are handled by ConnectPlatformDialog with proper duration scoping.
-    // This function only simulates the OAuth handshake and returns data.
-
-    return { success: true, data };
+    return { 
+      success: true, 
+      data,
+      verificationData: { 
+        signature, 
+        public_key, 
+        signedAt: signed_at, 
+        verificationStatus,
+        rawPayload: data // Required to mathematically prove the payload matches signature
+      }
+    };
   } catch (error) {
     return {
       success: false,

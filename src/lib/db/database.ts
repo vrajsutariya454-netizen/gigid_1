@@ -46,6 +46,16 @@ export interface ManualScoringData {
   verifiedInflow?: number;
 }
 
+export interface IdentityDocument {
+  id?: number;
+  credentialId: string;
+  name: string;
+  mimeType: string;
+  data: string;
+  uploadedAt: Date;
+  verification?: "pending" | "verified";
+}
+
 export interface VerifiableCredential {
   id?: number;
   credentialId: string;
@@ -71,6 +81,11 @@ export interface VerifiableCredential {
     verificationMethod: string;
     jws?: string;
   };
+  signature?: string;
+  publicKey?: string;
+  signedAt?: Date;
+  rawPayload?: any;
+  verificationStatus?: 'verified' | 'failed' | 'pending';
   status: "active" | "revoked" | "expired";
 }
 
@@ -101,11 +116,12 @@ export class GigIDDatabase extends Dexie {
   syncQueue!: Table<SyncQueueItem>;
   settings!: Table<AppSetting>;
   manualScoringData!: Table<ManualScoringData>;
+  documents!: Table<IdentityDocument>;
 
   constructor() {
     super("GigIDDatabase");
 
-    this.version(3).stores({
+    this.version(4).stores({
       profiles: "++id, did",
       platforms: "++id, platformId, name, connected",
       workRecords: "++id, instanceId, platformId, month",
@@ -113,6 +129,7 @@ export class GigIDDatabase extends Dexie {
       syncQueue: "++id, action, status, createdAt",
       settings: "++id, &key",
       manualScoringData: "++id, &month",
+      documents: "++id, credentialId",
     });
   }
 }

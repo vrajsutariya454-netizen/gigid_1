@@ -76,16 +76,24 @@ export function CredentialCard({ credential, onTap, onShare, onDelete }: Credent
               display: "flex",
               alignItems: "center",
               gap: "4px",
-              background: "rgba(16, 185, 129, 0.15)",
+              background: credential.verificationStatus === "failed" ? "rgba(239, 68, 68, 0.15)" : credential.verificationStatus === "pending" ? "rgba(245, 158, 11, 0.15)" : "rgba(16, 185, 129, 0.15)",
               padding: "4px 10px",
               borderRadius: "var(--radius-full)",
-              border: "1px solid rgba(16, 185, 129, 0.3)",
+              border: `1px solid ${credential.verificationStatus === "failed" ? "rgba(239, 68, 68, 0.3)" : credential.verificationStatus === "pending" ? "rgba(245, 158, 11, 0.3)" : "rgba(16, 185, 129, 0.3)"}`,
             }}
           >
-            <ShieldCheck size={14} color="var(--success-500)" />
-            <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--success-500)" }}>
-              Verified
-            </span>
+            {credential.verificationStatus === 'failed' ? (
+              <span className="text-[11px] font-bold text-red-500">❌ Not verified</span>
+            ) : credential.verificationStatus === 'pending' ? (
+              <span className="text-[11px] font-bold text-amber-500">⏳ Pending Verification</span>
+            ) : credential.verificationStatus === 'verified' ? (
+              <span className="text-[11px] font-bold text-teal-600 flex items-center gap-1">🔒 Signed by {cs.platform}</span>
+            ) : (
+              <>
+                <ShieldCheck size={14} color="var(--success-500)" />
+                <span className="text-[11px] font-bold text-teal-600">Verified</span>
+              </>
+            )}
           </div>
           {onTap && <ChevronRight size={18} color="var(--text-tertiary)" />}
         </div>
@@ -129,7 +137,7 @@ export function CredentialCard({ credential, onTap, onShare, onDelete }: Credent
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <Calendar size={13} color="var(--text-tertiary)" />
           <span style={{ fontSize: "11px", color: "var(--text-tertiary)" }}>
-            Issued {new Date(credential.issuanceDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+            Issued {new Date(credential.issuanceDate || Date.now()).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>

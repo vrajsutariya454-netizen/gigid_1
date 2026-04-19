@@ -6,7 +6,7 @@
 export interface Transaction {
   amount: number;
   timestamp: Date;
-  source: 'platform' | 'bank' | 'manual' | 'aa_verified';
+  source: 'platform' | 'bank' | 'screenshot' | 'verified_screenshot' | 'manual' | 'aa_verified' | 'unknown' | 'pending';
 }
 
 export interface AAData {
@@ -31,12 +31,15 @@ export interface ScoreBreakdown {
   finalScore: number;  // T
 }
 
-export const RELIABILITY_WEIGHTS = {
-  aa_verified: 1.0,
-  platform: 0.9,
-  bank: 0.7,
-  unknown: 0.5,
-  manual: 0.3
+export const RELIABILITY_WEIGHTS: Record<Transaction['source'], number> = {
+  platform: 1.0,         // Direct API / Cryptographically Signed
+  bank: 0.9,             // Bank matched
+  verified_screenshot: 0.8, // Screenshot verified by backend
+  screenshot: 0.5,       // Raw screenshot uploaded
+  manual: 0.3,           // User entered manually
+  aa_verified: 1.0,      // Account Aggregator / Digital Signature
+  unknown: 0.0,
+  pending: 0.0
 };
 
 const REFERENCE_INCOME = 50000;

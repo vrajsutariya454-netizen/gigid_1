@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { signData } from "@/lib/services/crypto-mock";
 
 export async function GET() {
   // Simulate API latency
@@ -27,5 +28,5 @@ export async function GET() {
     lastActive: new Date().toISOString(),
   };
 
-  return NextResponse.json(data);
+  return NextResponse.json(signData("zomato", data));
 }

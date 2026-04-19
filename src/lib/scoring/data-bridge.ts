@@ -11,6 +11,8 @@ export async function getLiveTrustScore(): Promise<ScoreBreakdown> {
   const manualData = await db.manualScoringData.toArray();
   const allPlatforms = await db.platforms.toArray();
   const platforms = allPlatforms.filter(p => p.connected);
+  const credentials = await db.credentials.toArray();
+  const documents = await db.documents.toArray();
 
   // 1. Check if we have any data (real or manual)
   const hasData = workRecords.length > 0 || manualData.length > 0 || platforms.length > 0;
@@ -33,24 +35,46 @@ export async function getLiveTrustScore(): Promise<ScoreBreakdown> {
   }
 
   // 2. Merge Data
-  const mergedMap = new Map<string, { income: number, days: number, verified: number }>();
+  const mergedMap = new Map<string, { income: number, days: number, verified: number, source: Transaction['source'] }>();
 
   // Add manual/seeded data
   manualData.forEach(m => {
     mergedMap.set(m.month, { 
       income: m.income, 
       days: m.activeDays, 
-      verified: m.verifiedInflow || 0 
+      verified: m.verifiedInflow || 0,
+      source: 'manual'
     });
   });
 
+  const getSource = (instanceId: number, platformId: string, platformName: string): Transaction['source'] => {
+    const vc = credentials.find(c => c.credentialSubject?.platform.includes(platformName.split(" ")[0]));
+    
+    if (!platformId.startsWith("manual_")) {
+      // It's API driven! Look at cryptographic signature
+      if (vc?.verificationStatus === 'pending') return "pending";
+      if (vc?.verificationStatus === 'verified') return "platform"; // mathematically verified via signature
+      return "unknown"; // Unverified/Tampered API data
+    }
+    
+    if (!vc) return "manual";
+    const platformDocs = documents.filter(d => d.credentialId === vc.credentialId);
+    if (platformDocs.length === 0) return "manual";
+    return platformDocs.some(d => d.verification === "verified") ? "verified_screenshot" : "screenshot";
+  };
+
   // Overlay with Platform records
   workRecords.forEach(w => {
-    const existing = mergedMap.get(w.month) || { income: 0, days: 0, verified: 0 };
+    const p = platforms.find(pl => pl.id === w.instanceId);
+    const source = p ? getSource(w.instanceId, w.platformId, p.name) : 'manual';
+    
+    const existing = mergedMap.get(w.month) || { income: 0, days: 0, verified: 0, source: 'manual' };
     mergedMap.set(w.month, {
       income: existing.income + w.earnings,
       days: Math.max(existing.days, (w.trips / 5)), 
-      verified: existing.verified + w.earnings
+      verified: existing.verified + w.earnings,
+      // Upgrade source if this record is stronger
+      source: source === 'platform' ? 'platform' : (source === 'verified_screenshot' && existing.source !== 'platform') ? 'verified_screenshot' : (source === 'screenshot' && existing.source === 'manual') ? 'screenshot' : existing.source
     });
   });
 
@@ -84,7 +108,7 @@ export async function getLiveTrustScore(): Promise<ScoreBreakdown> {
     transactions.push({
       amount: data.income,
       timestamp: date,
-      source: 'aa_verified'
+      source: data.source
     });
   });
 
