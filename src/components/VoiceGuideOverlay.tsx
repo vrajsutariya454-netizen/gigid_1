@@ -13,7 +13,7 @@ const ROUTE_MAP: Partial<Record<VoiceCommand, string>> = {
   SHARE_PROOF: "/share",
   SHOW_SETTINGS: "/settings",
   SHOW_PROFILE: "/profile",
-  SHOW_DASHBOARD: "/dashboard",
+  GO_DASHBOARD: "/dashboard",
   CONNECT_PLATFORM: "/platforms",
 };
 
@@ -35,7 +35,7 @@ export function VoiceGuideOverlay() {
     const engine = new SpeechEngine();
     setIsSupported(engine.isSupported);
     
-    engine.setOnStatusChange((listening) => {
+    engine.setOnStateChange((listening) => {
       setVoiceActive(listening);
       if (listening) {
         setStatus("listening");

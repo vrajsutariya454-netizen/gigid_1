@@ -14,5 +14,18 @@ if (typeof window !== 'undefined') {
 
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co', 
-  supabaseAnonKey || 'placeholder'
+  supabaseAnonKey || 'placeholder',
+  {
+    global: {
+      fetch: (...args) => {
+        return fetch(...args).catch(err => {
+          console.warn('Supabase fetch failed (likely due to mock credentials or network issue):', err.message);
+          return new Response(JSON.stringify({ error: 'fetch_failed', message: err.message }), {
+            status: 502,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        });
+      }
+    }
+  }
 )

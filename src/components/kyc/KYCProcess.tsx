@@ -616,7 +616,17 @@ export function KYCProcess() {
   );
 }
 
-function InputField({ label, value, onChange, placeholder, type = "text", maxLength, isMonospace }: any) {
+interface InputFieldProps {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+  type?: string;
+  maxLength?: number;
+  isMonospace?: boolean;
+}
+
+function InputField({ label, value, onChange, placeholder, type = "text", maxLength, isMonospace }: InputFieldProps) {
   return (
     <div className="flex flex-col gap-2 group">
       <label className="text-[9px] font-black uppercase tracking-widest text-primary ml-2">{label}</label>
@@ -632,7 +642,14 @@ function InputField({ label, value, onChange, placeholder, type = "text", maxLen
   );
 }
 
-function DocumentUpload({ label, description, isUploaded, onUpload }: any) {
+interface DocumentUploadProps {
+  label: string;
+  description: string;
+  isUploaded: boolean;
+  onUpload: () => void;
+}
+
+function DocumentUpload({ label, description, isUploaded, onUpload }: DocumentUploadProps) {
   return (
     <div className={`noise glass-card overflow-hidden rounded-[2.5rem] border-dashed border-2 aspect-[1.7/1] flex flex-col items-center justify-center transition-all relative ${isUploaded ? 'border-accent/40 bg-accent/5' : 'border-border/60 bg-muted/5 hover:border-primary/40'}`}>
       {isUploaded ? (

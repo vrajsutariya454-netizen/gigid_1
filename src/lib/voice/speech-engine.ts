@@ -10,6 +10,7 @@ export type VoiceCommand =
   | "SHOW_SETTINGS"
   | "CONNECT_PLATFORM"
   | "SHOW_PROFILE"
+  | "SHOW_HELP"
   | "UNKNOWN";
 
 interface CommandMapping {
@@ -18,6 +19,15 @@ interface CommandMapping {
 }
 
 const COMMAND_MAPPINGS: CommandMapping[] = [
+  {
+    command: "SHOW_HELP",
+    patterns: {
+      en: ["help", "show help", "what can i say", "commands"],
+      hi: ["मदद", "सहायता"],
+      ta: ["உதவி", "உதவி காட்டு"],
+      bn: ["সাহায্য", "সাহায্য দেখাও"],
+    },
+  },
   {
     command: "GO_HOME",
     patterns: {
@@ -249,6 +259,7 @@ export class SpeechEngine {
   private isListening = false;
   private onResult: ((transcript: string, command: VoiceCommand) => void) | null = null;
   private onStateChange: ((listening: boolean) => void) | null = null;
+  private onError: (() => void) | null = null;
 
   constructor() {
     if (typeof window !== "undefined") {
@@ -279,6 +290,10 @@ export class SpeechEngine {
     this.onStateChange = callback;
   }
 
+  setOnError(callback: () => void) {
+    this.onError = callback;
+  }
+
   startListening(locale: string = "en-IN"): void {
     if (!this.recognition || this.isListening) return;
 
@@ -303,6 +318,7 @@ export class SpeechEngine {
     this.recognition.onerror = () => {
       this.isListening = false;
       this.onStateChange?.(false);
+      this.onError?.();
     };
 
     try {

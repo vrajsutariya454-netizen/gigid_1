@@ -3,6 +3,24 @@ export type TranslationKey = keyof typeof translations.en;
 export const translations = {
   en: {
 
+    // App metadata
+    "app.name": "GigID",
+    "app.tagline": "Your Work, Your Identity",
+    "app.description": "The premium digital hub for gig workers to track earnings, build verifiable trust, and showcase experience with complete privacy.",
+    "app.beta_notice": "Now in private beta",
+    "app.hero_title_1": "Your work,",
+    "app.hero_title_2": "your identity.",
+    "app.claim_hub": "Claim your hub",
+    "app.watch_demo": "Watch the demo",
+
+    // Onboarding
+    "onboarding.title": "Welcome to GigID",
+    "onboarding.subtitle": "Your identity, secured.",
+    "onboarding.step1": "Connect Platforms",
+    "onboarding.step2": "Build Trust Score",
+    "onboarding.step3": "Share & Verify",
+    "onboarding.cta": "Get Started",
+
     // Navigation
     "nav.dashboard": "Dashboard",
     "nav.home": "Home",
@@ -236,9 +254,51 @@ export const translations = {
     "auth.google": "Continue with Google",
     "auth.noAccount": "Don't have an account? Sign up",
     "auth.haveAccount": "Already have an account? Sign In",
-    "auth.or": "or"
+    "auth.or": "or",
+    "auth.welcome_back": "Welcome back",
+    "auth.create_profile": "Create Profile",
+    "auth.sign_in_desc": "Sign in to manage your digital identity",
+    "auth.start_journey": "Start your professional journey",
+    "auth.full_name": "Full Name",
+    "auth.username": "Username",
+    "auth.forgot_password": "Forgot?",
+    "auth.processing": "Processing...",
+    "auth.create_account": "Create Account",
+    "auth.access_hub": "Access Hub",
+    "auth.continue_google": "Continue with Google",
+    "auth.no_account": "Don't have an account? Sign up",
+    "auth.has_account": "Already have an account? Sign in",
+
+    // Nav extended
+    "nav.features": "Features",
+    "nav.security": "Security",
+    "nav.enterprise": "Enterprise",
+    "nav.pricing": "Pricing",
+    "nav.get_access": "Get access",
+
+    // Stats extended
+    "stats.earnings_tracked": "Earnings tracked",
+    "stats.verified_workers": "Verified workers"
   },
   hi: {
+
+    // App metadata
+    "app.name": "GigID",
+    "app.tagline": "आपका काम, आपकी पहचान",
+    "app.description": "गिग वर्कर्स के लिए कमाई ट्रैक करने, सत्यापन योग्य विश्वास बनाने और पूर्ण गोपनीयता के साथ अनुभव प्रदर्शित करने का प्रीमियम हब।",
+    "app.beta_notice": "अब निजी बीटा में",
+    "app.hero_title_1": "आपका काम,",
+    "app.hero_title_2": "आपकी पहचान।",
+    "app.claim_hub": "अपना हब क्लेम करें",
+    "app.watch_demo": "डेमो देखें",
+
+    // Onboarding
+    "onboarding.title": "GigID में आपका स्वागत है",
+    "onboarding.subtitle": "आपकी पहचान, सुरक्षित।",
+    "onboarding.step1": "प्लेटफॉर्म जोड़ें",
+    "onboarding.step2": "ट्रस्ट स्कोर बनाएं",
+    "onboarding.step3": "साझा करें और सत्यापित करें",
+    "onboarding.cta": "शुरू करें",
 
     // Navigation
     "nav.dashboard": "डैशबोर्ड",
@@ -473,9 +533,51 @@ export const translations = {
     "auth.google": "गूगल के साथ जारी रखें",
     "auth.noAccount": "खाता नहीं है? साइन अप करें",
     "auth.haveAccount": "पहले से खाता है? साइन इन करें",
-    "auth.or": "या"
+    "auth.or": "या",
+    "auth.welcome_back": "वापसी पर स्वागत है",
+    "auth.create_profile": "प्रोफ़ाइल बनाएं",
+    "auth.sign_in_desc": "अपनी डिजिटल पहचान प्रबंधित करने के लिए साइन इन करें",
+    "auth.start_journey": "अपनी व्यावसायिक यात्रा शुरू करें",
+    "auth.full_name": "पूरा नाम",
+    "auth.username": "उपयोगकर्ता नाम",
+    "auth.forgot_password": "भूल गए?",
+    "auth.processing": "प्रसंस्करण...",
+    "auth.create_account": "खाता बनाएं",
+    "auth.access_hub": "हब एक्सेस करें",
+    "auth.continue_google": "गूगल के साथ जारी रखें",
+    "auth.no_account": "खाता नहीं है? साइन अप करें",
+    "auth.has_account": "पहले से खाता है? साइन इन करें",
+
+    // Nav extended
+    "nav.features": "सुविधाएं",
+    "nav.security": "सुरक्षा",
+    "nav.enterprise": "एंटरप्राइज़",
+    "nav.pricing": "मूल्य निर्धारण",
+    "nav.get_access": "एक्सेस पाएं",
+
+    // Stats extended
+    "stats.earnings_tracked": "ट्रैक की गई कमाई",
+    "stats.verified_workers": "सत्यापित कर्मचारी"
   },
   ta: {
+
+    // App metadata
+    "app.name": "GigID",
+    "app.tagline": "உங்கள் பணி, உங்கள் அடையாளம்",
+    "app.description": "கிக் தொழிலாளர்களுக்கான வருவாய் கண்காணிக்கவும், நம்பகமான அடையாளம் உருவாக்கவும் உதவும் பிரீமியம் டிஜிட்டல் மையம்.",
+    "app.beta_notice": "இப்போது தனியார் பீட்டாவில்",
+    "app.hero_title_1": "உங்கள் பணி,",
+    "app.hero_title_2": "உங்கள் அடையாளம்.",
+    "app.claim_hub": "உங்கள் மையத்தைப் பெறுங்கள்",
+    "app.watch_demo": "டெமோவைப் பாருங்கள்",
+
+    // Onboarding
+    "onboarding.title": "GigID-க்கு வரவேற்கிறோம்",
+    "onboarding.subtitle": "உங்கள் அடையாளம், பாதுகாப்பாக.",
+    "onboarding.step1": "தளங்களை இணைக்கவும்",
+    "onboarding.step2": "நம்பிக்கை மதிப்பெண் உருவாக்கவும்",
+    "onboarding.step3": "பகிர்ந்து சரிபார்க்கவும்",
+    "onboarding.cta": "தொடங்குங்கள்",
 
     // Navigation
     "nav.dashboard": "டாஷ்போர்டு",
@@ -710,9 +812,51 @@ export const translations = {
     "auth.google": "கூகிள் மூலம் தொடரவும்",
     "auth.noAccount": "கணக்கு இல்லையா? பதிவு செய்யவும்",
     "auth.haveAccount": "ஏற்கனவே கணக்கு உள்ளதா? உள்நுழைக",
-    "auth.or": "அல்லது"
+    "auth.or": "அல்லது",
+    "auth.welcome_back": "மீண்டும் வரவேற்கிறோம்",
+    "auth.create_profile": "சுயவிவரம் உருவாக்கவும்",
+    "auth.sign_in_desc": "உங்கள் டிஜிட்டல் அடையாளத்தை நிர்வகிக்க உள்நுழையவும்",
+    "auth.start_journey": "உங்கள் தொழில்முறை பயணத்தைத் தொடங்குங்கள்",
+    "auth.full_name": "முழு பெயர்",
+    "auth.username": "பயனர்பெயர்",
+    "auth.forgot_password": "மறந்துவிட்டதா?",
+    "auth.processing": "செயலாக்கம்...",
+    "auth.create_account": "கணக்கு உருவாக்கவும்",
+    "auth.access_hub": "மையத்தை அணுகவும்",
+    "auth.continue_google": "Google மூலம் தொடரவும்",
+    "auth.no_account": "கணக்கு இல்லையா? பதிவு செய்யவும்",
+    "auth.has_account": "ஏற்கனவே கணக்கு உள்ளதா? உள்நுழைக",
+
+    // Nav extended
+    "nav.features": "அம்சங்கள்",
+    "nav.security": "பாதுகாப்பு",
+    "nav.enterprise": "நிறுவனம்",
+    "nav.pricing": "விலை நிர்ணயம்",
+    "nav.get_access": "அணுகல் பெறவும்",
+
+    // Stats extended
+    "stats.earnings_tracked": "கண்காணிக்கப்பட்ட வருவாய்",
+    "stats.verified_workers": "சரிபார்க்கப்பட்ட தொழிலாளர்கள்"
   },
   bn: {
+
+    // App metadata
+    "app.name": "GigID",
+    "app.tagline": "আপনার কাজ, আপনার পরিচয়",
+    "app.description": "গিগ কর্মীদের জন্য উপার্জন ট্র্যাক করতে, যাচাইযোগ্য বিশ্বাস তৈরি করতে এবং সম্পূর্ণ গোপনীয়তার সাথে অভিজ্ঞতা প্রদর্শনের প্রিমিয়াম ডিজিটাল হাব।",
+    "app.beta_notice": "এখন প্রাইভেট বিটাতে",
+    "app.hero_title_1": "আপনার কাজ,",
+    "app.hero_title_2": "আপনার পরিচয়।",
+    "app.claim_hub": "আপনার হাব দাবি করুন",
+    "app.watch_demo": "ডেমো দেখুন",
+
+    // Onboarding
+    "onboarding.title": "GigID-এ স্বাগতম",
+    "onboarding.subtitle": "আপনার পরিচয়, সুরক্ষিত।",
+    "onboarding.step1": "প্ল্যাটফর্ম সংযুক্ত করুন",
+    "onboarding.step2": "ট্রাস্ট স্কোর তৈরি করুন",
+    "onboarding.step3": "শেয়ার করুন এবং যাচাই করুন",
+    "onboarding.cta": "শুরু করুন",
 
     // Navigation
     "nav.dashboard": "ড্যাশবোর্ড",
@@ -947,6 +1091,30 @@ export const translations = {
     "auth.google": "গুগল দিয়ে চালিয়ে যান",
     "auth.noAccount": "অ্যাকাউন্ট নেই? সাইন আপ করুন",
     "auth.haveAccount": "ইতিমধ্যেই অ্যাকাউন্ট আছে? সাইন ইন করুন",
-    "auth.or": "অথবা"
+    "auth.or": "অথবা",
+    "auth.welcome_back": "স্বাগতম",
+    "auth.create_profile": "প্রোফাইল তৈরি করুন",
+    "auth.sign_in_desc": "আপনার ডিজিটাল পরিচয় পরিচালনা করতে সাইন ইন করুন",
+    "auth.start_journey": "আপনার পেশাদার যাত্রা শুরু করুন",
+    "auth.full_name": "পূর্ণ নাম",
+    "auth.username": "ব্যবহারকারীর নাম",
+    "auth.forgot_password": "ভুলে গেছেন?",
+    "auth.processing": "প্রক্রিয়াকরণ...",
+    "auth.create_account": "অ্যাকাউন্ট তৈরি করুন",
+    "auth.access_hub": "হাব অ্যাক্সেস করুন",
+    "auth.continue_google": "Google দিয়ে চালিয়ে যান",
+    "auth.no_account": "অ্যাকাউন্ট নেই? সাইন আপ করুন",
+    "auth.has_account": "ইতিমধ্যেই অ্যাকাউন্ট আছে? সাইন ইন করুন",
+
+    // Nav extended
+    "nav.features": "বৈশিষ্ট্য",
+    "nav.security": "নিরাপত্তা",
+    "nav.enterprise": "এন্টারপ্রাইজ",
+    "nav.pricing": "মূল্য নির্ধারণ",
+    "nav.get_access": "অ্যাক্সেস পান",
+
+    // Stats extended
+    "stats.earnings_tracked": "ট্র্যাক করা উপার্জন",
+    "stats.verified_workers": "যাচাইকৃত কর্মী"
   }
 };
