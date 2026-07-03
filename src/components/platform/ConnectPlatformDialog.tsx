@@ -32,7 +32,7 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
   const { t } = useTranslation();
 
   // Real-time parity with database
-  const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
+  const platforms = useLiveQuery(() => db.platforms.where("userId").equals(did || "").toArray()) || [];
   const dbConnectedIds = platforms.filter(p => p.connected).map(p => p.platformId);
 
   const [step, setStep] = useState<"select" | "duration" | "consent" | "connecting" | "manual" | "success">("select");
@@ -62,7 +62,7 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
 
   const handleDisconnect = async (e: React.MouseEvent, platformId: string) => {
     e.stopPropagation();
-    const instances = await db.platforms.where("platformId").equals(platformId).toArray();
+    const instances = await db.platforms.where("platformId").equals(platformId).and(p => p.userId === did).toArray();
     if (instances.length === 0) return;
 
     const instanceNames = instances.map(p => p.name).join(", ");
@@ -128,6 +128,7 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
       }
 
       const instanceId = await db.platforms.add({
+        userId: did || undefined,
         platformId,
         name: `${manualName} (${months}m)`,
         icon: "📄",
@@ -144,6 +145,7 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
         avgRating: rating,
         last6MonthsEarnings: totalEarnings
       });
+      vc.userId = did || undefined;
       vc.instanceId = instanceId as number; // Link credential → platform row
       await db.credentials.add(vc);
 
@@ -253,6 +255,7 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
 
       if (result.success) {
         const instanceId = await db.platforms.add({
+          userId: did || undefined,
           platformId: selectedPlatform.id,
           name: `${selectedPlatform.name} (${selectedDuration}m)`,
           icon: selectedPlatform.icon,
@@ -278,6 +281,7 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
           vc.rawPayload = result.verificationData.rawPayload;
         }
 
+        vc.userId = did || undefined;
         vc.instanceId = instanceId as number; // Link credential → platform row
         await db.credentials.add(vc);
 
@@ -294,6 +298,7 @@ export function ConnectPlatformDialog({ open, onClose, onConnected }: ConnectPla
           const variance = 0.85 + Math.random() * 0.3;
           const monthTrips = Math.round(baseMonthlyTrips * variance);
           await db.workRecords.add({
+            userId: did || undefined,
             instanceId: instanceId as number,
             platformId: selectedPlatform.id,
             month,

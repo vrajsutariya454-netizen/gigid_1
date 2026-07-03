@@ -13,11 +13,13 @@ import { type VerifiableCredential, type IdentityDocument } from "@/lib/db/datab
 import { verifyCredential } from "@/lib/identity/credentials";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAppStore } from "@/lib/store/app-store";
 import { useTranslation } from "@/lib/i18n/use-translation";
 import { getBackendUrl } from "@/lib/services/backend-api";
 
 export function VaultView() {
-  const credentials = useLiveQuery(() => db.credentials.toArray()) || [];
+  const { did } = useAppStore();
+  const credentials = useLiveQuery(() => db.credentials.where("userId").equals(did || "").toArray(), [did]) || [];
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const { t } = useTranslation();
   const router = useRouter();

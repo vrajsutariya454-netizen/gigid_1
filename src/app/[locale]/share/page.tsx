@@ -13,13 +13,15 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAppStore } from "@/lib/store/app-store";
 
 function SharePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { did } = useAppStore();
   const preselectedId = searchParams.get("credentialId");
 
-  const credentials = useLiveQuery(() => db.credentials.toArray()) || [];
+  const credentials = useLiveQuery(() => db.credentials.where("userId").equals(did || "").toArray(), [did]) || [];
   const [selectedCredential, setSelectedCredential] = useState<VerifiableCredential | null>(null);
   const [selectedPredicate, setSelectedPredicate] = useState<ZKPPredicate | null>(null);
   const [proof, setProof] = useState<ZKProof | null>(null);

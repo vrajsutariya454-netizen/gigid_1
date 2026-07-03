@@ -16,8 +16,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "@/lib/i18n/use-translation";
 
 export default function PlatformsPage() {
+  const { did } = useAppStore();
   const [showConnect, setShowConnect] = useState(false);
-  const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
+  const platforms = useLiveQuery(() => db.platforms.where("userId").equals(did || "").toArray(), [did]) || [];
   const connectedPlatforms = platforms.filter(p => p.connected);
   const router = useRouter();
   const { t } = useTranslation();

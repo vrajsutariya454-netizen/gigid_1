@@ -13,14 +13,16 @@ import { formatCurrency } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { DEMO_PROFILES } from "@/lib/scoring/demo-profiles";
 import { useRouter } from "next/navigation";
+import { useAppStore } from "@/lib/store/app-store";
 
 export default function DataHubPage() {
   const [activeTab, setActiveTab] = useState<'work' | 'integrations' | 'raw'>('work');
   const router = useRouter();
+  const { did } = useAppStore();
   
-  const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
-  const workRecords = useLiveQuery(() => db.workRecords.toArray()) || [];
-  const manualData = useLiveQuery(() => db.manualScoringData.toArray()) || [];
+  const platforms = useLiveQuery(() => db.platforms.where("userId").equals(did || "").toArray(), [did]) || [];
+  const workRecords = useLiveQuery(() => db.workRecords.where("userId").equals(did || "").toArray(), [did]) || [];
+  const manualData = useLiveQuery(() => db.manualScoringData.where("userId").equals(did || "").toArray(), [did]) || [];
   const currentPersonaId = useLiveQuery(() => db.settings.where("key").equals("current_persona").first());
 
   const disconnectPlatform = async (id: number) => {

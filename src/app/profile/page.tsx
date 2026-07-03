@@ -73,6 +73,7 @@ export default function ProfilePage() {
     if (!newMonth || !newIncome || !newDays) return;
     try {
       await db.manualScoringData.add({
+        userId: did || undefined,
         month: newMonth,
         income: parseFloat(newIncome),
         activeDays: parseInt(newDays),

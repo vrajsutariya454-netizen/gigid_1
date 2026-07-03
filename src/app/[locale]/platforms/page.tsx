@@ -15,8 +15,9 @@ import { supabase } from "@/lib/supabaseClient";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function PlatformsPage() {
+  const { did } = useAppStore();
   const [showConnect, setShowConnect] = useState(false);
-  const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
+  const platforms = useLiveQuery(() => db.platforms.where("userId").equals(did || "").toArray(), [did]) || [];
   const connectedPlatforms = platforms.filter(p => p.connected);
   const router = useRouter();
   

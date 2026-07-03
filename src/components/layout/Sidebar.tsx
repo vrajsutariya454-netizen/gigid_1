@@ -11,6 +11,7 @@ import { useTranslation } from "@/lib/i18n/use-translation";
 import { useAppStore } from "@/lib/store/app-store";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { clearAllData } from "@/lib/db/database";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -43,7 +44,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error("Supabase signOut error:", e);
+    }
     logout();
     router.push("/");
     onClose();

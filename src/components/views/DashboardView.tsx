@@ -8,12 +8,14 @@ import { calculateTrustScore } from "@/lib/aggregation/platform-connector";
 import { TrustScore } from "@/components/dashboard/TrustScore";
 import { ConnectPlatformDialog } from "@/components/platform/ConnectPlatformDialog";
 import { formatCurrency } from "@/lib/utils";
+import { useAppStore } from "@/lib/store/app-store";
 
 export function DashboardView() {
   const [showConnect, setShowConnect] = useState(false);
+  const { did } = useAppStore();
 
-  const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
-  const credentials = useLiveQuery(() => db.credentials.toArray()) || [];
+  const platforms = useLiveQuery(() => db.platforms.where("userId").equals(did || "").toArray(), [did]) || [];
+  const credentials = useLiveQuery(() => db.credentials.where("userId").equals(did || "").toArray(), [did]) || [];
 
   const connectedPlatforms = useMemo(
     () => platforms.filter((p) => p.connected),

@@ -17,21 +17,23 @@ import { useRouter } from "next/navigation";
 import { getLiveTrustScore } from "@/lib/scoring/data-bridge";
 import { ScoreBreakdown } from "@/lib/scoring/trust-score";
 import AAStatementExplorer from "@/components/aa/AAStatementExplorer";
+import { useAppStore } from "@/lib/store/app-store";
 
 export default function DataHubPage() {
   const [activeTab, setActiveTab] = useState<'work' | 'integrations' | 'financial' | 'raw'>('work');
   const [scoreData, setScoreData] = useState<ScoreBreakdown | null>(null);
   const { t } = useTranslation();
   const router = useRouter();
+  const { did } = useAppStore();
   
-  const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
-  const workRecords = useLiveQuery(() => db.workRecords.toArray()) || [];
-  const manualData = useLiveQuery(() => db.manualScoringData.toArray()) || [];
+  const platforms = useLiveQuery(() => db.platforms.where("userId").equals(did || "").toArray(), [did]) || [];
+  const workRecords = useLiveQuery(() => db.workRecords.where("userId").equals(did || "").toArray(), [did]) || [];
+  const manualData = useLiveQuery(() => db.manualScoringData.where("userId").equals(did || "").toArray(), [did]) || [];
   const currentPersonaId = useLiveQuery(() => db.settings.where("key").equals("current_persona").first());
 
   useEffect(() => {
     async function loadData() {
-      const data = await getLiveTrustScore();
+      const data = await getLiveTrustScore(did || undefined);
       setScoreData(data);
     }
     loadData();

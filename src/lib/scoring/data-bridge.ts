@@ -6,17 +6,17 @@ import { generateMockHistory } from "./mock-service";
  * Gathers all data from local DB and User Inputs to compute the Trust Score.
  * Prioritizes: Platform Data > Manual Data > Mock Fallback
  */
-export async function getLiveTrustScore(): Promise<ScoreBreakdown> {
-  const allWorkRecords = await db.workRecords.toArray();
-  const manualData = await db.manualScoringData.toArray();
-  const allPlatforms = await db.platforms.toArray();
+export async function getLiveTrustScore(userId?: string): Promise<ScoreBreakdown> {
+  const allWorkRecords = userId ? await db.workRecords.where("userId").equals(userId).toArray() : await db.workRecords.toArray();
+  const manualData = userId ? await db.manualScoringData.where("userId").equals(userId).toArray() : await db.manualScoringData.toArray();
+  const allPlatforms = userId ? await db.platforms.where("userId").equals(userId).toArray() : await db.platforms.toArray();
   const platforms = allPlatforms.filter(p => p.connected && p.isVerified);
   
   // Only include work records from VERIFIED platforms — unverified platforms must not affect the score
   const verifiedInstanceIds = new Set(platforms.map(p => p.id!));
   const workRecords = allWorkRecords.filter(w => verifiedInstanceIds.has(w.instanceId));
   
-  const credentials = await db.credentials.toArray();
+  const credentials = userId ? await db.credentials.where("userId").equals(userId).toArray() : await db.credentials.toArray();
   const documents = await db.documents.toArray();
 
   // 1. Check if we have any data (real or manual)

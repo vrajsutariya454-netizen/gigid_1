@@ -33,8 +33,8 @@ export default function ProfilePage() {
   const [newDays, setNewDays] = useState("");
 
   // Data for calculation
-  const workRecords = useLiveQuery(() => db.workRecords.toArray()) || [];
-  const manualRecords = useLiveQuery(() => db.manualScoringData.toArray()) || [];
+  const workRecords = useLiveQuery(() => db.workRecords.where("userId").equals(did || "").toArray(), [did]) || [];
+  const manualRecords = useLiveQuery(() => db.manualScoringData.where("userId").equals(did || "").toArray(), [did]) || [];
 
   const factorsData = useMemo(() => {
     const allIncomes = [
@@ -99,6 +99,7 @@ export default function ProfilePage() {
     if (!newMonth || !newIncome || !newDays) return;
     try {
       await db.manualScoringData.add({
+        userId: did || undefined,
         month: newMonth,
         income: parseFloat(newIncome),
         activeDays: parseInt(newDays),

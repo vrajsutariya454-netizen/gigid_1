@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { hasCompletedOnboarding, setTrustScore: setGlobalTrustScore, name } = useAppStore();
+  const { hasCompletedOnboarding, setTrustScore: setGlobalTrustScore, name, did } = useAppStore();
   
   const [showConnect, setShowConnect] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +24,7 @@ export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<"bars" | "radar">("bars");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
+  const platforms = useLiveQuery(() => db.platforms.where("userId").equals(did || "").toArray(), [did]) || [];
   const connectedPlatforms = useMemo(() => platforms.filter((p) => p.connected), [platforms]);
 
   const disconnectPlatform = async (id: number) => {
@@ -54,7 +54,7 @@ export default function DashboardPage() {
       setScoreData(result);
       setGlobalTrustScore(result.trustScore);
     } catch (err) {
-      const local = await getLiveTrustScore();
+      const local = await getLiveTrustScore(did || undefined);
       setScoreData({
         trustScore: local.finalScore,
         breakdown: {

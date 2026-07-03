@@ -183,14 +183,20 @@ function SignInCard() {
       }
 
       if (isSignUp) {
-        const { data: authData, error: signupError } = await supabase.auth.signUp({ email, password });
+        const { data: authData, error: signupError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+              username: username,
+            },
+          },
+        });
         if (signupError) throw signupError;
         if (!authData.user) throw new Error("Signup failed");
 
-        await supabase.from("profiles").insert({
-          id: authData.user.id, email: authData.user.email, full_name: fullName, username: username, role: "gig-worker",
-        });
-        alert("Account created! Please sign in.");
+        alert("Account created! Please check your email to confirm your account.");
         setIsSignUp(false);
       } else {
         const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password });

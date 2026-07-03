@@ -17,7 +17,7 @@ import { useTranslation } from "@/lib/i18n/use-translation";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { hasCompletedOnboarding, setTrustScore: setGlobalTrustScore, name, kycStatus } = useAppStore();
+  const { hasCompletedOnboarding, setTrustScore: setGlobalTrustScore, name, kycStatus, did } = useAppStore();
   const { t } = useTranslation();
   
   const [showConnect, setShowConnect] = useState(false);
@@ -26,7 +26,7 @@ export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<"bars" | "radar">("bars");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const platforms = useLiveQuery(() => db.platforms.toArray()) || [];
+  const platforms = useLiveQuery(() => db.platforms.where("userId").equals(did || "").toArray(), [did]) || [];
   const connectedPlatforms = useMemo(() => platforms.filter((p) => p.connected), [platforms]);
 
   const disconnectPlatform = async (id: number) => {
@@ -56,7 +56,7 @@ export default function DashboardPage() {
       setScoreData(result);
       setGlobalTrustScore(result.trustScore);
     } catch (err) {
-      const local = await getLiveTrustScore();
+      const local = await getLiveTrustScore(did || undefined);
       setScoreData({
         trustScore: local.finalScore,
         breakdown: {

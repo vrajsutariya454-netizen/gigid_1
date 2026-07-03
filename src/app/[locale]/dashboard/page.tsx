@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { getCurrentUserProfile } from "@/lib/auth/profile";
+import { useAppStore } from "@/lib/store/app-store";
+import { clearAllData } from "@/lib/db/database";
 import { 
   User, Mail, ShieldCheck, LogOut, 
   LayoutDashboard, Loader2, AlertCircle 
@@ -15,6 +17,7 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { logout } = useAppStore();
 
   useEffect(() => {
     async function loadData() {
@@ -34,7 +37,12 @@ export default function DashboardPage() {
   }, [router]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error("Supabase signOut error:", e);
+    }
+    logout();
     router.replace("/");
   };
 

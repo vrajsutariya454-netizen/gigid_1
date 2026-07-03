@@ -16,6 +16,7 @@ export interface UserProfile {
 
 export interface Platform {
   id?: number;
+  userId?: string; // Links this platform instance to a specific user (Supabase user ID)
   platformId: string;
   name: string;
   icon: string;
@@ -33,6 +34,7 @@ export interface Platform {
 
 export interface WorkRecord {
   id?: number;
+  userId?: string; // Links this record to a specific user (Supabase user ID)
   instanceId: number; // Links to the unique ID of the Platform entry
   platformId: string;
   month: string;
@@ -44,6 +46,7 @@ export interface WorkRecord {
 
 export interface ManualScoringData {
   id?: number;
+  userId?: string; // Links this to a specific user (Supabase user ID)
   month: string;
   income: number;
   activeDays: number;
@@ -62,6 +65,7 @@ export interface IdentityDocument {
 
 export interface VerifiableCredential {
   id?: number;
+  userId?: string; // Links this credential to a specific user (Supabase user ID)
   credentialId: string;
   "@context": string[];
   type: string[];
@@ -147,6 +151,18 @@ export class GigIDDatabase extends Dexie {
       manualScoringData: "++id, &month",
       documents: "++id, credentialId",
     });
+
+    // Version 6: Add userId index to support multiple users on the same device
+    this.version(6).stores({
+      profiles: "++id, did",
+      platforms: "++id, userId, platformId, name, connected, isVerified",
+      workRecords: "++id, userId, instanceId, platformId, month",
+      credentials: "++id, userId, credentialId, credentialSubject.platform, instanceId",
+      syncQueue: "++id, action, status, createdAt",
+      settings: "++id, &key",
+      manualScoringData: "++id, userId, &month",
+      documents: "++id, credentialId",
+    });
   }
 }
 
@@ -176,3 +192,4 @@ export async function clearAllData(): Promise<void> {
     db.syncQueue.clear(),
   ]);
 }
+
