@@ -189,9 +189,22 @@ function SignInCard() {
         if (signupError) throw signupError;
         if (!authData.user) throw new Error("Signup failed");
 
-        await supabase.from("profiles").insert({
-          id: authData.user.id, email: authData.user.email, full_name: fullName, username: username, role: "gig-worker",
-        });
+        const { data, error } = await supabase
+          .from("profiles")
+          .insert({
+            id: authData.user.id,
+            email: authData.user.email,
+            full_name: fullName,
+            username: username,
+            role: "gig-worker",
+          });
+
+        console.log("Insert data:", data);
+        console.log("Insert error:", error);
+
+        if (error) {
+          alert(error.message);
+        }
         alert("Account created! Please sign in.");
         setIsSignUp(false);
       } else {
